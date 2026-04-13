@@ -1,0 +1,109 @@
+# =====================================================================
+# docker-compose.yml — Flight Analytics Platform
+#
+# USAGE:
+#   Start all services:     docker-compose up
+#   Start one service:      docker-compose up viz-emission
+#   Run a processor once:   docker-compose run --rm proc-prg
+#   Build images:           docker-compose build
+#
+# PORTS:
+#   main_page             → http://localhost:8050
+#   vizualizationJanuary  → http://localhost:8051
+#   vizualizationOffers   → http://localhost:8052
+#   vizualizationEmision  → http://localhost:8053
+#   vizualizationSankey   → http://localhost:8054
+#
+# DATA:
+#   Mount your local SAVE folder into /data inside the container.
+#   Set LOCAL_DATA_PATH in .env or export it before running.
+# =====================================================================
+
+version: "3.9"
+
+# ── Shared config reused by every service ─────────────────────────────
+x-common: &common
+  build: .
+  env_file: .env
+  environment:
+    APP_ENV: cloud
+    PYTHONUNBUFFERED: "1"
+  volumes:
+    - ${LOCAL_DATA_PATH:-./data}:/data   # mount your CSV data folder
+  restart: "no"
+
+services:
+
+  # ── Data processors (run once, then exit) ───────────────────────────
+
+  proc-prg:
+    <<: *common
+    container_name: proc_prg
+    command: python PRG_1_0.py
+    profiles: ["processors"]
+
+  proc-vie:
+    <<: *common
+    container_name: proc_vie
+    command: python VIE_1_0.py
+    profiles: ["processors"]
+
+  proc-waw:
+    <<: *common
+    container_name: proc_waw
+    command: python WAW_1_0.py
+    profiles: ["processors"]
+
+  proc-ber:
+    <<: *common
+    container_name: proc_ber
+    command: python BER_1_0.py
+    profiles: ["processors"]
+
+  proc-bud:
+    <<: *common
+    container_name: proc_bud
+    command: python BUD_1_0.py
+    profiles: ["processors"]
+
+  # ── Dash web apps (long-running, expose ports) ───────────────────────
+
+  main-page:
+    <<: *common
+    container_name: main_page
+    command: gunicorn --bind 0.0.0.0:8050 --workers 2 "main_page:server"
+    ports:
+      - "8050:8050"
+    profiles: ["dashboards"]
+
+  viz-january:
+    <<: *common
+    container_name: viz_january
+    command: gunicorn --bind 0.0.0.0:8051 --workers 2 "vizualizationJanuary:server"
+    ports:
+      - "8051:8051"
+    profiles: ["dashboards"]
+
+  viz-offers:
+    <<: *common
+    container_name: viz_offers
+    command: gunicorn --bind 0.0.0.0:8052 --workers 2 "vizualizationFlightOffers:server"
+    ports:
+      - "8052:8052"
+    profiles: ["dashboards"]
+
+  viz-emission:
+    <<: *common
+    container_name: viz_emission
+    command: gunicorn --bind 0.0.0.0:8053 --workers 2 "vizualizationEmision:server"
+    ports:
+      - "8053:8053"
+    profiles: ["dashboards"]
+
+  viz-sankey:
+    <<: *common
+    container_name: viz_sankey
+    command: gunicorn --bind 0.0.0.0:8054 --workers 2 "vizualizationSankey:server"
+    ports:
+      - "8054:8054"
+    profiles: ["dashboards"]

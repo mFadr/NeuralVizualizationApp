@@ -1,25 +1,34 @@
-# 1. Use an official, lightweight Python image
-FROM python:3.10-slim
+# =====================================================================
+# Dockerfile — Flight Analytics Platform
+# Base image: Python 3.11 slim (lightweight, no GUI)
+# =====================================================================
+FROM python:3.11-slim
 
-# 2. Prevent Python from writing .pyc files to disk and keep stdout unbuffered for logs
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
+# Metadata
+LABEL maintainer="mFadrhons"
+LABEL project="COM_IATA Flight Analytics"
 
-# 3. Set the working directory inside the container
+# ── System dependencies ───────────────────────────────────────────────
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+# ── Working directory ─────────────────────────────────────────────────
 WORKDIR /app
 
-# 4. Copy your requirements file first (this helps with caching)
-COPY requirements.txt /app/
-
-# 5. Install the Python dependencies
+# ── Python dependencies ───────────────────────────────────────────────
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 6. Copy the rest of your project files (Python scripts, CSVs, etc.) into the container
-COPY . /app/
+# ── Copy project source ───────────────────────────────────────────────
+COPY . .
 
-# 7. Expose the port that your app runs on (Dash usually defaults to 8050)
-EXPOSE 8050
+# ── Data directories (mounted at runtime via docker-compose volumes) ──
+RUN mkdir -p /data/FORM /data/COM
 
-# 8. Command to run the application using Gunicorn
-# Note: "chartActive_5datasets:server" means look in chartActive_5datasets.py for the 'server' variable
-CMD ["gunicorn", "--bind", "0.0.0.0:8050", "--workers", "3", "--timeout", "120", "chartActive_5datasets:server"]
+# ── Default env ───────────────────────────────────────────────────────
+ENV APP_ENV=cloud
+ENV PYTHONUNBUFFERED=1
+
+# Default command (overridden per service in docker-compose.yml)
+CMD ["python", "main_page.py"]
