@@ -6,7 +6,7 @@ ENV = os.getenv("APP_ENV", "local")   # "local" or "cloud"
 # ── Path definitions ─────────────────────────────────────────────────
 BASE_PATHS = {
     "local": "C:/Users/mFadrhons/Documents/WS/repository/SAVE",
-    "cloud": "/data"   # or wherever your cloud storage mounts
+    "cloud": "/data/FORM"   # or wherever your cloud storage mounts
 }
 
 BASE = BASE_PATHS[ENV]
