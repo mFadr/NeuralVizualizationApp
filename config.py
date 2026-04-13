@@ -1,12 +1,10 @@
 import os
 
-# ── Change this one variable to switch environments ──────────────────
-ENV = os.getenv("APP_ENV", "local")   # "local" or "cloud"
+ENV = os.getenv("APP_ENV", "local")
 
-# ── Path definitions ─────────────────────────────────────────────────
 BASE_PATHS = {
     "local": "C:/Users/mFadrhons/Documents/WS/repository/SAVE",
-    "cloud": "/data"   # or wherever your cloud storage mounts
+    "cloud": "data"   # ← relative path, sits next to the scripts
 }
 
 BASE = BASE_PATHS[ENV]
