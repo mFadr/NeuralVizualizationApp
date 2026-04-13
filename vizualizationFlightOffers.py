@@ -116,6 +116,9 @@ def get_aircraft(origin, dest, airline):
 from main_page import app  # share the single server instance
 server = app.server
 
+
+# =====================================================================
+
 LABEL_STYLE = {
     "color": NEON_BLUE,
     "fontSize": "10px",
