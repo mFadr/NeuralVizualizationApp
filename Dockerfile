@@ -21,7 +21,8 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # ── Copy project source ───────────────────────────────────────────────
-COPY . .
+
+COPY data/ /data/
 
 # ── Data directories (mounted at runtime via docker-compose volumes) ──
 RUN mkdir -p /data/FORM /data/COM
