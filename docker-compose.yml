@@ -68,12 +68,13 @@ services:
 
   # ── Dash web apps (long-running, expose ports) ───────────────────────
 
-  main-page:
+    main-page:
     <<: *common
     container_name: main_page
-  command: gunicorn --bind 0.0.0.0:8080 --workers 2 "main_page:server"
+    command: gunicorn --bind 0.0.0.0:8080 --workers 2 "main_page:server" 
   ports:
-    - "8080:8080"
+    ports:
+      - "8050:8050"
     profiles: ["dashboards"]
 
   viz-january:
