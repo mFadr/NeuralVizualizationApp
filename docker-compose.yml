@@ -8,7 +8,7 @@
 #   Build images:           docker-compose build
 #
 # PORTS:
-#   main_page             → http://localhost:8050
+#   main_page             → http://localhost:8080
 #   vizualizationJanuary  → http://localhost:8051
 #   vizualizationOffers   → http://localhost:8052
 #   vizualizationEmision  → http://localhost:8053
@@ -68,14 +68,12 @@ services:
 
   # ── Dash web apps (long-running, expose ports) ───────────────────────
 
-    main-page:
+  main-page:
     <<: *common
     container_name: main_page
-    command: gunicorn --bind 0.0.0.0:8080 --workers 2 "main_page:server" 
-  ports:
+    command: gunicorn --bind 0.0.0.0:8080 --workers 2 "main_page:server"
     ports:
-      - "8050:8050"
-    profiles: ["dashboards"]
+      - "8080:8080"
 
   viz-january:
     <<: *common
@@ -83,7 +81,6 @@ services:
     command: gunicorn --bind 0.0.0.0:8051 --workers 2 "vizualizationJanuary:server"
     ports:
       - "8051:8051"
-    profiles: ["dashboards"]
 
   viz-offers:
     <<: *common
@@ -91,7 +88,6 @@ services:
     command: gunicorn --bind 0.0.0.0:8052 --workers 2 "vizualizationFlightOffers:server"
     ports:
       - "8052:8052"
-    profiles: ["dashboards"]
 
   viz-emission:
     <<: *common
@@ -99,7 +95,6 @@ services:
     command: gunicorn --bind 0.0.0.0:8053 --workers 2 "vizualizationEmision:server"
     ports:
       - "8053:8053"
-    profiles: ["dashboards"]
 
   viz-sankey:
     <<: *common
@@ -107,4 +102,3 @@ services:
     command: gunicorn --bind 0.0.0.0:8054 --workers 2 "vizualizationSankey:server"
     ports:
       - "8054:8054"
-    profiles: ["dashboards"]
