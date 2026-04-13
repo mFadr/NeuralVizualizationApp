@@ -168,7 +168,7 @@ def get_airlines(origin, dest):
 # =====================================================================
 # 5. Layout
 # =====================================================================
-app  = Dash(__name__)
+from main_page import app  # share the single server instance
 server = app.server
 
 DIVIDER = html.Span(style={
@@ -225,6 +225,25 @@ app.layout = html.Div([
 
     # ── Filter Bar ────────────────────────────────────────────────────
     html.Div([
+
+
+        html.A(
+            "← BACK TO MAIN",
+            href="/",
+            style={
+                "display": "inline-block",
+                "color": "#66fcf1",
+                "border": "1px solid #45a29e",
+                "padding": "6px 16px",
+                "borderRadius": "6px",
+                "textDecoration": "none",
+                "fontSize": "11px",
+                "letterSpacing": "2px",
+                "marginBottom": "1100px",
+                "fontFamily": "Courier New, monospace",
+                "backgroundColor": "#1f2833"
+            }
+        ),
 
         # Origin
         html.Div([

@@ -93,7 +93,7 @@ CHART_CYAN = "#00D9FF"       # 3rd chart
 # =====================================================================
 # 3️⃣ Dash App Setup (Layout + Callback)
 # =====================================================================
-app = Dash(__name__)
+from main_page import app  # share the single server instance
 server = app.server
 
 # Layout: Using Flexbox instead of hard floats and margins
@@ -110,6 +110,26 @@ app.layout = html.Div([
 
     # Main Container
     html.Div([
+
+
+        # Back button — paste as first child of the layout Div
+        html.A(
+            "← BACK TO MAIN",
+            href="/",
+            style={
+                "display": "inline-block",
+                "color": "#66fcf1",
+                "border": "1px solid #45a29e",
+                "padding": "6px 16px",
+                "borderRadius": "6px",
+                "textDecoration": "none",
+                "fontSize": "11px",
+                "letterSpacing": "2px",
+                "marginBottom": "1100px",
+                "fontFamily": "Courier New, monospace",
+                "backgroundColor": "#1f2833"
+            }
+        ),
 
         # 🎛️ LEFT PANEL: Filters
         html.Div([

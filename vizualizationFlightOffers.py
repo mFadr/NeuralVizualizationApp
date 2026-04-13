@@ -113,7 +113,7 @@ def get_aircraft(origin, dest, airline):
 # =====================================================================
 # 5. Layout — one-line filter bar + full-width chart
 # =====================================================================
-app = Dash(__name__)
+from main_page import app  # share the single server instance
 server = app.server
 
 LABEL_STYLE = {
@@ -146,6 +146,24 @@ app.layout = html.Div([
 
     # ── Filter Bar ────────────────────────────────────────────────────
     html.Div([
+
+        html.A(
+            "← BACK TO MAIN",
+            href="/",
+            style={
+                "display": "inline-block",
+                "color": "#66fcf1",
+                "border": "1px solid #45a29e",
+                "padding": "6px 16px",
+                "borderRadius": "6px",
+                "textDecoration": "none",
+                "fontSize": "11px",
+                "letterSpacing": "2px",
+                "marginBottom": "1100px",
+                "fontFamily": "Courier New, monospace",
+                "backgroundColor": "#1f2833"
+            }
+        ),
 
         html.Div([
             html.Label("ORIGIN", style=LABEL_STYLE),
