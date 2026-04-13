@@ -136,5 +136,9 @@ app.layout = html.Div([
 })
 
 if __name__ == '__main__':
-    # We run the main page on port 8000 so it doesn't crash with your app on 8050!
-    app.run(debug=True, port=8000)
+
+    app.run(
+        host="0.0.0.0",
+        port=8080,
+        debug=False        # never run debug=True in production
+    )
