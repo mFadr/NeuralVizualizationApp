@@ -449,6 +449,6 @@ if __name__ == "__main__":
     print("\n" + "=" * 60)
     print("🚀 NEURAL FLIGHT TRACKER — SANKEY ROUTE ANALYZER")
     print("=" * 60)
-    print("http://127.0.0.1:8050")
+    print("http://127.0.0.1:8054")
     print("=" * 60 + "\n")
     app.run(debug=True)

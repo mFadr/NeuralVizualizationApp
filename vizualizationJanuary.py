@@ -791,4 +791,10 @@ if __name__ == "__main__":
     print("="*60 + "\n")
 
     # ✅ Run app
+if __name__ == '__main__':
+    print("\n" + "=" * 60)
+    print("🚀 NEURAL FLIGHT TRACKER — Viziualization of prices in January 2026")
+    print("=" * 60)
+    print("http://127.0.0.1:8051")
+    print("=" * 60 + "\n")
     app.run(debug=True)

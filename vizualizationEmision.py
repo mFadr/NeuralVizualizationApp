@@ -611,6 +611,6 @@ if __name__ == "__main__":
     print("\n" + "=" * 60)
     print("🌍 EMISSION INTELLIGENCE SYSTEM")
     print("=" * 60)
-    print("http://127.0.0.1:8050")
+    print("http://127.0.0.1:8053")
     print("=" * 60 + "\n")
     app.run(debug=True)
