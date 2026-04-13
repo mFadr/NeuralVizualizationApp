@@ -132,7 +132,7 @@ FILTER_CELL = {
     "marginRight": "18px"
 }
 
-app.layout = html.Div([
+layout = html.Div([
 
     # ── Title ─────────────────────────────────────────────────────────
     html.H2(
@@ -544,10 +544,6 @@ def _build_monthly_chart(dff, origin, dest, agg_method):
 # =====================================================================
 # 8. Run
 # =====================================================================
+# Remove or comment out:
 if __name__ == '__main__':
-    print("\n" + "=" * 60)
-    print("🚀 NEURAL FLIGHT TRACKER — BOOKING CURVE ANALYZER")
-    print("=" * 60)
-    print("http://127.0.0.1:8052")
-    print("=" * 60 + "\n")
     app.run(debug=True)
