@@ -50,7 +50,8 @@ PAGES = [
         "subtitle":    "Flow diagram of prices between cities",
         "href":        "/sankey",
         "accent":      "#f5c518",
-        "icon":        "🗺️"
+        "icon":        "🗺️",
+        "minWidth": "240px",
     },
 ]
 

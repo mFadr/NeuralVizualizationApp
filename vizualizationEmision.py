@@ -220,17 +220,14 @@ layout = html.Div([
             "letterSpacing": "4px",
             "marginTop": "4px",
             "fontFamily": "'Courier New', monospace"
-        })
-    ], style={"textAlign": "center", "marginBottom": "20px"}),
-
-    # ── Filter Bar ────────────────────────────────────────────────────
-    html.Div([
-
-
+        }),
         html.A(
             "← BACK TO MAIN",
             href="/",
             style={
+                "position": "absolute",
+                "top": "0",
+                "right": "0",
                 "display": "inline-block",
                 "color": "#66fcf1",
                 "border": "1px solid #45a29e",
@@ -239,11 +236,28 @@ layout = html.Div([
                 "textDecoration": "none",
                 "fontSize": "11px",
                 "letterSpacing": "2px",
-                "marginBottom": "1100px",
                 "fontFamily": "Courier New, monospace",
                 "backgroundColor": "#1f2833"
             }
-        ),
+        )
+    ], style={"textAlign": "center", "marginBottom": "20px", "position": "relative"}),
+
+    # ── Chart ─────────────────────────────────────────────────────────
+    html.Div([
+        dcc.Graph(
+            id="em-chart",
+            style={"height": "72vh", "width": "100%"},
+            config={"displayModeBar": True, "responsive": True}
+        )
+    ], style={
+        "borderRadius": "14px",
+        "overflow": "hidden",
+        "boxShadow": f"0 0 30px {NEON_CYAN}30, 0 0 60px {NEON_CYAN}10",
+        "border": f"1px solid {NEON_CYAN}20"
+    }),
+
+    # ── Filter Bar ────────────────────────────────────────────────────
+    html.Div([
 
         # Origin
         html.Div([
@@ -349,19 +363,6 @@ layout = html.Div([
         "whiteSpace": "nowrap"
     }),
 
-    # ── Chart ─────────────────────────────────────────────────────────
-    html.Div([
-        dcc.Graph(
-            id="em-chart",
-            style={"height": "72vh", "width": "100%"},
-            config={"displayModeBar": True, "responsive": True}
-        )
-    ], style={
-        "borderRadius": "14px",
-        "overflow": "hidden",
-        "boxShadow": f"0 0 30px {NEON_CYAN}30, 0 0 60px {NEON_CYAN}10",
-        "border": f"1px solid {NEON_CYAN}20"
-    })
 
 ], style={
     "backgroundColor": BG_COLOR,
