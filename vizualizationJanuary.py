@@ -125,7 +125,7 @@ layout = html.Div([
                 "textDecoration": "none",
                 "fontSize": "11px",
                 "letterSpacing": "2px",
-                "marginBottom": "1100px",
+                "marginBottom": "16px",
                 "fontFamily": "Courier New, monospace",
                 "backgroundColor": "#1f2833"
             }
@@ -736,62 +736,28 @@ def update_origin_comparison(selected_destinations):
     return fig
 
 # =====================================================================
-# 5️⃣ MAIN EXECUTION
+# 5️⃣ DATASET LOADING — module level (runs on import AND on direct run)
+# =====================================================================
+print("Loading datasets...")
+datasets = {}
+for origin_code, file_path in DATASET_PATHS.items():
+    try:
+        df = load_data_from_file(file_path)
+        datasets[origin_code] = df
+        print(f"✓ Loaded {origin_code}: {len(df)} records")
+    except Exception as e:
+        print(f"✗ Error loading {origin_code} from {file_path}: {e}")
+
+if not datasets:
+    print("⚠️  WARNING: No datasets loaded. Creating placeholder datasets...")
+    datasets = {code: pd.DataFrame() for code in DATASET_PATHS.keys()}
+
+print(f"\n✓ Successfully loaded {len(datasets)} datasets\n")
+
+# =====================================================================
+# 6️⃣ MAIN EXECUTION (local dev only)
 # =====================================================================
 if __name__ == "__main__":
-
-    # Load all 5 datasets into a dictionary
-    print("Loading datasets...")
-    datasets = {}
-    for origin_code, file_path in DATASET_PATHS.items():
-        try:
-            df = load_data_from_file(file_path)
-            datasets[origin_code] = df
-            print(f"✓ Loaded {origin_code}: {len(df)} records")
-        except Exception as e:
-            print(f"✗ Error loading {origin_code} from {file_path}: {e}")
-
-    if not datasets:
-        print("⚠️  WARNING: No datasets loaded. Creating placeholder datasets...")
-        datasets = {code: pd.DataFrame() for code in DATASET_PATHS.keys()}
-
-
-    print(f"\n✓ Successfully loaded {len(datasets)} datasets\n")
-
-    # Calculate and print route analytics
-    print("="*60)
-    print("ROUTE ANALYTICS - Average Prices by Route")
-    print("="*60)
-
-    route_prices = calculate_route_analytics(datasets)
-
-    # Organize by origin
-    origins = ['BER', 'BUD', 'PRG', 'VIE', 'WAW']
-
-    for origin in origins:
-        print(f"\n{origin} Routes:")
-        origin_routes = {k: v for k, v in route_prices.items() if k.startswith(origin)}
-        for route, price in sorted(origin_routes.items()):
-            print(f"  {route}: ${price:.2f}")
-
-    # Print variables for each specific route
-    print("\n" + "="*60)
-    print("INDIVIDUAL ROUTE VARIABLES")
-    print("="*60)
-
-    # Store in individual variables
-    for route, price in sorted(route_prices.items()):
-        var_name = route.replace('-', '_')
-        print(f"{var_name} = ${price:.2f}")
-
-    # Store in global scope
-    globals().update({route.replace('-', '_'): price for route, price in route_prices.items()})
-
-    print("\n" + "="*60)
-    print(f"Total routes analyzed: {len(route_prices)}")
-    print("="*60 + "\n")
-
-    # ✅ Run app
-# Remove or comment out:
-if __name__ == '__main__':
-    app.run(debug=True)
+    import os
+    port = int(os.environ.get("PORT", 8050))
+    app.run(host="0.0.0.0", port=port, debug=False)
