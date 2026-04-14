@@ -1,21 +1,10 @@
 import os
-from dash import Dash, html, dcc
-import dash
+from dash import html, dcc, Input, Output
+from app_instance import app, server   # noqa — server exported for gunicorn
 
-# ── Single shared Dash instance ───────────────────────────────────────
-# Remove: app = Dash(...)
-# Add:
-from app_instance import app, server
-server = app.server           # gunicorn entry point
-
-# ── Import all viz modules AFTER app is created ───────────────────────
-# Each module registers its own layout on its own route
-import vizualizationEmision       # noqa
-import vizualizationFlightOffers  # noqa
-import vizualizationJanuary       # noqa
-import vizualizationSankey        # noqa
-
-# ── Cyberpunk theme colours ───────────────────────────────────────────
+# =====================================================================
+# Cyberpunk theme
+# =====================================================================
 BG_COLOR   = "#0b0c10"
 PANEL_BG   = "#1f2833"
 NEON_CYAN  = "#66fcf1"
@@ -25,40 +14,42 @@ TEXT_MUTED = "#c5c6c7"
 
 PAGES = [
     {
-        "title":       "BOOKING CURVE ANALYZER",
-        "subtitle":    "Price trends over the scraping period",
-        "href":        "/offers",
-        "accent":      NEON_CYAN,
-        "icon":        "📈"
+        "title":    "BOOKING CURVE ANALYZER",
+        "subtitle": "Price trends over the scraping period",
+        "href":     "/offers",
+        "accent":   NEON_CYAN,
+        "icon":     "📈"
     },
     {
-        "title":       "JANUARY FLIGHT TRACKER",
-        "subtitle":    "Multi-origin price comparison — Jan 2026",
-        "href":        "/january",
-        "accent":      NEON_PINK,
-        "icon":        "✈️"
+        "title":    "JANUARY FLIGHT TRACKER",
+        "subtitle": "Multi-origin price comparison — Jan 2026",
+        "href":     "/january",
+        "accent":   NEON_PINK,
+        "icon":     "✈️"
     },
     {
-        "title":       "EMISSION INTELLIGENCE",
-        "subtitle":    "CO₂ and per-seat emission analysis",
-        "href":        "/emission",
-        "accent":      "#39ff14",
-        "icon":        "🌍"
+        "title":    "EMISSION INTELLIGENCE",
+        "subtitle": "CO₂ and per-seat emission analysis",
+        "href":     "/emission",
+        "accent":   "#39ff14",
+        "icon":     "🌍"
     },
     {
-        "title":       "ROUTE SANKEY",
-        "subtitle":    "Flow diagram of prices between cities",
-        "href":        "/sankey",
-        "accent":      "#f5c518",
-        "icon":        "🗺️",
-        "minWidth": "240px",
+        "title":    "ROUTE SANKEY",
+        "subtitle": "Flow diagram of prices between cities",
+        "href":     "/sankey",
+        "accent":   "#f5c518",
+        "icon":     "🗺️"
     },
 ]
 
+# =====================================================================
+# Main page layout (landing page)
+# =====================================================================
 def make_card(page):
     return html.A(
         href=page["href"],
-        style={"textDecoration": "none"},
+        style={"textDecoration": "none", "display": "block", "height": "100%"},
         children=html.Div([
             html.Div(page["icon"], style={
                 "fontSize": "32px", "marginBottom": "10px"
@@ -81,17 +72,16 @@ def make_card(page):
             "backgroundColor": PANEL_BG,
             "border": f"1px solid {page['accent']}40",
             "borderRadius": "12px",
-            "padding": "28px 24px",
+            "padding": "40px 32px",
             "textAlign": "center",
             "boxShadow": f"0 0 20px {page['accent']}20",
-            "transition": "box-shadow 0.2s",
             "cursor": "pointer",
-            "minWidth": "220px",
-            "flex": "1"
+            "height": "100%",
+            "boxSizing": "border-box"
         })
     )
 
-# ── Main page layout ──────────────────────────────────────────────────
+
 main_layout = html.Div([
     html.Div([
         html.H1("✈  FLIGHT ANALYTICS PLATFORM", style={
@@ -112,13 +102,14 @@ main_layout = html.Div([
         html.Div(
             [make_card(p) for p in PAGES],
             style={
-                "display": "flex",
+                "display": "grid",
+                "gridTemplateColumns": "1fr 1fr",
+                "gridTemplateRows":    "1fr 1fr",
                 "gap": "24px",
-                "flexWrap": "wrap",
-                "justifyContent": "center"
+                "width": "100%"
             }
         )
-    ], style={"textAlign": "center", "maxWidth": "960px", "margin": "0 auto"})
+    ], style={"textAlign": "center", "maxWidth": "780px", "margin": "0 auto", "width": "100%"})
 ], style={
     "backgroundColor": BG_COLOR,
     "minHeight": "100vh",
@@ -129,28 +120,46 @@ main_layout = html.Div([
     "fontFamily": "Courier New, monospace"
 })
 
-# ── URL routing ───────────────────────────────────────────────────────
+# =====================================================================
+# Root layout — URL router
+# =====================================================================
 app.layout = html.Div([
     dcc.Location(id="url", refresh=False),
     html.Div(id="page-content")
 ])
 
+# =====================================================================
+# Routing callback — LAZY imports inside the function
+# This is the key fix: viz modules are imported only when first needed,
+# not at startup, which breaks the circular import completely.
+# =====================================================================
 @app.callback(
-    dash.Output("page-content", "children"),
-    dash.Input("url",           "pathname")
+    Output("page-content", "children"),
+    Input("url", "pathname")
 )
 def route(pathname):
     if pathname == "/offers":
+        import vizualizationFlightOffers
         return vizualizationFlightOffers.layout
-    if pathname == "/january":
-        return vizualizationJanuary.layout
-    if pathname == "/emission":
-        return vizualizationEmision.layout
-    if pathname == "/sankey":
-        return vizualizationSankey.layout
-    return main_layout   # default: "/"
 
-# ── Entry point ───────────────────────────────────────────────────────
+    if pathname == "/january":
+        import vizualizationJanuary
+        return vizualizationJanuary.layout
+
+    if pathname == "/emission":
+        import vizualizationEmision
+        return vizualizationEmision.layout
+
+    if pathname == "/sankey":
+        import vizualizationSankey
+        return vizualizationSankey.layout
+
+    return main_layout
+
+
+# =====================================================================
+# Entry point (local dev only — production uses gunicorn)
+# =====================================================================
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port, debug=False)

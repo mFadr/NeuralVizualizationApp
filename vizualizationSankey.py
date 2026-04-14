@@ -172,26 +172,27 @@ server = app.server
 
 layout = html.Div([
 
-    html.H2(
-        "✈️  NEURAL FLIGHT TRACKER — ROUTE PRICE SANKEY",
-        style={
-            "textAlign": "center",
-            "color": NEON_CYAN,
-            "textShadow": f"0 0 12px {NEON_CYAN}",
-            "letterSpacing": "3px",
-            "margin": "0 0 16px 0",
-            "fontSize": "20px"
-        }
-    ),
-
-    # ── Filter bar ────────────────────────────────────────────────────
     html.Div([
-
-        # Back button — paste as first child of the layout Div
+        html.H2(
+            "✈️  NEURAL FLIGHT TRACKER — ROUTE PRICE SANKEY",
+            style={
+                "textAlign": "center",
+                "color": NEON_CYAN,
+                "textShadow": f"0 0 12px {NEON_CYAN}",
+                "letterSpacing": "3px",
+                "margin": "0 0 16px 0",
+                "fontSize": "20px",
+                "display": "inline-block",
+                "width": "calc(100% - 100px)"
+            }
+        ),
         html.A(
             "← BACK TO MAIN",
             href="/",
             style={
+                "position": "absolute",
+                "top": "0",
+                "right": "0",
                 "display": "inline-block",
                 "color": "#66fcf1",
                 "border": "1px solid #45a29e",
@@ -200,12 +201,27 @@ layout = html.Div([
                 "textDecoration": "none",
                 "fontSize": "11px",
                 "letterSpacing": "2px",
-                "marginBottom": "1100px",
                 "fontFamily": "Courier New, monospace",
                 "backgroundColor": "#1f2833"
             }
-        ),
+        )
+    ], style={"position": "relative", "marginBottom": "16px"}),
 
+    # ── Sankey chart ──────────────────────────────────────────────────
+    html.Div([
+        dcc.Graph(
+            id="sankey-chart",
+            style={"height": "72vh", "width": "100%"},
+            config={"displayModeBar": True, "responsive": True}
+        )
+    ], style={
+        "borderRadius": "15px",
+        "overflow": "hidden",
+        "boxShadow": f"0 0 20px {NEON_CYAN}40"
+    }),
+
+    # ── Filter bar ────────────────────────────────────────────────────
+    html.Div([
 
         # Source filter
         html.Div([
@@ -285,19 +301,6 @@ layout = html.Div([
         "boxShadow": f"0 0 10px {NEON_BLUE}30",
         "overflowX": "auto",
         "whiteSpace": "nowrap"
-    }),
-
-    # ── Sankey chart ──────────────────────────────────────────────────
-    html.Div([
-        dcc.Graph(
-            id="sankey-chart",
-            style={"height": "72vh", "width": "100%"},
-            config={"displayModeBar": True, "responsive": True}
-        )
-    ], style={
-        "borderRadius": "15px",
-        "overflow": "hidden",
-        "boxShadow": f"0 0 20px {NEON_CYAN}40"
     })
 
 ], style={
