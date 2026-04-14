@@ -170,7 +170,7 @@ def build_links(selected_sources, price_tbl, link_color):
 from main_page import app  # share the single server instance
 server = app.server
 
-app.layout = html.Div([
+layout = html.Div([
 
     html.H2(
         "✈️  NEURAL FLIGHT TRACKER — ROUTE PRICE SANKEY",
@@ -445,10 +445,6 @@ def update_sankey(selected_source, selected_dest, stat_method):
 # =====================================================================
 # 8. Run
 # =====================================================================
-if __name__ == "__main__":
-    print("\n" + "=" * 60)
-    print("🚀 NEURAL FLIGHT TRACKER — SANKEY ROUTE ANALYZER")
-    print("=" * 60)
-    print("http://127.0.0.1:8054")
-    print("=" * 60 + "\n")
+# Remove or comment out:
+if __name__ == '__main__':
     app.run(debug=True)
