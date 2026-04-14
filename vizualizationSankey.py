@@ -192,7 +192,7 @@ layout = html.Div([
             style={
                 "position": "absolute",
                 "top": "0",
-                "right": "0",
+                "left": "0",
                 "display": "inline-block",
                 "color": "#66fcf1",
                 "border": "1px solid #45a29e",
