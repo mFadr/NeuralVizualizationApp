@@ -73,8 +73,8 @@ for code, path in DATASET_PATHS.items():
         print(f"✗ {code}: {e}")
 
 if not datasets:
-    print("⚠️  WARNING: No datasets loaded. Creating placeholder datasets...")
-    datasets = {code: pd.DataFrame() for code in DATASET_PATHS.keys()}
+    print("ERROR: No datasets loaded.")
+    sys.exit(1)
 
 origins = list(datasets.keys())
 
@@ -113,11 +113,8 @@ def get_aircraft(origin, dest, airline):
 # =====================================================================
 # 5. Layout — one-line filter bar + full-width chart
 # =====================================================================
-from app_instance import app  # share the single server instance
+app = Dash(__name__)
 server = app.server
-
-
-# =====================================================================
 
 LABEL_STYLE = {
     "color": NEON_BLUE,
@@ -132,7 +129,7 @@ FILTER_CELL = {
     "marginRight": "18px"
 }
 
-layout = html.Div([
+app.layout = html.Div([
 
     # ── Title ─────────────────────────────────────────────────────────
     html.H2(
@@ -142,35 +139,13 @@ layout = html.Div([
             "color": NEON_CYAN,
             "textShadow": f"0 0 12px {NEON_CYAN}",
             "letterSpacing": "3px",
-            "margin": "0 0 16px 0",
-            "fontSize": "20px"
+            "margin": "0 0 8px 0",
+            "fontSize": "17px"
         }
     ),
 
-    html.Div([
-        html.A(
-            "← BACK TO MAIN",
-            href="/",
-            style={
-                "display": "inline-block",
-                "color": "#66fcf1",
-                "border": "1px solid #45a29e",
-                "padding": "6px 16px",
-                "borderRadius": "6px",
-                "textDecoration": "none",
-                "fontSize": "11px",
-                "letterSpacing": "2px",
-                "marginBottom": "1100px",
-                "fontFamily": "Courier New, monospace",
-                "backgroundColor": "#1f2833"
-            }
-        )
-   ]),
-
     # ── Filter Bar ────────────────────────────────────────────────────
     html.Div([
-
-
 
         html.Div([
             html.Label("ORIGIN", style=LABEL_STYLE),
@@ -272,7 +247,7 @@ layout = html.Div([
         "backgroundColor": PANEL_BG,
         "padding": "12px 20px",
         "borderRadius": "12px",
-        "marginBottom": "16px",
+        "marginBottom": "8px",
         "boxShadow": f"0 0 16px {NEON_BLUE}50",
         "whiteSpace": "nowrap",
         "overflowX": "auto",
@@ -286,23 +261,28 @@ layout = html.Div([
     html.Div([
         dcc.Graph(
             id="price-chart",
-            style={"height": "78vh", "width": "100%"},
+            style={"height": "100%", "width": "100%"},
             config={"displayModeBar": True, "responsive": True}
         )
     ], style={
         "borderRadius": "15px",
         "overflow": "hidden",
         "boxShadow": f"0 0 20px {NEON_CYAN}40",
-        "width": "100%"
+        "width": "100%",
+        "flex": "1",
+        "minHeight": "0"
     })
 
 ], style={
     "backgroundColor": BG_COLOR,
     "color": NEON_CYAN,
-    "minHeight": "100vh",
-    "padding": "22px 26px",
+    "padding": "12px 22px",
     "fontFamily": "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-    "boxSizing": "border-box"
+    "boxSizing": "border-box",
+    "display": "flex",
+    "flexDirection": "column",
+    "height": "100vh",
+    "overflow": "hidden"
 })
 
 # =====================================================================
@@ -548,6 +528,10 @@ def _build_monthly_chart(dff, origin, dest, agg_method):
 # =====================================================================
 # 8. Run
 # =====================================================================
-# Remove or comment out:
 if __name__ == '__main__':
+    print("\n" + "=" * 60)
+    print("🚀 NEURAL FLIGHT TRACKER — BOOKING CURVE ANALYZER")
+    print("=" * 60)
+    print("http://127.0.0.1:8050")
+    print("=" * 60 + "\n")
     app.run(debug=True)
