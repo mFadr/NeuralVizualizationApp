@@ -167,7 +167,7 @@ def build_links(selected_sources, price_tbl, link_color):
 # =====================================================================
 # 6. Dash App
 # =====================================================================
-from main_page import app  # share the single server instance
+from app_instance import app # share the single server instance
 server = app.server
 
 layout = html.Div([

@@ -168,7 +168,7 @@ def get_airlines(origin, dest):
 # =====================================================================
 # 5. Layout
 # =====================================================================
-from main_page import app  # share the single server instance
+from app_instance import app  # share the single server instance
 server = app.server
 
 DIVIDER = html.Span(style={

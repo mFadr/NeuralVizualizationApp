@@ -113,7 +113,7 @@ def get_aircraft(origin, dest, airline):
 # =====================================================================
 # 5. Layout — one-line filter bar + full-width chart
 # =====================================================================
-from main_page import app  # share the single server instance
+from app_instance import app  # share the single server instance
 server = app.server
 
 

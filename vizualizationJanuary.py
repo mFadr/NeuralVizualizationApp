@@ -93,7 +93,7 @@ CHART_CYAN = "#00D9FF"       # 3rd chart
 # =====================================================================
 # 3️⃣ Dash App Setup (Layout + Callback)
 # =====================================================================
-from main_page import app  # share the single server instance
+from app_instance import app # share the single server instance
 server = app.server
 
 # Layout: Using Flexbox instead of hard floats and margins
