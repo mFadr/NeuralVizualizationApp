@@ -11,7 +11,7 @@ from dash import Dash, dcc, html, Input, Output
 from config import DATASET_PATHS
 
 sources_cities = ["PRG", "WAW", "BER", "VIE", "BUD"]
-targets_cities = ["FCO", "BCN", "LHR", "AMS"]
+targets_cities = ["FCO", "BCN", "LON", "AMS"]
 
 # =====================================================================
 # 2. Cyberpunk Theme
