@@ -1,7 +1,7 @@
 import pandas as pd
 import plotly.graph_objects as go
-from dash import Dash, dcc, html, Input, Output
-import sys
+from dash import dcc, html, Input, Output
+from app_instance import app
 
 # =====================================================================
 # 1. Configuration
@@ -73,8 +73,7 @@ for code, path in DATASET_PATHS.items():
         print(f"✗ {code}: {e}")
 
 if not datasets:
-    print("ERROR: No datasets loaded.")
-    sys.exit(1)
+    print("WARNING: No datasets loaded — app will show empty state.")
 
 origins = list(datasets.keys())
 
@@ -113,9 +112,6 @@ def get_aircraft(origin, dest, airline):
 # =====================================================================
 # 5. Layout — one-line filter bar + full-width chart
 # =====================================================================
-app = Dash(__name__)
-server = app.server
-
 LABEL_STYLE = {
     "color": NEON_BLUE,
     "fontSize": "10px",
@@ -129,7 +125,26 @@ FILTER_CELL = {
     "marginRight": "18px"
 }
 
-app.layout = html.Div([
+layout = html.Div([
+
+    # ── Back button ───────────────────────────────────────────────────
+    html.A(
+        "← BACK TO MAIN",
+        href="/",
+        style={
+            "display": "inline-block",
+            "color": NEON_CYAN,
+            "border": f"1px solid {NEON_BLUE}",
+            "padding": "6px 16px",
+            "borderRadius": "6px",
+            "textDecoration": "none",
+            "fontSize": "11px",
+            "letterSpacing": "2px",
+            "marginBottom": "12px",
+            "fontFamily": "Courier New, monospace",
+            "backgroundColor": PANEL_BG
+        }
+    ),
 
     # ── Title ─────────────────────────────────────────────────────────
     html.H2(
@@ -526,12 +541,9 @@ def _build_monthly_chart(dff, origin, dest, agg_method):
 
 
 # =====================================================================
-# 8. Run
+# 8. Entry point (local dev only)
 # =====================================================================
 if __name__ == '__main__':
-    print("\n" + "=" * 60)
-    print("🚀 NEURAL FLIGHT TRACKER — BOOKING CURVE ANALYZER")
-    print("=" * 60)
-    print("http://127.0.0.1:8050")
-    print("=" * 60 + "\n")
-    app.run(debug=True)
+    import os
+    port = int(os.environ.get("PORT", 8050))
+    app.run(host="0.0.0.0", port=port, debug=False)
