@@ -1,6 +1,43 @@
 import os
+import datetime
+import json
 from dash import html, dcc, Input, Output
 from app_instance import app, server   # noqa — server exported for gunicorn
+
+# =====================================================================
+# Tracking and KPI measurement (Streamlit-inspired plugin adaptation for Dash)
+# =====================================================================
+TRACKING_FILE = "user_activity.log"
+COUNTERS_FILE = "kpi_counters.json"
+KPI_COUNTERS = {
+    "/": 0,
+    "/offers": 0,
+    "/january": 0,
+    "/emission": 0,
+    "/sankey": 0,
+    "/gini": 0
+}
+
+# Load existing counters if file exists
+if os.path.exists(COUNTERS_FILE):
+    with open(COUNTERS_FILE, "r") as f:
+        loaded = json.load(f)
+        KPI_COUNTERS.update(loaded)
+
+def log_user_activity(pathname):
+    """Log user activity and update KPI counters."""
+    timestamp = datetime.datetime.now().isoformat()
+    with open(TRACKING_FILE, "a") as f:
+        f.write(f"{timestamp},{pathname}\n")
+    if pathname in KPI_COUNTERS:
+        KPI_COUNTERS[pathname] += 1
+        # Persist counters
+        with open(COUNTERS_FILE, "w") as f:
+            json.dump(KPI_COUNTERS, f)
+
+def get_kpi_data():
+    """Return current KPI data (page visit counts)."""
+    return KPI_COUNTERS.copy()
 
 # =====================================================================
 # Cyberpunk theme
@@ -10,6 +47,7 @@ PANEL_BG   = "#1f2833"
 NEON_CYAN  = "#66fcf1"
 NEON_BLUE  = "#45a29e"
 NEON_PINK  = "#ff007f"
+NEON_PURPLE = "#9D4EDD"
 TEXT_MUTED = "#c5c6c7"
 
 PAGES = [
@@ -41,6 +79,13 @@ PAGES = [
         "accent":   "#f5c518",
         "icon":     "🗺️"
     },
+    {
+        "title":    "GINI CHARTS",
+        "subtitle": "Clarification of price inequality across origins",
+        "href":     "/gini",
+        "accent":   NEON_PURPLE,
+        "icon":     "⏳"
+    }
 ]
 
 # =====================================================================
@@ -103,7 +148,7 @@ main_layout = html.Div([
             [make_card(p) for p in PAGES],
             style={
                 "display": "grid",
-                "gridTemplateColumns": "1fr 1fr",
+                "gridTemplateColumns": "1fr 1fr 1fr",
                 "gridTemplateRows":    "1fr 1fr",
                 "gap": "24px",
                 "width": "100%"
@@ -138,6 +183,7 @@ app.layout = html.Div([
     Input("url", "pathname")
 )
 def route(pathname):
+    log_user_activity(pathname)  # Track user activity and update KPIs
     if pathname == "/offers":
         import vizualizationFlightOffers
         return vizualizationFlightOffers.layout
@@ -153,6 +199,10 @@ def route(pathname):
     if pathname == "/sankey":
         import vizualizationSankey
         return vizualizationSankey.layout
+
+    if pathname == "/gini":
+        import vizualizationGini
+        return vizualizationGini.layout
 
     return main_layout
 
