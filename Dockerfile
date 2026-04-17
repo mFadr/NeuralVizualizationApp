@@ -31,4 +31,4 @@ ENV APP_ENV=cloud
 ENV PYTHONUNBUFFERED=1
 
 # Default command (overridden per service in docker-compose.yml)
-CMD ["python", "main_page.py"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--workers", "1", "--timeout", "120", "main_page:server"]
