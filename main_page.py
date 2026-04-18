@@ -10,6 +10,7 @@ PANEL_BG   = "#1f2833"
 NEON_CYAN  = "#66fcf1"
 NEON_BLUE  = "#45a29e"
 NEON_PINK  = "#ff007f"
+NEON_PURPLE = "#9b59b6"
 TEXT_MUTED = "#c5c6c7"
 
 PAGES = [
@@ -39,6 +40,13 @@ PAGES = [
         "subtitle": "Flow diagram of prices between cities",
         "href":     "/sankey",
         "accent":   "#f5c518",
+        "icon":     "🗺️"
+    },
+    {
+        "title":    "GiNI ANALYZER",
+        "subtitle": "Inequality analysis of price distributions",
+        "href":     "/gini",
+        "accent":   NEON_PURPLE,
         "icon":     "🗺️"
     },
 ]
@@ -153,6 +161,11 @@ def route(pathname):
     if pathname == "/sankey":
         import vizualizationSankey
         return vizualizationSankey.layout
+
+    if pathname == "/gini":
+        import vizualizationGini
+    return vizualizationGini.layout
+
 
     return main_layout
 
