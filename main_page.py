@@ -1,7 +1,6 @@
 import os
 from dash import html, dcc, Input, Output
 from app_instance import app, server   # noqa — server exported for gunicorn
-import data_cache   # noqa — triggers loading once at startup
 
 # =====================================================================
 # Cyberpunk theme
