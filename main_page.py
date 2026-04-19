@@ -351,8 +351,8 @@ def route(pathname):
         return vizualizationGini.layout
 
     if pathname == "/info":
-        import vizualizationManual
-        return vizualizationManual.layout
+        import vizualizationmanual
+        return vizualizationmanual.layout
 
     return main_layout
 
