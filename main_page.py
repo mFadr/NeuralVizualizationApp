@@ -52,6 +52,13 @@ PAGES = [
         "accent":   NEON_PURPLE,
         "icon":     "📊"
     },
+    {
+        "title":    "Manual",
+        "subtitle": "How to use the platform and interpret the data",
+        "href":     "/info",
+        "accent":   NEON_PURPLE,
+        "icon":     "📊"
+    },
 ]
 
 # =====================================================================
@@ -342,6 +349,10 @@ def route(pathname):
     if pathname == "/gini":
         import vizualizationGini
         return vizualizationGini.layout
+
+    if pathname == "/info":
+        import vizualizationManual
+        return vizualizationManual.layout
 
     return main_layout
 
