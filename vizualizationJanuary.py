@@ -15,7 +15,7 @@ def load_data_from_file(file_path):
     df = pd.read_csv(file_path, sep=r"[\t;,]", engine="python")
 
     # Clean price
-    df["price"] = df["price"].astype(str).str.replace(r"[^\d.]", "", regex=True).astype(float)
+    df["price"] = pd.to_numeric(df["price"].astype(str).str.replace(r"[^\d.]", "", regex=True), errors="coerce")
 
     # Ensure expected columns exist
     for col in ["departure_time", "duration", "Est. CO2 (kg)", "AVG CO2 (kg/hr)"]:
@@ -125,7 +125,7 @@ layout = html.Div([
                 "textDecoration": "none",
                 "fontSize": "11px",
                 "letterSpacing": "2px",
-                "marginBottom": "1100px",
+                "marginBottom": "16px",
                 "fontFamily": "Courier New, monospace",
                 "backgroundColor": "#1f2833"
             }
@@ -134,6 +134,21 @@ layout = html.Div([
         # 🎛️ LEFT PANEL: Filters
         html.Div([
             html.H3("SYSTEM PARAMETERS", style={"color": NEON_BLUE, "borderBottom": f"1px solid {NEON_BLUE}", "paddingBottom": "10px"}),
+
+            # Aggregation Method Toggle
+            html.Div([
+                html.Label("Aggregation Method", style={"color": TEXT_MUTED, "fontSize": "12px"}),
+                dcc.RadioItems(
+                    id="agg-method",
+                    options=[
+                        {"label": "  Mean",   "value": "mean"},
+                        {"label": "  Median", "value": "median"}
+                    ],
+                    value="mean",
+                    labelStyle={"display": "inline-block", "color": NEON_CYAN, "marginRight": "16px", "fontSize": "13px"},
+                    style={"marginTop": "6px", "marginBottom": "16px"}
+                )
+            ], style={"borderBottom": f"1px solid {NEON_BLUE}40", "paddingBottom": "12px", "marginBottom": "8px"}),
 
             # Filters Chart 1
             html.Div([
@@ -180,18 +195,11 @@ layout = html.Div([
             "height": "fit-content"
         }),
 
-        # 📈 RIGHT PANEL: Charts
+        # 📈 RIGHT PANEL: Merged Chart
         html.Div([
-
-            # Chart 1 Container
             html.Div([
-                dcc.Graph(id="price-chart-1")
-            ], style={"borderRadius": "15px", "overflow": "hidden", "boxShadow": f"0 0 15px {NEON_CYAN}80", "marginBottom": "30px"}),
-
-            # Chart 2 Container
-            html.Div([
-                dcc.Graph(id="price-chart-2")
-            ], style={"borderRadius": "15px", "overflow": "hidden", "boxShadow": f"0 0 15px {NEON_PINK}80"})
+                dcc.Graph(id="merged-price-chart", style={"height": "800px"})
+            ], style={"borderRadius": "15px", "overflow": "hidden", "boxShadow": f"0 0 15px {NEON_CYAN}80", "padding": "10px", "backgroundColor": PANEL_BG})
 
         ], style={"width": "75%", "display": "flex", "flexDirection": "column"})
 
@@ -468,34 +476,26 @@ def aggregate_price_data(filtered_df, agg_method='mean'):
 
     return agg_df.sort_values('Date')
 
+
+
+# =====================================================================
+# 6️⃣ MERGED CHART CALLBACK
+# =====================================================================
 @app.callback(
-    Output("price-chart-1", "figure"),
-    Input("dataset-origin-1", "value"),
-    Input("destination-filter-1", "value"),
-    Input("airline-filter-1", "value"),
-    Input("search-date-filter-1", "value")
+    Output("merged-price-chart", "figure"),
+    Input("dataset-origin-1",    "value"),
+    Input("destination-filter-1","value"),
+    Input("airline-filter-1",    "value"),
+    Input("search-date-filter-1","value"),
+    Input("dataset-origin-2",    "value"),
+    Input("destination-filter-2","value"),
+    Input("airline-filter-2",    "value"),
+    Input("search-date-filter-2","value"),
+    Input("agg-method",          "value"),
 )
-def update_chart_1(selected_dataset_origin, selected_destination, selected_airline, selected_search_date):
-    if selected_dataset_origin not in datasets:
-        fig = px.scatter(title="NO SIGNAL: Dataset not loaded")
-        return style_cyberpunk_figure(fig, line_color=NEON_CYAN, title="TRACKER ALPHA")
+def update_merged_chart(orig1, dest1, air1, date1, orig2, dest2, air2, date2, agg_method):
+    fig = go.Figure()
 
-    filtered = datasets[selected_dataset_origin].copy()
-
-    if selected_destination != "All":
-        filtered = filtered[filtered["Destination"] == selected_destination]
-    if selected_airline != "All":
-        filtered = filtered[filtered["Airline"] == selected_airline]
-    if selected_search_date != "All":
-        filtered = filtered[filtered["search_date"] == pd.to_datetime(selected_search_date)]
-
-    if filtered.empty:
-        fig = px.scatter(title="NO SIGNAL: Data not found for Tracker Alpha")
-        return style_cyberpunk_figure(fig, line_color=NEON_CYAN, title="TRACKER ALPHA")
-
-    agg = aggregate_price_data(filtered, agg_method='mean')
-
-    # Create figure with custom hover data
     hover_template = (
             "<b>Date:</b> %{x|%b %d, %Y}<br>" +
             "<b>Airline:</b> %{customdata[0]}<br>" +
@@ -504,235 +504,148 @@ def update_chart_1(selected_dataset_origin, selected_destination, selected_airli
             "<extra></extra>"
     )
 
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(
-        x=agg["Date"],
-        y=agg["Price"],
-        customdata=agg[["Airline", "AvgCO2"]],
-        hovertemplate=hover_template,
-        mode="lines+markers",
-        name="Price Trend",
-        line=dict(color=NEON_CYAN, width=3),
-        marker=dict(size=8, color=NEON_CYAN, line=dict(width=2, color=BG_COLOR))
-    ))
+    def process(orig, dest, air, search_date):
+        if orig not in datasets:
+            return pd.DataFrame()
+        df = datasets[orig].copy()
+        if dest != "All":
+            df = df[df["Destination"] == dest]
+        if air != "All":
+            df = df[df["Airline"] == air]
+        if search_date != "All":
+            df = df[df["search_date"] == pd.to_datetime(search_date)]
+        if df.empty:
+            return df
+        if agg_method == "median":
+            return df.groupby(["Date", "Airline"])[["Price", "AvgCO2"]].median().reset_index()
+        return df.groupby(["Date", "Airline"])[["Price", "AvgCO2"]].mean().reset_index()
 
-    title_text = f"TRACKER ALPHA: {selected_dataset_origin} → {selected_destination}"
-    return style_cyberpunk_figure(fig, title=title_text)
+    agg1 = process(orig1, dest1, air1, date1)
+    agg2 = process(orig2, dest2, air2, date2)
 
-@app.callback(
-    Output("price-chart-2", "figure"),
-    Input("dataset-origin-2", "value"),
-    Input("destination-filter-2", "value"),
-    Input("airline-filter-2", "value"),
-    Input("search-date-filter-2", "value")
-)
-def update_chart_2(selected_dataset_origin, selected_destination, selected_airline, selected_search_date):
-    if selected_dataset_origin not in datasets:
-        fig = px.scatter(title="NO SIGNAL: Dataset not loaded")
-        return style_cyberpunk_figure(fig, line_color=NEON_PINK, title="TRACKER BETA")
+    if not agg1.empty:
+        label = f"ALPHA ({orig1} → {dest1})" if dest1 != "All" else f"ALPHA ({orig1})"
+        fig.add_trace(go.Scatter(
+            x=agg1["Date"], y=agg1["Price"],
+            customdata=agg1[["Airline", "AvgCO2"]],
+            hovertemplate=hover_template,
+            mode="lines+markers", name=label,
+            line=dict(color=NEON_CYAN, width=3),
+            marker=dict(size=8, color=NEON_CYAN, line=dict(width=2, color=BG_COLOR))
+        ))
 
-    filtered = datasets[selected_dataset_origin].copy()
+    if not agg2.empty:
+        label = f"BETA ({orig2} → {dest2})" if dest2 != "All" else f"BETA ({orig2})"
+        fig.add_trace(go.Scatter(
+            x=agg2["Date"], y=agg2["Price"],
+            customdata=agg2[["Airline", "AvgCO2"]],
+            hovertemplate=hover_template,
+            mode="lines+markers", name=label,
+            line=dict(color=NEON_PINK, width=3),
+            marker=dict(size=8, color=NEON_PINK, line=dict(width=2, color=BG_COLOR))
+        ))
 
-    if selected_destination != "All":
-        filtered = filtered[filtered["Destination"] == selected_destination]
-    if selected_airline != "All":
-        filtered = filtered[filtered["Airline"] == selected_airline]
-    if selected_search_date != "All":
-        filtered = filtered[filtered["search_date"] == pd.to_datetime(selected_search_date)]
+    metric = "Median" if agg_method == "median" else "Avg"
+    if agg1.empty and agg2.empty:
+        title = f"NO SIGNAL: Adjust parameters to load {metric} paths"
+    else:
+        title = f"COMPARISON MATRIX: {metric} Price Trends"
 
-    if filtered.empty:
-        fig = px.scatter(title="NO SIGNAL: Data not found for Tracker Beta")
-        return style_cyberpunk_figure(fig, line_color=NEON_PINK, title="TRACKER BETA")
+    return style_cyberpunk_figure(fig, title=title)
 
-    agg = aggregate_price_data(filtered, agg_method='mean')
-
-    # Create figure with custom hover data
-    hover_template = (
-            "<b>Date:</b> %{x|%b %d, %Y}<br>" +
-            "<b>Airline:</b> %{customdata[0]}<br>" +
-            "<b>Price:</b> $%{y:.2f}<br>" +
-            "<b>AVG CO2:</b> %{customdata[1]:.2f} kg/hr<br>" +
-            "<extra></extra>"
-    )
-
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(
-        x=agg["Date"],
-        y=agg["Price"],
-        customdata=agg[["Airline", "AvgCO2"]],
-        hovertemplate=hover_template,
-        mode="lines+markers",
-        name="Price Trend",
-        line=dict(color=NEON_PINK, width=3),
-        marker=dict(size=8, color=NEON_PINK, line=dict(width=2, color=BG_COLOR))
-    ))
-
-    title_text = f"TRACKER BETA: {selected_dataset_origin} → {selected_destination}"
-    return style_cyberpunk_figure(fig, title=title_text)
 
 # =====================================================================
-# 6️⃣ ROUTE ANALYTICS - Calculate AVG prices for all routes
+# 7️⃣ ROUTE ANALYTICS — respect aggregation method
 # =====================================================================
-def calculate_route_analytics(datasets):
-    """Calculate average prices for all routes across all datasets"""
+def calculate_route_analytics(datasets, method="mean"):
     route_prices = {}
-
     for origin_code, df in datasets.items():
-        for destination in df['Destination'].unique():
+        for destination in df["Destination"].unique():
             route_key = f"{origin_code}-{destination}"
-            route_data = df[df['Destination'] == destination]
-            avg_price = route_data['Price'].mean()
-            route_prices[route_key] = avg_price
-
+            route_data = df[df["Destination"] == destination]
+            route_prices[route_key] = (
+                route_data["Price"].median() if method == "median"
+                else route_data["Price"].mean()
+            )
     return route_prices
 
-# Callback for cheapest routes chart
+
 @app.callback(
     Output("cheapest-routes-chart", "figure"),
-    Input("destination-checklist-cheapest", "value")
+    Input("destination-checklist-cheapest", "value"),
+    Input("agg-method", "value")
 )
-def update_cheapest_routes(selected_destinations):
-    route_prices = calculate_route_analytics(datasets)
-
-    # Filter by selected destinations
+def update_cheapest_routes(selected_destinations, agg_method):
+    route_prices = calculate_route_analytics(datasets, method=agg_method)
     if selected_destinations:
-        filtered_routes = {k: v for k, v in route_prices.items()
-                           if k.split('-')[1] in selected_destinations}
-    else:
-        filtered_routes = route_prices
-
-    # Sort and get 10 cheapest, reverse to show cheapest at the top
-    sorted_routes = sorted(filtered_routes.items(), key=lambda x: x[1])[:10]
-    sorted_routes.reverse()  # Reverse so cheapest is at the top
-    routes = [r[0] for r in sorted_routes]
-    prices = [r[1] for r in sorted_routes]
-
-    fig = px.bar(
-        x=prices,
-        y=routes,
-        orientation='h',
-        text=prices
-    )
-
-    fig.update_traces(
-        marker_color=TRUE_PURPLE,
-        texttemplate='$%{text:.2f}',
-        textposition='outside',
-        textfont=dict(color=TEXT_MUTED, size=11)
-    )
-
-    fig.update_layout(
-        title="10 CHEAPEST ROUTES",
-        template="plotly_dark",
-        plot_bgcolor="rgba(0,0,0,0)",
-        paper_bgcolor=PANEL_BG,
-        font=dict(color=TEXT_MUTED, family="Segoe UI"),
-        margin=dict(l=80, r=80, t=60, b=50),
-        xaxis=dict(showgrid=True, gridcolor="#333", title="Price ($)"),
-        yaxis=dict(showgrid=False, title="Route"),
-        height=400
-    )
-
+        route_prices = {k: v for k, v in route_prices.items()
+                        if k.split("-")[1] in selected_destinations}
+    sorted_routes = list(reversed(sorted(route_prices.items(), key=lambda x: x[1])[:10]))
+    fig = px.bar(x=[r[1] for r in sorted_routes], y=[r[0] for r in sorted_routes],
+                 orientation="h", text=[r[1] for r in sorted_routes])
+    fig.update_traces(marker_color=TRUE_PURPLE, texttemplate="$%{text:.2f}",
+                      textposition="outside", textfont=dict(color=TEXT_MUTED, size=11))
+    metric = "MEDIAN" if agg_method == "median" else "AVG"
+    fig.update_layout(title=f"10 CHEAPEST ROUTES ({metric})", template="plotly_dark",
+                      plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor=PANEL_BG,
+                      font=dict(color=TEXT_MUTED, family="Segoe UI"),
+                      margin=dict(l=80, r=80, t=60, b=50),
+                      xaxis=dict(showgrid=True, gridcolor="#333", title="Price ($)"),
+                      yaxis=dict(showgrid=False, title="Route"), height=400)
     return fig
 
-# Callback for most expensive routes chart
+
 @app.callback(
     Output("expensive-routes-chart", "figure"),
-    Input("destination-checklist-expensive", "value")
+    Input("destination-checklist-expensive", "value"),
+    Input("agg-method", "value")
 )
-def update_expensive_routes(selected_destinations):
-    route_prices = calculate_route_analytics(datasets)
-
-    # Filter by selected destinations
+def update_expensive_routes(selected_destinations, agg_method):
+    route_prices = calculate_route_analytics(datasets, method=agg_method)
     if selected_destinations:
-        filtered_routes = {k: v for k, v in route_prices.items()
-                           if k.split('-')[1] in selected_destinations}
-    else:
-        filtered_routes = route_prices
-
-    # Sort and get 10 most expensive, reverse to show most expensive at the top
-    sorted_routes = sorted(filtered_routes.items(), key=lambda x: x[1], reverse=True)[:10]
-    sorted_routes.reverse()  # Reverse so most expensive is at the top
-    routes = [r[0] for r in sorted_routes]
-    prices = [r[1] for r in sorted_routes]
-
-    fig = px.bar(
-        x=prices,
-        y=routes,
-        orientation='h',
-        text=prices
-    )
-
-    fig.update_traces(
-        marker_color=ELECTRIC_PURPLE,
-        texttemplate='$%{text:.2f}',
-        textposition='outside',
-        textfont=dict(color=TEXT_MUTED, size=11)
-    )
-
-    fig.update_layout(
-        title="10 MOST EXPENSIVE ROUTES",
-        template="plotly_dark",
-        plot_bgcolor="rgba(0,0,0,0)",
-        paper_bgcolor=PANEL_BG,
-        font=dict(color=TEXT_MUTED, family="Segoe UI"),
-        margin=dict(l=80, r=80, t=60, b=50),
-        xaxis=dict(showgrid=True, gridcolor="#333", title="Price ($)"),
-        yaxis=dict(showgrid=False, title="Route"),
-        height=400
-    )
-
+        route_prices = {k: v for k, v in route_prices.items()
+                        if k.split("-")[1] in selected_destinations}
+    sorted_routes = list(reversed(sorted(route_prices.items(),
+                                         key=lambda x: x[1], reverse=True)[:10]))
+    fig = px.bar(x=[r[1] for r in sorted_routes], y=[r[0] for r in sorted_routes],
+                 orientation="h", text=[r[1] for r in sorted_routes])
+    fig.update_traces(marker_color=ELECTRIC_PURPLE, texttemplate="$%{text:.2f}",
+                      textposition="outside", textfont=dict(color=TEXT_MUTED, size=11))
+    metric = "MEDIAN" if agg_method == "median" else "AVG"
+    fig.update_layout(title=f"10 MOST EXPENSIVE ROUTES ({metric})", template="plotly_dark",
+                      plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor=PANEL_BG,
+                      font=dict(color=TEXT_MUTED, family="Segoe UI"),
+                      margin=dict(l=80, r=80, t=60, b=50),
+                      xaxis=dict(showgrid=True, gridcolor="#333", title="Price ($)"),
+                      yaxis=dict(showgrid=False, title="Route"), height=400)
     return fig
 
-# Callback for origin comparison chart with destination filters
+
 @app.callback(
     Output("origin-comparison-chart", "figure"),
-    Input("destination-checklist", "value")
+    Input("destination-checklist", "value"),
+    Input("agg-method", "value")
 )
-def update_origin_comparison(selected_destinations):
-    origin_avg_prices = {}
-
+def update_origin_comparison(selected_destinations, agg_method):
+    origin_prices = {}
     for origin_code, df in datasets.items():
-        if selected_destinations:
-            # Filter by selected destinations
-            filtered_df = df[df['Destination'].isin(selected_destinations)]
-        else:
-            # If no destinations selected, use all
-            filtered_df = df
-
-        if not filtered_df.empty:
-            avg_price = filtered_df['Price'].mean()
-            origin_avg_prices[origin_code] = avg_price
-
-    origins = list(origin_avg_prices.keys())
-    prices = list(origin_avg_prices.values())
-
-    fig = px.bar(
-        x=prices,
-        y=origins,
-        orientation='h',
-        text=prices
-    )
-
-    fig.update_traces(
-        marker_color=CHART_CYAN,
-        texttemplate='$%{text:.2f}',
-        textposition='outside',
-        textfont=dict(color=TEXT_MUTED, size=11)
-    )
-
-    fig.update_layout(
-        title="ORIGIN AIRPORT AVG PRICE COMPARISON",
-        template="plotly_dark",
-        plot_bgcolor="rgba(0,0,0,0)",
-        paper_bgcolor=PANEL_BG,
-        font=dict(color=TEXT_MUTED, family="Segoe UI"),
-        margin=dict(l=80, r=80, t=60, b=50),
-        xaxis=dict(showgrid=True, gridcolor="#333", title="Average Price ($)"),
-        yaxis=dict(showgrid=False, title="Origin Airport"),
-        height=400
-    )
-
+        filtered = df[df["Destination"].isin(selected_destinations)]                    if selected_destinations else df
+        if not filtered.empty:
+            origin_prices[origin_code] = (
+                filtered["Price"].median() if agg_method == "median"
+                else filtered["Price"].mean()
+            )
+    fig = px.bar(x=list(origin_prices.values()), y=list(origin_prices.keys()),
+                 orientation="h", text=list(origin_prices.values()))
+    fig.update_traces(marker_color=CHART_CYAN, texttemplate="$%{text:.2f}",
+                      textposition="outside", textfont=dict(color=TEXT_MUTED, size=11))
+    metric = "MEDIAN" if agg_method == "median" else "AVG"
+    fig.update_layout(title=f"ORIGIN AIRPORT COMPARISON ({metric})", template="plotly_dark",
+                      plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor=PANEL_BG,
+                      font=dict(color=TEXT_MUTED, family="Segoe UI"),
+                      margin=dict(l=80, r=80, t=60, b=50),
+                      xaxis=dict(showgrid=True, gridcolor="#333", title="Price ($)"),
+                      yaxis=dict(showgrid=False, title="Origin Airport"), height=400)
     return fig
 
 # =====================================================================
