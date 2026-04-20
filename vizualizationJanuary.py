@@ -195,11 +195,20 @@ layout = html.Div([
             "height": "fit-content"
         }),
 
-        # 📈 RIGHT PANEL: Merged Chart
+        # 📈 RIGHT PANEL: Merged Chart + Monthly Price Chart
         html.Div([
             html.Div([
-                dcc.Graph(id="merged-price-chart", style={"height": "800px"})
-            ], style={"borderRadius": "15px", "overflow": "hidden", "boxShadow": f"0 0 15px {NEON_CYAN}80", "padding": "10px", "backgroundColor": PANEL_BG})
+                dcc.Graph(id="merged-price-chart", style={"height": "500px"})
+            ], style={"borderRadius": "15px", "overflow": "hidden", "boxShadow": f"0 0 15px {NEON_CYAN}80", "padding": "10px", "backgroundColor": PANEL_BG, "marginBottom": "20px"}),
+
+            # Monthly price level chart
+            html.Div([
+                html.Div([
+                    html.Span("📅  MONTHLY PRICE LEVEL", style={"color": NEON_CYAN, "fontSize": "11px", "letterSpacing": "2px", "fontFamily": "Courier New, monospace"}),
+                    html.Span("  —  Mean & Median per departure month (Sep–Jan)", style={"color": TEXT_MUTED, "fontSize": "10px", "fontFamily": "Courier New, monospace"})
+                ], style={"padding": "8px 12px", "backgroundColor": "#0d1117", "borderRadius": "6px", "marginBottom": "8px"}),
+                dcc.Graph(id="monthly-price-chart", style={"height": "380px"})
+            ], style={"borderRadius": "15px", "overflow": "hidden", "boxShadow": f"0 0 15px {NEON_BLUE}60", "padding": "10px", "backgroundColor": PANEL_BG})
 
         ], style={"width": "75%", "display": "flex", "flexDirection": "column"})
 
@@ -404,7 +413,28 @@ def update_airline_options_2(selected_dataset_origin, selected_destination):
     airlines = ["All"] + sorted(allowed_route_airlines)
     return airlines, "All"
 
-# Callback to update search date options (Chart 1)
+
+# Month order: Sep → Oct → Nov → Dec → Jan (chronological scraping period)
+MONTH_ORDER = [
+    (9,  "September"),
+    (10, "October"),
+    (11, "November"),
+    (12, "December"),
+    (1,  "January"),
+]
+
+def get_month_options(df):
+    """Return months present in search_date, ordered Sep→Jan."""
+    if df.empty or "search_date" not in df.columns:
+        return [{"label": "All", "value": "All"}]
+    months_present = set(df["search_date"].dropna().dt.month.unique())
+    opts = [{"label": "All months", "value": "All"}]
+    for num, name in MONTH_ORDER:
+        if num in months_present:
+            opts.append({"label": name, "value": str(num)})
+    return opts
+
+# Callback to update search date options (Chart 1) — now shows months
 @app.callback(
     Output("search-date-filter-1", "options"),
     Output("search-date-filter-1", "value"),
@@ -412,14 +442,10 @@ def update_airline_options_2(selected_dataset_origin, selected_destination):
 )
 def update_search_dates_1(selected_dataset_origin):
     if selected_dataset_origin not in datasets:
-        return [], None
+        return [{"label": "All", "value": "All"}], "All"
+    return get_month_options(datasets[selected_dataset_origin]), "All"
 
-    df = datasets[selected_dataset_origin]
-    search_dates = sorted(df["search_date"].dropna().unique())
-    search_date_options = ["All"] + [pd.Timestamp(d).strftime("%Y-%m-%d") for d in search_dates]
-    return search_date_options, "All"
-
-# Callback to update search date options (Chart 2)
+# Callback to update search date options (Chart 2) — now shows months
 @app.callback(
     Output("search-date-filter-2", "options"),
     Output("search-date-filter-2", "value"),
@@ -427,12 +453,8 @@ def update_search_dates_1(selected_dataset_origin):
 )
 def update_search_dates_2(selected_dataset_origin):
     if selected_dataset_origin not in datasets:
-        return [], None
-
-    df = datasets[selected_dataset_origin]
-    search_dates = sorted(df["search_date"].dropna().unique())
-    search_date_options = ["All"] + [pd.Timestamp(d).strftime("%Y-%m-%d") for d in search_dates]
-    return search_date_options, "All"
+        return [{"label": "All", "value": "All"}], "All"
+    return get_month_options(datasets[selected_dataset_origin]), "All"
 
 def style_cyberpunk_figure(fig, line_color=None, title=""):
     """Applies the dark modern aesthetic to Plotly figures."""
@@ -497,11 +519,11 @@ def update_merged_chart(orig1, dest1, air1, date1, orig2, dest2, air2, date2, ag
     fig = go.Figure()
 
     hover_template = (
-            "<b>Date:</b> %{x|%b %d, %Y}<br>" +
-            "<b>Airline:</b> %{customdata[0]}<br>" +
-            "<b>Price:</b> $%{y:.2f}<br>" +
-            "<b>AVG CO2:</b> %{customdata[1]:.2f} kg/hr<br>" +
-            "<extra></extra>"
+        "<b>Date:</b> %{x|%b %d, %Y}<br>" +
+        "<b>Airline:</b> %{customdata[0]}<br>" +
+        "<b>Price:</b> $%{y:.2f}<br>" +
+        "<b>AVG CO2:</b> %{customdata[1]:.2f} kg/hr<br>" +
+        "<extra></extra>"
     )
 
     def process(orig, dest, air, search_date):
@@ -513,7 +535,8 @@ def update_merged_chart(orig1, dest1, air1, date1, orig2, dest2, air2, date2, ag
         if air != "All":
             df = df[df["Airline"] == air]
         if search_date != "All":
-            df = df[df["search_date"] == pd.to_datetime(search_date)]
+            # Filter by search_date month number (e.g. "9" = September)
+            df = df[df["search_date"].dt.month == int(search_date)]
         if df.empty:
             return df
         if agg_method == "median":
@@ -647,6 +670,135 @@ def update_origin_comparison(selected_destinations, agg_method):
                       xaxis=dict(showgrid=True, gridcolor="#333", title="Price ($)"),
                       yaxis=dict(showgrid=False, title="Origin Airport"), height=400)
     return fig
+
+# =====================================================================
+# 8️⃣ MONTHLY PRICE CHART — mean & median per departure month (Sep–Jan)
+# =====================================================================
+MONTH_NAMES_ORDERED = ["September", "October", "November", "December", "January"]
+MONTH_NUM_TO_NAME   = {9: "September", 10: "October", 11: "November", 12: "December", 1: "January"}
+
+@app.callback(
+    Output("monthly-price-chart", "figure"),
+    Input("dataset-origin-1",    "value"),
+    Input("destination-filter-1","value"),
+    Input("dataset-origin-2",    "value"),
+    Input("destination-filter-2","value"),
+    Input("agg-method",          "value"),
+)
+def update_monthly_chart(orig1, dest1, orig2, dest2, agg_method):
+    fig = go.Figure()
+
+    def get_monthly(orig, dest, line_color, label_prefix):
+        if orig not in datasets:
+            return
+        df = datasets[orig].copy()
+        if dest != "All":
+            df = df[df["Destination"] == dest]
+        if df.empty:
+            return
+
+        # Extract departure month from Date (flight_date)
+        df["dep_month_num"]  = df["Date"].dt.month
+        df["dep_month_name"] = df["dep_month_num"].map(MONTH_NUM_TO_NAME)
+
+        # Keep only Sep–Jan months
+        df = df[df["dep_month_num"].isin(MONTH_NUM_TO_NAME.keys())]
+        if df.empty:
+            return
+
+        # Aggregate per departure month
+        grp = df.groupby("dep_month_num")["Price"].agg(
+            mean_price="mean",
+            median_price="median",
+            count="count"
+        ).reset_index()
+        grp["month_name"] = grp["dep_month_num"].map(MONTH_NUM_TO_NAME)
+
+        # Sort chronologically Sep→Jan
+        month_order_map = {9: 0, 10: 1, 11: 2, 12: 3, 1: 4}
+        grp["sort_key"] = grp["dep_month_num"].map(month_order_map)
+        grp = grp.sort_values("sort_key")
+
+        y_col  = "mean_price"   if agg_method == "mean"   else "median_price"
+        y_dim  = "median_price" if agg_method == "mean"   else "mean_price"
+        label  = f"{label_prefix} ({orig} → {dest if dest != 'All' else 'All'})"
+        label2 = f"{label_prefix} {'Median' if agg_method == 'mean' else 'Mean'} (dim)"
+
+        # Primary trace — active aggregation, solid
+        fig.add_trace(go.Scatter(
+            x=grp["month_name"],
+            y=grp[y_col],
+            mode="lines+markers",
+            name=label,
+            line=dict(color=line_color, width=3, dash="solid"),
+            marker=dict(size=10, color=line_color, line=dict(width=2, color=BG_COLOR)),
+            customdata=grp[["count", "mean_price", "median_price"]].values,
+            hovertemplate=(
+                "<b>%{x}</b><br>"
+                f"<b>{'Mean' if agg_method == 'mean' else 'Median'}:</b> $%{{y:.2f}}<br>"
+                "<b>Flights (n):</b> %{customdata[0]}<br>"
+                "<b>Mean:</b> $%{customdata[1]:.2f}<br>"
+                "<b>Median:</b> $%{customdata[2]:.2f}<br>"
+                "<extra></extra>"
+            )
+        ))
+
+        # Secondary trace — dimmed, dotted
+        dim_color = line_color + "55"
+        fig.add_trace(go.Scatter(
+            x=grp["month_name"],
+            y=grp[y_dim],
+            mode="lines+markers",
+            name=label2,
+            line=dict(color=dim_color, width=1.5, dash="dot"),
+            marker=dict(size=5, color=dim_color),
+            hovertemplate=(
+                "<b>%{x}</b><br>"
+                f"<b>{'Median' if agg_method == 'mean' else 'Mean'}:</b> $%{{y:.2f}}<br>"
+                "<extra></extra>"
+            )
+        ))
+
+        # Δ annotations between mean and median
+        for _, row in grp.iterrows():
+            diff = abs(row["mean_price"] - row["median_price"])
+            top  = max(row["mean_price"], row["median_price"])
+            fig.add_annotation(
+                x=row["month_name"],
+                y=top,
+                text=f"Δ${diff:.0f}",
+                showarrow=False,
+                yshift=14,
+                font=dict(color=NEON_YELLOW, size=9, family="Courier New, monospace")
+            )
+
+    get_monthly(orig1, dest1, NEON_CYAN, "ALPHA")
+    get_monthly(orig2, dest2, NEON_PINK, "BETA")
+
+    metric = "MEAN" if agg_method == "mean" else "MEDIAN"
+    title  = f"MONTHLY PRICE LEVEL — {metric} per Departure Month  (Sep → Jan)"
+
+    fig.update_layout(
+        title=dict(text=title, font=dict(color=NEON_CYAN, size=13,
+                                         family="Courier New, monospace")),
+        template="plotly_dark",
+        plot_bgcolor="rgba(0,0,0,0)",
+        paper_bgcolor=PANEL_BG,
+        font=dict(color=TEXT_MUTED, family="Segoe UI"),
+        margin=dict(l=60, r=40, t=55, b=50),
+        xaxis=dict(
+            showgrid=True, gridcolor="#2a2a2a", zeroline=False,
+            categoryorder="array",
+            categoryarray=MONTH_NAMES_ORDERED
+        ),
+        yaxis=dict(showgrid=True, gridcolor="#2a2a2a", zeroline=False,
+                   tickprefix="$"),
+        legend=dict(bgcolor="rgba(0,0,0,0)", bordercolor="#333",
+                    font=dict(color=TEXT_MUTED, size=10)),
+        hovermode="x unified"
+    )
+    return fig
+
 
 # =====================================================================
 # 5️⃣ DATASET LOADING — module level (runs on import AND on direct run)
