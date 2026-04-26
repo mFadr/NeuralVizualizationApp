@@ -720,8 +720,8 @@ def update_cheapest_routes(selected_destinations):
     routes = [r[0] for r in sorted_routes]
     prices = [r[1] for r in sorted_routes]
 
-    # Dark purple for cheapest (top), light purple for more expensive
-    colors = get_color_gradient(prices, '#3d1a4d', '#c9a0dc')
+    # White for cheapest (top), dark purple for more expensive
+    colors = get_color_gradient(prices, '#ffffff', '#3d1a4d')
 
     fig = px.bar(
         x=prices,
