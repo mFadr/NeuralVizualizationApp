@@ -86,6 +86,9 @@ TRUE_PURPLE = "#9D4EDD"      # 1st chart
 ELECTRIC_PURPLE = "#7209B7"  # 2nd chart
 CHART_CYAN = "#00D9FF"       # 3rd chart
 
+# Shared height so filter panel and main chart end on the same bottom line
+MAIN_PANEL_HEIGHT = "760px"
+
 # =====================================================================
 # 3️⃣ Layout
 # =====================================================================
@@ -110,166 +113,167 @@ _back_btn = html.A(
 )
 
 layout = html.Div([_back_btn,
-    html.H2(
-        "✈️ NEURAL FLIGHT TRACKER v2.0 - MULTI-ORIGIN",
-        style={
-            "textAlign": "center",
-            "textShadow": f"0 0 10px {NEON_CYAN}",
-            "letterSpacing": "3px",
-            "marginBottom": "30px"
-        }
-    ),
+                   html.H2(
+                       "✈️ NEURAL FLIGHT TRACKER v2.0 - MULTI-ORIGIN",
+                       style={
+                           "textAlign": "center",
+                           "textShadow": f"0 0 10px {NEON_CYAN}",
+                           "letterSpacing": "3px",
+                           "marginBottom": "30px"
+                       }
+                   ),
 
-    # Main Container
-    html.Div([
+                   # Main Container
+                   html.Div([
 
-        # 🎛️ LEFT PANEL: Filters
-        html.Div([
-            html.H3("SYSTEM PARAMETERS", style={"color": NEON_BLUE, "borderBottom": f"1px solid {NEON_BLUE}", "paddingBottom": "10px"}),
+                       # 🎛️ LEFT PANEL: Filters
+                       html.Div([
+                           html.H3("SYSTEM PARAMETERS", style={"color": NEON_BLUE, "borderBottom": f"1px solid {NEON_BLUE}", "paddingBottom": "10px"}),
 
-            # Aggregation Method Toggle
-            html.Div([
-                html.Label("Aggregation Method", style={"color": TEXT_MUTED, "fontSize": "12px"}),
-                dcc.RadioItems(
-                    id="agg-method",
-                    options=[
-                        {"label": "  Mean",   "value": "mean"},
-                        {"label": "  Median", "value": "median"}
-                    ],
-                    value="mean",
-                    labelStyle={"display": "inline-block", "color": NEON_CYAN, "marginRight": "16px", "fontSize": "13px"},
-                    style={"marginTop": "6px", "marginBottom": "16px"}
-                )
-            ], style={"borderBottom": f"1px solid {NEON_BLUE}40", "paddingBottom": "12px", "marginBottom": "8px"}),
+                           # Aggregation Method Toggle
+                           html.Div([
+                               html.Label("Aggregation Method", style={"color": TEXT_MUTED, "fontSize": "12px"}),
+                               dcc.RadioItems(
+                                   id="agg-method",
+                                   options=[
+                                       {"label": "  Mean",   "value": "mean"},
+                                       {"label": "  Median", "value": "median"}
+                                   ],
+                                   value="mean",
+                                   labelStyle={"display": "inline-block", "color": NEON_CYAN, "marginRight": "16px", "fontSize": "13px"},
+                                   style={"marginTop": "6px", "marginBottom": "16px"}
+                               )
+                           ], style={"borderBottom": f"1px solid {NEON_BLUE}40", "paddingBottom": "12px", "marginBottom": "8px"}),
 
-            # Filters Chart 1
-            html.Div([
-                html.H4("TRACKER ALPHA", style={"color": NEON_CYAN, "marginTop": "20px"}),
-                html.Label("Dataset Origin"),
-                dcc.Dropdown(
-                    id="dataset-origin-1",
-                    options=['BER', 'BUD', 'PRG', 'VIE', 'WAW'],
-                    value="PRG",
-                    style=DROPDOWN_STYLE
-                ),
-                html.Label("Destination"),
-                dcc.Dropdown(id="destination-filter-1", value="AMS", style=DROPDOWN_STYLE),
-                html.Label("Airline"),
-                dcc.Dropdown(id="airline-filter-1", value="All", style=DROPDOWN_STYLE),
-                html.Label("Search Date"),
-                dcc.Dropdown(id="search-date-filter-1", value="All", style=DROPDOWN_STYLE)
-            ], style={"border": f"1px solid {NEON_CYAN}", "padding": "15px", "borderRadius": "10px", "marginBottom": "20px", "boxShadow": f"0 0 10px {NEON_CYAN}40"}),
+                           # Filters Chart 1
+                           html.Div([
+                               html.H4("TRACKER ALPHA", style={"color": NEON_CYAN, "marginTop": "20px"}),
+                               html.Label("Dataset Origin"),
+                               dcc.Dropdown(
+                                   id="dataset-origin-1",
+                                   options=['BER', 'BUD', 'PRG', 'VIE', 'WAW'],
+                                   value="PRG",
+                                   style=DROPDOWN_STYLE
+                               ),
+                               html.Label("Destination"),
+                               dcc.Dropdown(id="destination-filter-1", value="AMS", style=DROPDOWN_STYLE),
+                               html.Label("Airline"),
+                               dcc.Dropdown(id="airline-filter-1", value="All", style=DROPDOWN_STYLE),
+                               html.Label("Search Date"),
+                               dcc.Dropdown(id="search-date-filter-1", value="All", style=DROPDOWN_STYLE)
+                           ], style={"border": f"1px solid {NEON_CYAN}", "padding": "15px", "borderRadius": "10px", "marginBottom": "20px", "boxShadow": f"0 0 10px {NEON_CYAN}40"}),
 
-            # Filters Chart 2
-            html.Div([
-                html.H4("TRACKER BETA", style={"color": NEON_PINK}),
-                html.Label("Dataset Origin"),
-                dcc.Dropdown(
-                    id="dataset-origin-2",
-                    options=['BER', 'BUD', 'PRG', 'VIE', 'WAW'],
-                    value="PRG",
-                    style=DROPDOWN_STYLE
-                ),
-                html.Label("Destination"),
-                dcc.Dropdown(id="destination-filter-2", value="FCO", style=DROPDOWN_STYLE),
-                html.Label("Airline"),
-                dcc.Dropdown(id="airline-filter-2", value="All", style=DROPDOWN_STYLE),
-                html.Label("Search Date"),
-                dcc.Dropdown(id="search-date-filter-2", value="All", style=DROPDOWN_STYLE)
-            ], style={"border": f"1px solid {NEON_PINK}", "padding": "15px", "borderRadius": "10px", "boxShadow": f"0 0 10px {NEON_PINK}40"})
+                           # Filters Chart 2
+                           html.Div([
+                               html.H4("TRACKER BETA", style={"color": NEON_PINK}),
+                               html.Label("Dataset Origin"),
+                               dcc.Dropdown(
+                                   id="dataset-origin-2",
+                                   options=['BER', 'BUD', 'PRG', 'VIE', 'WAW'],
+                                   value="PRG",
+                                   style=DROPDOWN_STYLE
+                               ),
+                               html.Label("Destination"),
+                               dcc.Dropdown(id="destination-filter-2", value="FCO", style=DROPDOWN_STYLE),
+                               html.Label("Airline"),
+                               dcc.Dropdown(id="airline-filter-2", value="All", style=DROPDOWN_STYLE),
+                               html.Label("Search Date"),
+                               dcc.Dropdown(id="search-date-filter-2", value="All", style=DROPDOWN_STYLE)
+                           ], style={"border": f"1px solid {NEON_PINK}", "padding": "15px", "borderRadius": "10px", "boxShadow": f"0 0 10px {NEON_PINK}40"})
 
-        ], style={
-            "width": "25%",
-            "backgroundColor": PANEL_BG,
-            "padding": "20px",
-            "borderRadius": "15px",
-            "boxShadow": f"0 0 20px {NEON_BLUE}60",
-            "height": "fit-content"
-        }),
+                       ], style={
+                           "width": "25%",
+                           "backgroundColor": PANEL_BG,
+                           "padding": "20px",
+                           "borderRadius": "15px",
+                           "boxShadow": f"0 0 20px {NEON_BLUE}60",
+                           "height": MAIN_PANEL_HEIGHT,
+                           "overflowY": "auto"
+                       }),
 
-        # 📈 RIGHT PANEL: Charts
-        html.Div([
+                       # 📈 RIGHT PANEL: Charts
+                       html.Div([
 
-            # Merged Chart Container - Both trackers on same chart
-            html.Div([
-                dcc.Graph(
-                    id="merged-price-chart",
-                    style={"height": "760px"},
-                    config={"responsive": True}
-                )
-            ], style={"borderRadius": "15px", "overflow": "hidden", "boxShadow": f"0 0 15px {NEON_CYAN}80", "marginBottom": "30px"}),
+                           # Merged Chart Container - Both trackers on same chart
+                           html.Div([
+                               dcc.Graph(
+                                   id="merged-price-chart",
+                                   style={"height": "100%"},
+                                   config={"responsive": True}
+                               )
+                           ], style={"height": MAIN_PANEL_HEIGHT, "borderRadius": "15px", "overflow": "hidden", "boxShadow": f"0 0 15px {NEON_CYAN}80", "marginBottom": "30px"}),
 
 
 
-        ], style={"width": "75%", "display": "flex", "flexDirection": "column"})
+                       ], style={"width": "75%", "display": "flex", "flexDirection": "column"})
 
-    ], style={"display": "flex", "gap": "30px"}),
+                   ], style={"display": "flex", "gap": "30px"}),
 
-    # 📊 BOTTOM HORIZONTAL BAR CHARTS (3 in one line)
-    html.Div([
-        # Chart 3: 10 Cheapest Routes
-        html.Div([
-            html.Div([
-                html.Label("Destination Filters:", style={"color": NEON_CYAN, "marginBottom": "10px"}),
-                dcc.Checklist(
-                    id="destination-checklist-cheapest",
-                    options=[
-                        {'label': ' AMS', 'value': 'AMS'},
-                        {'label': ' BCN', 'value': 'BCN'},
-                        {'label': ' FCO', 'value': 'FCO'},
-                        {'label': ' LON', 'value': 'LON'}
-                    ],
-                    value=['AMS', 'BCN', 'FCO', 'LON'],
-                    inline=True,
-                    labelStyle={"color": "white", "display": "inline-flex", "alignItems": "center", "marginRight": "15px"}
-                ),
-            ], style={"backgroundColor": "#333333", "padding": "10px", "borderRadius": "10px", "marginBottom": "10px"}),
-            dcc.Graph(id="cheapest-routes-chart")
-        ], style={"flex": "1", "borderRadius": "15px", "overflow": "hidden", "boxShadow": f"0 0 15px {TRUE_PURPLE}80"}),
+                   # 📊 BOTTOM HORIZONTAL BAR CHARTS (3 in one line)
+                   html.Div([
+                       # Chart 3: 10 Cheapest Routes
+                       html.Div([
+                           html.Div([
+                               html.Label("Destination Filters:", style={"color": NEON_CYAN, "marginBottom": "10px"}),
+                               dcc.Checklist(
+                                   id="destination-checklist-cheapest",
+                                   options=[
+                                       {'label': ' AMS', 'value': 'AMS'},
+                                       {'label': ' BCN', 'value': 'BCN'},
+                                       {'label': ' FCO', 'value': 'FCO'},
+                                       {'label': ' LON', 'value': 'LON'}
+                                   ],
+                                   value=['AMS', 'BCN', 'FCO', 'LON'],
+                                   inline=True,
+                                   labelStyle={"color": "white", "display": "inline-flex", "alignItems": "center", "marginRight": "15px"}
+                               ),
+                           ], style={"backgroundColor": "#333333", "padding": "10px", "borderRadius": "10px", "marginBottom": "10px"}),
+                           dcc.Graph(id="cheapest-routes-chart")
+                       ], style={"flex": "1", "borderRadius": "15px", "overflow": "hidden", "boxShadow": f"0 0 15px {TRUE_PURPLE}80"}),
 
-        # Chart 4: 10 Most Expensive Routes
-        html.Div([
-            html.Div([
-                html.Label("Destination Filters:", style={"color": NEON_CYAN, "marginBottom": "10px"}),
-                dcc.Checklist(
-                    id="destination-checklist-expensive",
-                    options=[
-                        {'label': ' AMS', 'value': 'AMS'},
-                        {'label': ' BCN', 'value': 'BCN'},
-                        {'label': ' FCO', 'value': 'FCO'},
-                        {'label': ' LON', 'value': 'LON'}
-                    ],
-                    value=['AMS', 'BCN', 'FCO', 'LON'],
-                    inline=True,
-                    labelStyle={"color": "white", "display": "inline-flex", "alignItems": "center", "marginRight": "15px"}
-                ),
-            ], style={"backgroundColor": "#333333", "padding": "10px", "borderRadius": "10px", "marginBottom": "10px"}),
-            dcc.Graph(id="expensive-routes-chart")
-        ], style={"flex": "1", "borderRadius": "15px", "overflow": "hidden", "boxShadow": f"0 0 15px {ELECTRIC_PURPLE}80"}),
+                       # Chart 4: 10 Most Expensive Routes
+                       html.Div([
+                           html.Div([
+                               html.Label("Destination Filters:", style={"color": NEON_CYAN, "marginBottom": "10px"}),
+                               dcc.Checklist(
+                                   id="destination-checklist-expensive",
+                                   options=[
+                                       {'label': ' AMS', 'value': 'AMS'},
+                                       {'label': ' BCN', 'value': 'BCN'},
+                                       {'label': ' FCO', 'value': 'FCO'},
+                                       {'label': ' LON', 'value': 'LON'}
+                                   ],
+                                   value=['AMS', 'BCN', 'FCO', 'LON'],
+                                   inline=True,
+                                   labelStyle={"color": "white", "display": "inline-flex", "alignItems": "center", "marginRight": "15px"}
+                               ),
+                           ], style={"backgroundColor": "#333333", "padding": "10px", "borderRadius": "10px", "marginBottom": "10px"}),
+                           dcc.Graph(id="expensive-routes-chart")
+                       ], style={"flex": "1", "borderRadius": "15px", "overflow": "hidden", "boxShadow": f"0 0 15px {ELECTRIC_PURPLE}80"}),
 
-        # Chart 5: Origin Airport Comparison with filters
-        html.Div([
-            html.Div([
-                html.Label("Destination Filters:", style={"color": NEON_CYAN, "marginBottom": "10px"}),
-                dcc.Checklist(
-                    id="destination-checklist",
-                    options=[
-                        {'label': ' AMS', 'value': 'AMS'},
-                        {'label': ' BCN', 'value': 'BCN'},
-                        {'label': ' FCO', 'value': 'FCO'},
-                        {'label': ' LON', 'value': 'LON'}
-                    ],
-                    value=['AMS', 'BCN', 'FCO', 'LON'],
-                    inline=True,
-                    labelStyle={"color": "white", "display": "inline-flex", "alignItems": "center", "marginRight": "15px"}
-                ),
-            ], style={"backgroundColor": "#333333", "padding": "10px", "borderRadius": "10px", "marginBottom": "10px"}),
-            dcc.Graph(id="origin-comparison-chart")
-        ], style={"flex": "1", "borderRadius": "15px", "overflow": "hidden", "boxShadow": f"0 0 15px {CHART_CYAN}80"})
+                       # Chart 5: Origin Airport Comparison with filters
+                       html.Div([
+                           html.Div([
+                               html.Label("Destination Filters:", style={"color": NEON_CYAN, "marginBottom": "10px"}),
+                               dcc.Checklist(
+                                   id="destination-checklist",
+                                   options=[
+                                       {'label': ' AMS', 'value': 'AMS'},
+                                       {'label': ' BCN', 'value': 'BCN'},
+                                       {'label': ' FCO', 'value': 'FCO'},
+                                       {'label': ' LON', 'value': 'LON'}
+                                   ],
+                                   value=['AMS', 'BCN', 'FCO', 'LON'],
+                                   inline=True,
+                                   labelStyle={"color": "white", "display": "inline-flex", "alignItems": "center", "marginRight": "15px"}
+                               ),
+                           ], style={"backgroundColor": "#333333", "padding": "10px", "borderRadius": "10px", "marginBottom": "10px"}),
+                           dcc.Graph(id="origin-comparison-chart")
+                       ], style={"flex": "1", "borderRadius": "15px", "overflow": "hidden", "boxShadow": f"0 0 15px {CHART_CYAN}80"})
 
-    ], style={"display": "flex", "gap": "20px", "marginTop": "30px"})
+                   ], style={"display": "flex", "gap": "20px", "marginTop": "30px"})
 
-], style={
+                   ], style={
     "backgroundColor": BG_COLOR,
     "color": NEON_CYAN,
     "minHeight": "100vh",
@@ -415,21 +419,21 @@ def update_search_dates_1(selected_dataset_origin):
         return [], None
 
     df = datasets[selected_dataset_origin]
-    
+
     # Extract months from search_date
     df_temp = df.copy()
     df_temp['SearchMonth'] = df_temp['search_date'].dt.month
     df_temp['SearchMonthName'] = df_temp['search_date'].dt.strftime('%B')
-    
+
     # Filter for Sep(9), Oct(10), Nov(11), Dec(12), Jan(1)
     valid_months = [1, 9, 10, 11, 12]
     valid_data = df_temp[df_temp['SearchMonth'].isin(valid_months)][['SearchMonth', 'SearchMonthName']].drop_duplicates()
-    
+
     # Sort months properly
     month_order = {1: 0, 9: 1, 10: 2, 11: 3, 12: 4}
     valid_data['SortOrder'] = valid_data['SearchMonth'].map(month_order)
     valid_data = valid_data.sort_values('SortOrder')
-    
+
     month_options = ["All"] + valid_data['SearchMonthName'].unique().tolist()
     return month_options, "All"
 
@@ -444,21 +448,21 @@ def update_search_dates_2(selected_dataset_origin):
         return [], None
 
     df = datasets[selected_dataset_origin]
-    
+
     # Extract months from search_date
     df_temp = df.copy()
     df_temp['SearchMonth'] = df_temp['search_date'].dt.month
     df_temp['SearchMonthName'] = df_temp['search_date'].dt.strftime('%B')
-    
+
     # Filter for Sep(9), Oct(10), Nov(11), Dec(12), Jan(1)
     valid_months = [1, 9, 10, 11, 12]
     valid_data = df_temp[df_temp['SearchMonth'].isin(valid_months)][['SearchMonth', 'SearchMonthName']].drop_duplicates()
-    
+
     # Sort months properly
     month_order = {1: 0, 9: 1, 10: 2, 11: 3, 12: 4}
     valid_data['SortOrder'] = valid_data['SearchMonth'].map(month_order)
     valid_data = valid_data.sort_values('SortOrder')
-    
+
     month_options = ["All"] + valid_data['SearchMonthName'].unique().tolist()
     return month_options, "All"
 
@@ -531,33 +535,33 @@ def update_merged_chart(orig1, dest1, air1, month1, orig2, dest2, air2, month2, 
     fig = go.Figure()
 
     hover_template = (
-        "<b>Date:</b> %{x|%b %d, %Y}<br>" +
-        "<b>Airline:</b> %{customdata[0]}<br>" +
-        "<b>Price:</b> $%{y:.2f}<br>" +
-        "<b>AVG CO2:</b> %{customdata[1]:.2f} kg/hr<br>" +
-        "<extra></extra>"
+            "<b>Date:</b> %{x|%b %d, %Y}<br>" +
+            "<b>Airline:</b> %{customdata[0]}<br>" +
+            "<b>Price:</b> $%{y:.2f}<br>" +
+            "<b>AVG CO2:</b> %{customdata[1]:.2f} kg/hr<br>" +
+            "<extra></extra>"
     )
 
     def process(orig, dest, air, month_name):
         if orig not in datasets:
             return pd.DataFrame()
-        
+
         df = datasets[orig].copy()
-        
+
         # Filter by destination
         if dest != "All":
             df = df[df["Destination"] == dest]
-        
+
         # Filter by airline
         if air != "All":
             df = df[df["Airline"] == air]
-        
+
         # Filter by month
         df = filter_by_month_name(df, month_name)
-        
+
         if df.empty:
             return df
-        
+
         # Aggregate by date ONLY (one point per date across all airlines)
         agg_dict = {
             'Price': agg_method,
@@ -565,7 +569,7 @@ def update_merged_chart(orig1, dest1, air1, month1, orig2, dest2, air2, month2, 
             'AvgCO2': 'mean'  # Average CO2 per hour
         }
         agg_data = df.groupby('Date').agg(agg_dict).reset_index()
-        
+
         return agg_data
 
     # Get data for both trackers
@@ -615,8 +619,7 @@ def update_merged_chart(orig1, dest1, air1, month1, orig2, dest2, air2, month2, 
         margin=dict(l=50, r=30, t=70, b=50),
         xaxis=dict(showgrid=True, gridcolor="#333", zeroline=False, title="Departure Date"),
         yaxis=dict(showgrid=True, gridcolor="#333", zeroline=False, tickprefix="$", title=f"{metric} Price ($)"),
-        hovermode="x unified",
-        height=500
+        hovermode="x unified"
     )
 
     return fig
