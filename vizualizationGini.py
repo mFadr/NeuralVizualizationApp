@@ -394,7 +394,7 @@ layout = html.Div([
             "padding":         "10px 18px",
             "borderRadius":    "10px 10px 0 0",
             "borderBottom":    f"1px solid {NEON_PURPLE}30",
-            "display":         "block",
+            "display":         "flex",
             "alignItems":      "center",
             "flexWrap":        "wrap"
         }),
@@ -423,7 +423,9 @@ layout = html.Div([
     "padding":         "14px 22px",
     "fontFamily":      "Courier New, monospace",
     "boxSizing":       "border-box",
-    "minHeight":       "100vh"
+    "minHeight":       "100vh",
+    "maxWidth":        "1200px",
+    "margin":          "0 auto"
 })
 
 
