@@ -252,13 +252,17 @@ layout = html.Div([
     ]),
 
     # ──────────────────────────────────────────────────────────────────
-    # CHART #1 — LORENZ CURVE  (s vlastní lištou Origin/Destination)
+    # UNIFIED CHART — switchable via CHART MODE
+    #   • Lorenz   → Lorenzova křivka pro vybranou trasu (default)
+    #   • Bar      → True Gini napříč všemi trasami (sloupcový graf)
+    #   • Heatmap  → True Gini matice origin × destination
     # ──────────────────────────────────────────────────────────────────
     html.Div([
 
-        # Lišta filtrů pro Lorenz
+        # Lišta filtrů (společná pro všechny režimy)
         html.Div([
-            html.Span("◈  LORENZ CURVE  ·  ROUTE-SPECIFIC INEQUALITY", style={
+
+            html.Span("◈  PRICE INEQUALITY", style={
                 "color":         NEON_CYAN,
                 "fontSize":      "11px",
                 "letterSpacing": "2px",
@@ -270,78 +274,10 @@ layout = html.Div([
             html.Div([
                 html.Label("ORIGIN", style=LABEL_STYLE),
                 dcc.Dropdown(
-                    id="lorenz-origin",
+                    id="gini-origin",
+                    # Options jsou doplněny dynamicky callbackem na základě režimu
                     options=[{"label": o, "value": o} for o in ALL_ORIGINS],
                     value=DEFAULT_LORENZ_ORIGIN,
-                    clearable=False,
-                    style={**DROPDOWN_STYLE, "width": "120px"}
-                )
-            ], style=FILTER_CELL),
-
-            html.Div([
-                html.Label("DESTINATION", style=LABEL_STYLE),
-                dcc.Dropdown(
-                    id="lorenz-dest",
-                    options=[{"label": d, "value": d} for d in ALL_DESTINATIONS],
-                    value=DEFAULT_LORENZ_DEST,
-                    clearable=False,
-                    style={**DROPDOWN_STYLE, "width": "140px"}
-                )
-            ], style=FILTER_CELL),
-
-        ], style={
-            "backgroundColor": PANEL_BG,
-            "padding":         "10px 18px",
-            "borderRadius":    "10px 10px 0 0",
-            "borderBottom":    f"1px solid {NEON_CYAN}30",
-            "display":         "flex",
-            "alignItems":      "center",
-            "flexWrap":        "wrap"
-        }),
-
-        # Samotný Lorenzův graf
-        html.Div([
-            dcc.Graph(
-                id="lorenz-chart",
-                config={"displayModeBar": False, "responsive": True},
-                style={"height": "440px"}
-            )
-        ], style={
-            "borderRadius":    "0 0 12px 12px",
-            "backgroundColor": PANEL_BG
-        })
-
-    ], style={
-        "borderRadius": "12px",
-        "boxShadow":    f"0 0 18px {NEON_CYAN}30",
-        "border":       f"1px solid {NEON_CYAN}20",
-        "marginBottom": "16px"
-    }),
-
-    # ──────────────────────────────────────────────────────────────────
-    # CHART #2 — Bar / Heatmap pro PRICE napříč všemi trasami
-    # ──────────────────────────────────────────────────────────────────
-    html.Div([
-
-        # Lišta filtrů pro chart #2
-        html.Div([
-
-            html.Span("◈  PRICE GINI  ·  ALL ROUTES", style={
-                "color":         NEON_PURPLE,
-                "fontSize":      "11px",
-                "letterSpacing": "2px",
-                "fontWeight":    "bold",
-                "marginRight":   "24px",
-                "fontFamily":    "Courier New, monospace"
-            }),
-
-            html.Div([
-                html.Label("ORIGIN", style=LABEL_STYLE),
-                dcc.Dropdown(
-                    id="gini-origin",
-                    options=[{"label": "All Origins", "value": "ALL"}] +
-                            [{"label": o, "value": o} for o in ALL_ORIGINS],
-                    value="ALL",
                     clearable=False,
                     style={**DROPDOWN_STYLE, "width": "150px"}
                 )
@@ -351,9 +287,8 @@ layout = html.Div([
                 html.Label("DESTINATION", style=LABEL_STYLE),
                 dcc.Dropdown(
                     id="gini-dest",
-                    options=[{"label": "All Destinations", "value": "ALL"}] +
-                            [{"label": d, "value": d} for d in ALL_DESTINATIONS],
-                    value="ALL",
+                    options=[{"label": d, "value": d} for d in ALL_DESTINATIONS],
+                    value=DEFAULT_LORENZ_DEST,
                     clearable=False,
                     style={**DROPDOWN_STYLE, "width": "180px"}
                 )
@@ -370,16 +305,17 @@ layout = html.Div([
                 "marginRight":     "20px"
             }),
 
-            # Režim grafu
+            # Režim grafu — defaultní je Lorenz
             html.Div([
                 html.Label("CHART MODE", style=LABEL_STYLE),
                 dcc.RadioItems(
                     id="gini-chart-mode",
                     options=[
+                        {"label": "  Lorenz",  "value": "lorenz"},
                         {"label": "  Bar",     "value": "bar"},
                         {"label": "  Heatmap", "value": "heatmap"},
                     ],
-                    value="bar",
+                    value="lorenz",
                     labelStyle={
                         "display":     "inline-block",
                         "color":       TEXT_MUTED,
@@ -393,7 +329,7 @@ layout = html.Div([
             "backgroundColor": PANEL_BG,
             "padding":         "10px 18px",
             "borderRadius":    "10px 10px 0 0",
-            "borderBottom":    f"1px solid {NEON_PURPLE}30",
+            "borderBottom":    f"1px solid {NEON_CYAN}30",
             "display":         "flex",
             "alignItems":      "center",
             "flexWrap":        "wrap"
@@ -402,9 +338,9 @@ layout = html.Div([
         # Samotný graf
         html.Div([
             dcc.Graph(
-                id="gini-chart-price",
+                id="gini-unified-chart",
                 config={"displayModeBar": False, "responsive": True},
-                style={"height": "420px"}
+                style={"height": "560px"}
             )
         ], style={
             "borderRadius":    "0 0 12px 12px",
@@ -413,8 +349,10 @@ layout = html.Div([
 
     ], style={
         "borderRadius": "12px",
-        "boxShadow":    f"0 0 18px {NEON_PURPLE}30",
-        "border":       f"1px solid {NEON_PURPLE}20"
+        "boxShadow":    f"0 0 18px {NEON_CYAN}30",
+        "border":       f"1px solid {NEON_CYAN}20",
+        "maxWidth":     "1100px",
+        "margin":       "0 auto"
     })
 
 ], style={
@@ -423,9 +361,7 @@ layout = html.Div([
     "padding":         "14px 22px",
     "fontFamily":      "Courier New, monospace",
     "boxSizing":       "border-box",
-    "minHeight":       "100vh",
-    "maxWidth":        "1200px",
-    "margin":          "0 auto"
+    "minHeight":       "100vh"
 })
 
 
@@ -453,14 +389,9 @@ def _apply_theme(fig, title: str, accent: str) -> go.Figure:
 
 
 # =====================================================================
-# 5a. LORENZOVA KŘIVKA — callback
+# 5a. LORENZOVA KŘIVKA — pomocná funkce (volaná z unified callback)
 # =====================================================================
-@app.callback(
-    Output("lorenz-chart", "figure"),
-    Input("lorenz-origin", "value"),
-    Input("lorenz-dest",   "value"),
-)
-def update_lorenz(origin, dest):
+def _build_lorenz(origin, dest):
     fig = go.Figure()
 
     if origin is None or dest is None:
@@ -636,7 +567,7 @@ def _build_bar(df: pd.DataFrame) -> go.Figure:
 
     fig.update_xaxes(
         range=[0, min(df["true_gini"].max() * 1.3, 1.0)
-        if not df.empty else 1.0]
+               if not df.empty else 1.0]
     )
 
     title = "PRICE  ·  TRUE GINI  (0 = equality, 1 = max inequality)"
@@ -693,12 +624,22 @@ def _build_heatmap(df: pd.DataFrame) -> go.Figure:
 
 
 @app.callback(
-    Output("gini-chart-price", "figure"),
+    Output("gini-unified-chart", "figure"),
     Input("gini-origin",     "value"),
     Input("gini-dest",       "value"),
     Input("gini-chart-mode", "value"),
 )
-def update_price_chart(origin, dest, chart_mode):
+def update_unified_chart(origin, dest, chart_mode):
+    """
+    Single chart at a time. Mode is selected via CHART MODE radio.
+       lorenz  → Lorenz curve for selected route (origin/dest required)
+       bar     → bar chart of Gini across all routes (origin/dest filters work)
+       heatmap → matrix of Gini origin × destination
+    """
+    if chart_mode == "lorenz":
+        return _build_lorenz(origin, dest)
+
+    # Pro Bar/Heatmap režim podporujeme i hodnotu "ALL".
     df = _filter_table(origin, dest)
     if chart_mode == "heatmap":
         return _build_heatmap(df)
