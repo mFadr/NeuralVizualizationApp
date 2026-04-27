@@ -275,9 +275,9 @@ layout = html.Div([
                 html.Label("ORIGIN", style=LABEL_STYLE),
                 dcc.Dropdown(
                     id="gini-origin",
-                    # Options jsou doplněny dynamicky callbackem na základě režimu
-                    options=[{"label": o, "value": o} for o in ALL_ORIGINS],
-                    value=ALL_ORIGINS,
+                    options=[{"label": "All Origins", "value": "ALL"}] +
+                            [{"label": o, "value": o} for o in ALL_ORIGINS],
+                    value=DEFAULT_LORENZ_ORIGIN,
                     clearable=False,
                     style={**DROPDOWN_STYLE, "width": "150px"}
                 )
@@ -287,8 +287,9 @@ layout = html.Div([
                 html.Label("DESTINATION", style=LABEL_STYLE),
                 dcc.Dropdown(
                     id="gini-dest",
-                    options=[{"label": d, "value": d} for d in ALL_DESTINATIONS],
-                    value=ALL_DESTINATIONS,
+                    options=[{"label": "All Destinations", "value": "ALL"}] +
+                            [{"label": d, "value": d} for d in ALL_DESTINATIONS],
+                    value=DEFAULT_LORENZ_DEST,
                     clearable=False,
                     style={**DROPDOWN_STYLE, "width": "180px"}
                 )
@@ -394,11 +395,12 @@ def _apply_theme(fig, title: str, accent: str) -> go.Figure:
 def _build_lorenz(origin, dest):
     fig = go.Figure()
 
-    if origin is None or dest is None:
+    # V režimu Lorenz se nedá zobrazit "ALL" — potřebujeme konkrétní trasu
+    if origin is None or dest is None or origin == "ALL" or dest == "ALL":
         fig.add_annotation(
-            text="SELECT ORIGIN AND DESTINATION",
+            text="SELECT SPECIFIC ORIGIN AND DESTINATION (not 'All')\nLorenz curve requires a single route",
             xref="paper", yref="paper", x=0.5, y=0.5,
-            showarrow=False, font=dict(color=NEON_PINK, size=14)
+            showarrow=False, font=dict(color=NEON_PINK, size=13)
         )
         return _apply_theme(fig, "LORENZ CURVE", NEON_CYAN)
 
