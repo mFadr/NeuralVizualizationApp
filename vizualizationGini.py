@@ -394,7 +394,7 @@ layout = html.Div([
             "padding":         "10px 18px",
             "borderRadius":    "10px 10px 0 0",
             "borderBottom":    f"1px solid {NEON_PURPLE}30",
-            "display":         "flex",
+            "display":         "block",
             "alignItems":      "center",
             "flexWrap":        "wrap"
         }),
@@ -634,7 +634,7 @@ def _build_bar(df: pd.DataFrame) -> go.Figure:
 
     fig.update_xaxes(
         range=[0, min(df["true_gini"].max() * 1.3, 1.0)
-               if not df.empty else 1.0]
+        if not df.empty else 1.0]
     )
 
     title = "PRICE  ·  TRUE GINI  (0 = equality, 1 = max inequality)"
