@@ -277,7 +277,7 @@ layout = html.Div([
                     id="gini-origin",
                     # Options jsou doplněny dynamicky callbackem na základě režimu
                     options=[{"label": o, "value": o} for o in ALL_ORIGINS],
-                    value=DEFAULT_LORENZ_ORIGIN,
+                    value=ALL_ORIGINS,
                     clearable=False,
                     style={**DROPDOWN_STYLE, "width": "150px"}
                 )
@@ -288,7 +288,7 @@ layout = html.Div([
                 dcc.Dropdown(
                     id="gini-dest",
                     options=[{"label": d, "value": d} for d in ALL_DESTINATIONS],
-                    value=DEFAULT_LORENZ_DEST,
+                    value=ALL_DESTINATIONS,
                     clearable=False,
                     style={**DROPDOWN_STYLE, "width": "180px"}
                 )
@@ -567,7 +567,7 @@ def _build_bar(df: pd.DataFrame) -> go.Figure:
 
     fig.update_xaxes(
         range=[0, min(df["true_gini"].max() * 1.3, 1.0)
-               if not df.empty else 1.0]
+        if not df.empty else 1.0]
     )
 
     title = "PRICE  ·  TRUE GINI  (0 = equality, 1 = max inequality)"
