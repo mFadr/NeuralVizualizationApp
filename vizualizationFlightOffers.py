@@ -127,24 +127,37 @@ FILTER_CELL = {
 
 layout = html.Div([
 
-    # ── Tlačítko zpět ──────────────────────────────────────────────────
-    html.A(
-        "← BACK TO MAIN",
-        href="/",
-        style={
-            "display":        "inline-block",
-            "color":          NEON_CYAN,
-            "border":         f"1px solid {NEON_BLUE}",
-            "padding":        "6px 16px",
-            "borderRadius":   "6px",
-            "textDecoration": "none",
-            "fontSize":       "11px",
-            "letterSpacing":  "2px",
-            "marginBottom":   "14px",
-            "fontFamily":     "Courier New, monospace",
-            "backgroundColor": PANEL_BG
-        }
-    ),
+    # ── Tlačítko zpět + Nápověda (Refresh Tip) ──────────────────────────
+    html.Div([
+        html.A(
+            "← BACK TO MAIN",
+            href="/",
+            style={
+                "display":        "inline-block",
+                "color":          NEON_CYAN,
+                "border":         f"1px solid {NEON_BLUE}",
+                "padding":        "6px 16px",
+                "borderRadius":   "6px",
+                "textDecoration": "none",
+                "fontSize":       "11px",
+                "letterSpacing":  "2px",
+                "fontFamily":     "Courier New, monospace",
+                "backgroundColor": PANEL_BG
+            }
+        ),
+        # Subtle help message below the button
+        html.P(
+            "💡 Data not showing? The app may be warming up. Please press F5 to refresh.",
+            style={
+                "color": TEXT_MUTED,
+                "fontSize": "10px",
+                "marginTop": "8px",
+                "marginBottom": "14px",
+                "opacity": "0.7",
+                "fontStyle": "italic"
+            }
+        )
+    ]),
 
     # ── Titulek ────────────────────────────────────────────────────────
     html.H2(
@@ -161,13 +174,13 @@ layout = html.Div([
 
     # ── Lišta filtrů ───────────────────────────────────────────────────
     html.Div([
-
+        # ... (dropdowns remain the same)
         html.Div([
             html.Label("ORIGIN", style=LABEL_STYLE),
             dcc.Dropdown(
                 id="filter-origin",
                 options=[{"label": o, "value": o} for o in origins],
-                value=origins[0],
+                value=origins[0] if origins else None,
                 clearable=False,
                 style={**DROPDOWN_STYLE, "width": "100px"}
             )
@@ -203,58 +216,27 @@ layout = html.Div([
             )
         ], style=FILTER_CELL),
 
-        # Vizuální oddělovač
-        html.Span(style={
-            "display": "inline-block",
-            "width": "1px", "height": "44px",
-            "backgroundColor": NEON_BLUE,
-            "verticalAlign": "middle",
-            "opacity": "0.4",
-            "marginRight": "18px"
-        }),
+        html.Span(style={"display": "inline-block", "width": "1px", "height": "44px", "backgroundColor": NEON_BLUE, "verticalAlign": "middle", "opacity": "0.4", "marginRight": "18px"}),
 
         html.Div([
             html.Label("VIEW MODE", style=LABEL_STYLE),
             dcc.RadioItems(
                 id="filter-date-mode",
-                options=[
-                    {"label": "  Daily",   "value": "daily"},
-                    {"label": "  Monthly", "value": "monthly"}
-                ],
+                options=[{"label": "  Daily", "value": "daily"}, {"label": "  Monthly", "value": "monthly"}],
                 value="daily",
-                labelStyle={
-                    "display": "inline-block",
-                    "color": TEXT_MUTED,
-                    "marginRight": "12px",
-                    "fontSize": "13px"
-                }
+                labelStyle={"display": "inline-block", "color": TEXT_MUTED, "marginRight": "12px", "fontSize": "13px"}
             )
         ], style=FILTER_CELL),
 
-        html.Span(style={
-            "display": "inline-block",
-            "width": "1px", "height": "44px",
-            "backgroundColor": NEON_BLUE,
-            "verticalAlign": "middle",
-            "opacity": "0.4",
-            "marginRight": "18px"
-        }),
+        html.Span(style={"display": "inline-block", "width": "1px", "height": "44px", "backgroundColor": NEON_BLUE, "verticalAlign": "middle", "opacity": "0.4", "marginRight": "18px"}),
 
         html.Div([
             html.Label("AGGREGATION  (monthly mode)", style=LABEL_STYLE),
             dcc.RadioItems(
                 id="filter-agg",
-                options=[
-                    {"label": "  Mean",   "value": "mean"},
-                    {"label": "  Median", "value": "median"}
-                ],
+                options=[{"label": "  Mean", "value": "mean"}, {"label": "  Median", "value": "median"}],
                 value="mean",
-                labelStyle={
-                    "display": "inline-block",
-                    "color": TEXT_MUTED,
-                    "marginRight": "12px",
-                    "fontSize": "13px"
-                }
+                labelStyle={"display": "inline-block", "color": TEXT_MUTED, "marginRight": "12px", "fontSize": "13px"}
             )
         ], style=FILTER_CELL),
 
@@ -269,7 +251,11 @@ layout = html.Div([
         "display": "flex",
         "alignItems": "center",
         "flexWrap": "wrap",
-        "gap": "0px"
+        "gap": "0px",
+        # --- CRITICAL FIX START ---
+        "position": "relative",
+        "zIndex": "1000"
+        # --- CRITICAL FIX END ---
     }),
 
     # ── Graf přes plnou šířku ──────────────────────────────────────────
@@ -285,7 +271,9 @@ layout = html.Div([
         "boxShadow": f"0 0 20px {NEON_CYAN}40",
         "width": "100%",
         "flex": "1",
-        "minHeight": "0"
+        "minHeight": "0",
+        "position": "relative",
+        "zIndex": "1" # Lower than the filter bar
     })
 
 ], style={
@@ -299,7 +287,6 @@ layout = html.Div([
     "height": "100vh",
     "overflow": "hidden"
 })
-
 # =====================================================================
 # 6. Callbacky
 # =====================================================================
