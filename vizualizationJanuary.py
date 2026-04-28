@@ -8,7 +8,9 @@ from config import DATASET_PATHS
 # 1️⃣ Function: Load CSV data from file
 # =====================================================================
 def load_data_from_file(file_path):
-    df = pd.read_csv(file_path, sep=r"[\t;,]", engine="python")
+    df = pd.read_csv(file_path, sep=r"[\t;,]", engine="python", na_values=[""],          # prázdné buňky = NaN
+                     keep_default_na=True,
+                     dtype=str                )
 
     # Clean price
     df["price"] = df["price"].astype(str).str.replace(r"[^\d.]", "", regex=True).astype(float)
@@ -665,26 +667,6 @@ def aggregate_price_by_month(filtered_df, agg_method='mean'):
 # =====================================================================
 # 7️⃣ ROUTE ANALYTICS - Calculate AVG prices for all routes
 # =====================================================================
-
-# Helper: Generate color gradients
-def interpolate_color(color1, color2, factor):
-    """Linear interpolation between two colors (hex format)"""
-    c1_rgb = tuple(int(color1[i:i+2], 16) for i in (1, 3, 5))
-    c2_rgb = tuple(int(color2[i:i+2], 16) for i in (1, 3, 5))
-    result = tuple(int(c1_rgb[i] + (c2_rgb[i] - c1_rgb[i]) * factor) for i in range(3))
-    return '#{:02x}{:02x}{:02x}'.format(*result)
-
-def get_color_gradient(values, dark_color, light_color):
-    """Create gradient colors based on values (0=dark, 1=light)"""
-    min_val, max_val = min(values), max(values)
-    range_val = max_val - min_val if max_val != min_val else 1
-    colors = []
-    for val in values:
-        factor = (val - min_val) / range_val
-        color = interpolate_color(dark_color, light_color, factor)
-        colors.append(color)
-    return colors
-
 def calculate_route_analytics(datasets):
     """Calculate average prices for all routes across all datasets"""
     route_prices = {}
@@ -697,7 +679,6 @@ def calculate_route_analytics(datasets):
             route_prices[route_key] = avg_price
 
     return route_prices
-
 
 # Callback for cheapest routes chart
 @app.callback(
@@ -720,9 +701,6 @@ def update_cheapest_routes(selected_destinations):
     routes = [r[0] for r in sorted_routes]
     prices = [r[1] for r in sorted_routes]
 
-    # White for cheapest (top), dark purple for more expensive
-    colors = get_color_gradient(prices, '#ffffff', '#3d1a4d')
-
     fig = px.bar(
         x=prices,
         y=routes,
@@ -731,7 +709,7 @@ def update_cheapest_routes(selected_destinations):
     )
 
     fig.update_traces(
-        marker_color=colors,
+        marker_color=TRUE_PURPLE,
         texttemplate='$%{text:.2f}',
         textposition='outside',
         textfont=dict(color=TEXT_MUTED, size=11)
@@ -772,9 +750,6 @@ def update_expensive_routes(selected_destinations):
     routes = [r[0] for r in sorted_routes]
     prices = [r[1] for r in sorted_routes]
 
-    # Dark magenta for most expensive (top), light magenta for cheaper
-    colors = get_color_gradient(prices, '#6b0080', '#e6b3ff')
-
     fig = px.bar(
         x=prices,
         y=routes,
@@ -783,7 +758,7 @@ def update_expensive_routes(selected_destinations):
     )
 
     fig.update_traces(
-        marker_color=colors,
+        marker_color=ELECTRIC_PURPLE,
         texttemplate='$%{text:.2f}',
         textposition='outside',
         textfont=dict(color=TEXT_MUTED, size=11)
@@ -826,9 +801,6 @@ def update_origin_comparison(selected_destinations):
     origins = list(origin_avg_prices.keys())
     prices = list(origin_avg_prices.values())
 
-    # Dark cyan for most expensive, light cyan for cheaper
-    colors = get_color_gradient(prices, '#003d4d', '#99e6f0')
-
     fig = px.bar(
         x=prices,
         y=origins,
@@ -837,7 +809,7 @@ def update_origin_comparison(selected_destinations):
     )
 
     fig.update_traces(
-        marker_color=colors,
+        marker_color=CHART_CYAN,
         texttemplate='$%{text:.2f}',
         textposition='outside',
         textfont=dict(color=TEXT_MUTED, size=11)
