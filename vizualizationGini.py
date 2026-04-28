@@ -223,6 +223,17 @@ layout = html.Div([
             "backgroundColor": PANEL_BG
         }
     ),
+    html.P(
+        "💡 Data not showing? The app may be warming up. Please press F5 to refresh.",
+        style={
+            "color": TEXT_MUTED,
+            "fontSize": "10px",
+            "marginTop": "8px",
+            "marginBottom": "14px",
+            "opacity": "0.7",
+            "fontStyle": "italic"
+        }
+    ),
 
     # ── Titulek ────────────────────────────────────────────────────────
     html.Div([

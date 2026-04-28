@@ -5,16 +5,16 @@ from dash import Dash, dcc, html, Input, Output
 import sys
 
 # =====================================================================
-# 1. Configuration
+# 1. Konfigurace
 # =====================================================================
 from config import DATASET_PATHS
 
-# X-axis date range — fixed to January 2026
+# Rozsah dat na ose X — pevně nastavený na leden 2026
 DATE_START = pd.Timestamp("2026-01-01")
 DATE_END   = pd.Timestamp("2026-01-31")
 
 # =====================================================================
-# 2. Cyberpunk Theme
+# 2. Cyberpunk téma
 # =====================================================================
 BG_COLOR       = "#0b0c10"
 PANEL_BG       = "#1f2833"
@@ -28,7 +28,7 @@ TEXT_MUTED     = "#c5c6c7"
 GRID_COLOR     = "#1e2a2a"
 DROPDOWN_STYLE = {"color": "black"}
 
-# Colour palette for traces (airlines/routes get cycled through these)
+# Paleta barev pro křivky (aerolinky/trasy se přes ně cyklicky střídají)
 TRACE_COLORS = [
     NEON_CYAN, NEON_PINK, NEON_YELLOW, NEON_GREEN, NEON_ORANGE,
     "#a855f7", "#00d4ff", "#ff3366", "#ffcc00", "#00ff99"
@@ -48,13 +48,13 @@ FILTER_CELL = {
 }
 
 # =====================================================================
-# 3. Data Loading
+# 3. Načítání dat
 # =====================================================================
 def load_data(file_path):
     df = pd.read_csv(file_path, sep=r"[\t;,]", engine="python")
     df.columns = df.columns.str.strip().str.lower().str.replace(" ", "_").str.replace(".", "_", regex=False)
 
-    # Normalise key column names
+    # Normalizace klíčových názvů sloupců
     rename_map = {}
     for col in df.columns:
         if col in ("airline_details", "airline"):
@@ -69,7 +69,7 @@ def load_data(file_path):
             rename_map[col] = "est_fuel_kg"
     df.rename(columns=rename_map, inplace=True)
 
-    # Also handle the exact column names from the sample header
+    # Ošetří také přesné názvy sloupců ze vzorové hlavičky
     col_map = {}
     for col in df.columns:
         if "est" in col and "co2" in col and "kg" in col:
@@ -83,21 +83,21 @@ def load_data(file_path):
             continue
         df.rename(columns={old: new}, inplace=True)
 
-    # Parse dates
+    # Převod datumů
     df["search_date"] = pd.to_datetime(df["search_date"], errors="coerce")
     df["flight_date"]  = pd.to_datetime(df["flight_date"],  errors="coerce")
     df = df.dropna(subset=["search_date", "flight_date"])
 
-    # Filter to Jan 2026 flight dates only
+    # Filtr pouze na data letů v lednu 2026
     df = df[(df["flight_date"] >= DATE_START) & (df["flight_date"] <= DATE_END)]
 
-    # Parse price
+    # Převod ceny
     df["price"] = pd.to_numeric(
         df["price"].astype(str).str.replace(r"[^\d.]", "", regex=True),
         errors="coerce"
     )
 
-    # Parse CO2 columns — replace string 'Flight Canceled' with NaN for numeric ops
+    # Převod CO2 sloupců — nahrazuje text 'Flight Canceled' hodnotou NaN pro číselné operace
     for col in ["est_co2_kg", "avg_co2_hr", "est_fuel_kg", "emissions_per_seat_(avg)"]:
         if col in df.columns:
             df[col] = pd.to_numeric(
@@ -105,7 +105,7 @@ def load_data(file_path):
                 errors="coerce"
             )
 
-    # Normalise emissions_per_seat column name (semicolon sep may vary spacing)
+    # Normalizace názvu sloupce emissions_per_seat (u oddělovače středníkem se může lišit mezera)
     for col in list(df.columns):
         if "emission" in col and "seat" in col:
             df.rename(columns={col: "emissions_per_seat"}, inplace=True)
@@ -113,7 +113,7 @@ def load_data(file_path):
     if "emissions_per_seat" not in df.columns:
         df["emissions_per_seat"] = np.nan
 
-    # Ensure helper columns exist
+    # Zajistí existenci pomocných sloupců
     if "_airline" not in df.columns:
         df["_airline"] = "Unknown"
     if "aircraft" not in df.columns:
@@ -145,7 +145,7 @@ if not datasets:
 origins = list(datasets.keys())
 
 # =====================================================================
-# 4. Helpers
+# 4. Pomocné funkce
 # =====================================================================
 def get_destinations(origin):
     if origin not in datasets:
@@ -166,9 +166,9 @@ def get_airlines(origin, dest):
 
 
 # =====================================================================
-# 5. Layout
+# 5. Rozložení
 # =====================================================================
-from app_instance import app  # share the single server instance
+from app_instance import app  # sdílení jediné instance serveru
 server = app.server
 
 DIVIDER = html.Span(style={
@@ -182,7 +182,7 @@ DIVIDER = html.Span(style={
 
 layout = html.Div([
 
-    # ── Scanline overlay (purely decorative CSS) ──────────────────────
+    # ── Překryv skenovacích čar (čistě dekorativní CSS) ────────────────
     html.Div(style={
         "position": "fixed", "top": 0, "left": 0,
         "width": "100%", "height": "100%",
@@ -190,7 +190,7 @@ layout = html.Div([
         "pointerEvents": "none", "zIndex": 9999
     }),
 
-    # ── Title ─────────────────────────────────────────────────────────
+    # ── Titulek ────────────────────────────────────────────────────────
     html.Div([
         html.Div("◈", style={
             "color": NEON_CYAN, "fontSize": "28px",
@@ -239,10 +239,21 @@ layout = html.Div([
                 "fontFamily": "Courier New, monospace",
                 "backgroundColor": "#1f2833"
             }
+        ),
+        html.P(
+            "💡 Data not showing? The app may be warming up. Please press F5 to refresh.",
+            style={
+                "color": TEXT_MUTED,
+                "fontSize": "10px",
+                "marginTop": "8px",
+                "marginBottom": "14px",
+                "opacity": "0.7",
+                "fontStyle": "italic"
+            }
         )
     ], style={"textAlign": "center", "marginBottom": "20px", "position": "relative"}),
 
-    # ── Chart ─────────────────────────────────────────────────────────
+    # ── Graf ───────────────────────────────────────────────────────────
     html.Div([
         dcc.Graph(
             id="em-chart",
@@ -256,10 +267,10 @@ layout = html.Div([
         "border": f"1px solid {NEON_CYAN}20"
     }),
 
-    # ── Filter Bar ────────────────────────────────────────────────────
+    # ── Lišta filtrů ───────────────────────────────────────────────────
     html.Div([
 
-        # Origin
+        # Počáteční letiště
         html.Div([
             html.Label("ORIGIN", style=LABEL_STYLE),
             dcc.Dropdown(
@@ -271,7 +282,7 @@ layout = html.Div([
             )
         ], style=FILTER_CELL),
 
-        # Destination
+        # Cílové letiště
         html.Div([
             html.Label("DESTINATION", style=LABEL_STYLE),
             dcc.Dropdown(
@@ -282,7 +293,7 @@ layout = html.Div([
             )
         ], style=FILTER_CELL),
 
-        # Airline
+        # Aerolinka
         html.Div([
             html.Label("AIRLINE", style=LABEL_STYLE),
             dcc.Dropdown(
@@ -295,7 +306,7 @@ layout = html.Div([
 
         DIVIDER,
 
-        # Viz mode
+        # Režim vizualizace
         html.Div([
             html.Label("EMISSION MODE", style=LABEL_STYLE),
             dcc.RadioItems(
@@ -317,7 +328,7 @@ layout = html.Div([
 
         DIVIDER,
 
-        # Group-by
+        # Seskupení podle
         html.Div([
             html.Label("GROUP TRACES BY", style=LABEL_STYLE),
             dcc.RadioItems(
@@ -349,7 +360,7 @@ layout = html.Div([
         "flexWrap": "wrap"
     }),
 
-    # ── Stats row ─────────────────────────────────────────────────────
+    # ── Řádek statistik ────────────────────────────────────────────────
     html.Div(id="em-stats", style={
         "backgroundColor": PANEL_BG,
         "padding": "8px 20px",
@@ -374,7 +385,7 @@ layout = html.Div([
 })
 
 # =====================================================================
-# 6. Callbacks
+# 6. Callbacky
 # =====================================================================
 @app.callback(
     Output("em-dest",    "options"),
@@ -413,7 +424,7 @@ def update_chart(origin, dest, airline, mode, groupby):
 
     dff = datasets[origin].copy()
 
-    # Apply filters
+    # Aplikace filtrů
     if dest != "All":
         dff = dff[dff["destination"] == dest]
     if airline != "All":
@@ -422,7 +433,7 @@ def update_chart(origin, dest, airline, mode, groupby):
     if dff.empty:
         return _empty_fig("NO SIGNAL — no data for selected filters"), "—"
 
-    # Pick the Y column based on mode
+    # Výběr sloupce Y podle režimu
     if mode == "avg":
         y_col   = "avg_co2_hr"
         y_label = "AVG CO₂ (kg/hr)"
@@ -436,13 +447,13 @@ def update_chart(origin, dest, airline, mode, groupby):
         y_label = "Emission/Seat (kg/hr)"
         accent  = NEON_GREEN
 
-    # Drop rows where Y is NaN (canceled flights)
+    # Odstraní řádky, kde je Y = NaN (zrušené lety)
     dff = dff.dropna(subset=[y_col])
 
     if dff.empty:
         return _empty_fig(f"NO SIGNAL — no {y_label} data in selection"), "—"
 
-    # Build group key
+    # Vytvoření klíče pro seskupení
     if groupby == "airline":
         dff["_group"] = dff["_airline"]
     elif groupby == "aircraft":
@@ -457,7 +468,7 @@ def update_chart(origin, dest, airline, mode, groupby):
         gdf = dff[dff["_group"] == grp].sort_values("flight_date")
         color = TRACE_COLORS[i % len(TRACE_COLORS)]
 
-        # Build hover fields safely
+        # Bezpečné sestavení polí pro hover
         price_col        = gdf["price"].apply(
             lambda x: f"${x:.2f}" if pd.notna(x) else "N/A"
         )
@@ -501,7 +512,7 @@ def update_chart(origin, dest, airline, mode, groupby):
             )
         ))
 
-    # Title
+    # Titulek
     dest_part = dest if dest != "All" else "All Destinations"
     mode_label = {"avg": "AVG CO₂/hr", "est": "Est. CO₂/flight", "per_seat": "Emission/Seat"}.get(mode, mode)
     title = (
@@ -512,7 +523,7 @@ def update_chart(origin, dest, airline, mode, groupby):
 
     fig = _apply_theme(fig, title, y_label, accent)
 
-    # ── Stats bar ─────────────────────────────────────────────────────
+    # ── Lišta statistik ────────────────────────────────────────────────
     stats_parts = []
     overall_mean   = dff[y_col].mean()
     overall_median = dff[y_col].median()
@@ -547,7 +558,7 @@ def update_chart(origin, dest, airline, mode, groupby):
 
 
 # =====================================================================
-# 7. Chart helpers
+# 7. Pomocné funkce pro graf
 # =====================================================================
 def _empty_fig(msg):
     fig = go.Figure()
@@ -606,8 +617,8 @@ def _apply_theme(fig, title, y_label, accent):
 
 
 # =====================================================================
-# 8. Run
+# 8. Spuštění
 # =====================================================================
-# Remove or comment out:
+# Odeberte nebo zakomentujte:
 if __name__ == '__main__':
     app.run(debug=True)
