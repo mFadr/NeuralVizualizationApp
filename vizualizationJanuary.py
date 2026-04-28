@@ -8,10 +8,18 @@ from config import DATASET_PATHS
 # 1️⃣ Function: Load CSV data from file
 # =====================================================================
 def load_data_from_file(file_path):
-    df = pd.read_csv(file_path, sep=r"[\t;,]", engine="python")
+    df = pd.read_csv(
+        file_path,
+        sep=r"[\t;,]",
+        engine="python",
+        na_values=[""],          # prázdné buňky = NaN
+        keep_default_na=True,
+        dtype=str                # vše jako string, převody dělají pd.to_numeric níže
+    )
 
     # Clean price
-    df["price"] = df["price"].astype(str).str.replace(r"[^\d.]", "", regex=True).astype(float)
+    df["price"] = pd.to_numeric(df["price"].astype(str).str.replace(r"[^\d.]", "", regex=True), errors="coerce")
+
 
     # Ensure expected columns exist
     for col in ["departure_time", "duration", "Est. CO2 (kg)", "AVG CO2 (kg/hr)"]:
@@ -84,8 +92,7 @@ DROPDOWN_STYLE = {"color": "black", "marginBottom": "15px"} # Dropdowns need dar
 # New colors for horizontal bar charts
 TRUE_PURPLE = "#9D4EDD"      # 1st chart
 ELECTRIC_PURPLE = "#7209B7"  # 2nd chart
-CHART_CYAN = "#00D9FF"       # 3rd chart
-
+CHART_CYAN = "#00D9FF"
 # Shared height so filter panel and main chart end on the same bottom line
 MAIN_PANEL_HEIGHT = "760px"
 
@@ -666,16 +673,16 @@ def aggregate_price_by_month(filtered_df, agg_method='mean'):
 # 7️⃣ ROUTE ANALYTICS - Calculate AVG prices for all routes
 # =====================================================================
 
-# Helper: Generate color gradients
+# Pomocné funkce: Generování barevných gradačních přechodů
 def interpolate_color(color1, color2, factor):
-    """Linear interpolation between two colors (hex format)"""
+    """Lineární interpolace mezi jmenovitými barvami (hex formát)"""
     c1_rgb = tuple(int(color1[i:i+2], 16) for i in (1, 3, 5))
     c2_rgb = tuple(int(color2[i:i+2], 16) for i in (1, 3, 5))
     result = tuple(int(c1_rgb[i] + (c2_rgb[i] - c1_rgb[i]) * factor) for i in range(3))
     return '#{:02x}{:02x}{:02x}'.format(*result)
 
 def get_color_gradient(values, dark_color, light_color):
-    """Create gradient colors based on values (0=dark, 1=light)"""
+    """Vytvoř gradační barvy na základě hodnot (0=tmavá, 1=světlá)"""
     min_val, max_val = min(values), max(values)
     range_val = max_val - min_val if max_val != min_val else 1
     colors = []
@@ -698,7 +705,6 @@ def calculate_route_analytics(datasets):
 
     return route_prices
 
-
 # Callback for cheapest routes chart
 @app.callback(
     Output("cheapest-routes-chart", "figure"),
@@ -720,9 +726,7 @@ def update_cheapest_routes(selected_destinations):
     routes = [r[0] for r in sorted_routes]
     prices = [r[1] for r in sorted_routes]
 
-    # Dark purple for cheapest (top), light purple for more expensive
-    colors = get_color_gradient(prices, '#3d1a4d', '#c9a0dc')
-    # White for cheapest (top), dark purple for more expensive
+    # Bílá barva pro nejlevnější (vršek), tmavě fialová pro dražší
     colors = get_color_gradient(prices, '#ffffff', '#3d1a4d')
 
     fig = px.bar(
@@ -774,7 +778,7 @@ def update_expensive_routes(selected_destinations):
     routes = [r[0] for r in sorted_routes]
     prices = [r[1] for r in sorted_routes]
 
-    # Dark magenta for most expensive (top), light magenta for cheaper
+    # Tmavě purpurová pro nejdražší (vršek), světlá purpurová pro levnější
     colors = get_color_gradient(prices, '#6b0080', '#e6b3ff')
 
     fig = px.bar(
@@ -828,7 +832,7 @@ def update_origin_comparison(selected_destinations):
     origins = list(origin_avg_prices.keys())
     prices = list(origin_avg_prices.values())
 
-    # Dark cyan for most expensive, light cyan for cheaper
+    # Tmavě cyan pro nejdražší, světlý cyan pro levnější
     colors = get_color_gradient(prices, '#003d4d', '#99e6f0')
 
     fig = px.bar(
