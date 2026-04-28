@@ -89,10 +89,10 @@ NEON_PINK = "#ff007f"       # Contrast color for charts
 TEXT_MUTED = "#c5c6c7"      # Muted text
 DROPDOWN_STYLE = {"color": "black", "marginBottom": "15px"} # Dropdowns need dark text to be readable without complex CSS
 
-# New colors for horizontal bar charts
-TRUE_PURPLE = "#9D4EDD"      # 1st chart
-ELECTRIC_PURPLE = "#7209B7"  # 2nd chart
-CHART_CYAN = "#00D9FF"       # 3rd chart
+# Barvy pro horizontální sloupcové grafy (podle obrázku)
+CHART_CHEAPEST = "#D0D0D0"   # Chart 3: White/light gray
+CHART_EXPENSIVE = "#FF1493"  # Chart 4: Hot pink/magenta
+CHART_CYAN = "#00D9FF"       # Chart 5: Cyan/turquoise
 
 # Shared height so filter panel and main chart end on the same bottom line
 MAIN_PANEL_HEIGHT = "760px"
@@ -237,7 +237,7 @@ layout = html.Div([_back_btn,
                                ),
                            ], style={"backgroundColor": "#333333", "padding": "10px", "borderRadius": "10px", "marginBottom": "10px"}),
                            dcc.Graph(id="cheapest-routes-chart")
-                       ], style={"flex": "1", "borderRadius": "15px", "overflow": "hidden", "boxShadow": f"0 0 15px {TRUE_PURPLE}80"}),
+                       ], style={"flex": "1", "borderRadius": "15px", "overflow": "hidden", "boxShadow": f"0 0 15px {CHART_CHEAPEST}80"}),
 
                        # Chart 4: 10 Most Expensive Routes
                        html.Div([
@@ -257,7 +257,7 @@ layout = html.Div([_back_btn,
                                ),
                            ], style={"backgroundColor": "#333333", "padding": "10px", "borderRadius": "10px", "marginBottom": "10px"}),
                            dcc.Graph(id="expensive-routes-chart")
-                       ], style={"flex": "1", "borderRadius": "15px", "overflow": "hidden", "boxShadow": f"0 0 15px {ELECTRIC_PURPLE}80"}),
+                       ], style={"flex": "1", "borderRadius": "15px", "overflow": "hidden", "boxShadow": f"0 0 15px {CHART_EXPENSIVE}80"}),
 
                        # Chart 5: Origin Airport Comparison with filters
                        html.Div([
@@ -715,7 +715,7 @@ def update_cheapest_routes(selected_destinations):
     )
 
     fig.update_traces(
-        marker_color=TRUE_PURPLE,
+        marker_color=CHART_CHEAPEST,
         texttemplate='$%{text:.2f}',
         textposition='outside',
         textfont=dict(color=TEXT_MUTED, size=11)
@@ -764,7 +764,7 @@ def update_expensive_routes(selected_destinations):
     )
 
     fig.update_traces(
-        marker_color=ELECTRIC_PURPLE,
+        marker_color=CHART_EXPENSIVE,
         texttemplate='$%{text:.2f}',
         textposition='outside',
         textfont=dict(color=TEXT_MUTED, size=11)
