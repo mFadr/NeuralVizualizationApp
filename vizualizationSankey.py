@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 from dash import Dash, dcc, html, Input, Output
 
 # =====================================================================
-# 1. Configuration
+# 1. Konfigurace
 # =====================================================================
 
 from config import DATASET_PATHS
@@ -14,7 +14,7 @@ sources_cities = ["PRG", "WAW", "BER", "VIE", "BUD"]
 targets_cities = ["FCO", "BCN", "LON", "AMS"]
 
 # =====================================================================
-# 2. Cyberpunk Theme
+# 2. Cyberpunk téma
 # =====================================================================
 BG_COLOR    = "#0b0c10"
 PANEL_BG    = "#1f2833"
@@ -24,13 +24,13 @@ NEON_PINK   = "#ff007f"
 NEON_YELLOW = "#f5c518"
 TEXT_MUTED  = "#c5c6c7"
 
-# Node colours: sources = cyan family, targets = pink family
+# Barvy uzlů: zdroje = tyrkysová paleta, cíle = růžová paleta
 SOURCE_COLORS = ["#66fcf1", "#45a29e", "#00b4d8", "#0077b6", "#023e8a"]
 TARGET_COLORS = ["#ff007f", "#c9184a", "#ff4d6d", "#ff758f"]
 
-# Link colours per stat method (semi-transparent)
-LINK_COLOR_MEAN   = "rgba(102,252,241,0.25)"   # cyan tint
-LINK_COLOR_MEDIAN = "rgba(255,0,127,0.25)"      # pink tint
+# Barvy spojení podle statistické metody (poloprůhledné)
+LINK_COLOR_MEAN   = "rgba(102,252,241,0.25)"   # tyrkysový odstín
+LINK_COLOR_MEDIAN = "rgba(255,0,127,0.25)"      # růžový odstín
 
 DROPDOWN_STYLE = {"color": "black"}
 LABEL_STYLE = {
@@ -40,14 +40,14 @@ LABEL_STYLE = {
 FILTER_CELL = {"display": "inline-block", "verticalAlign": "top", "marginRight": "20px"}
 
 # =====================================================================
-# 3. Load & compute per-route statistics from real CSV files
+# 3. Načtení a výpočet statistik jednotlivých tras z reálných CSV souborů
 # =====================================================================
 def load_form_csv(path):
     """Load a _form.csv and return cleaned DataFrame."""
     df = pd.read_csv(path, sep=r"[\t;,]", engine="python")
     df.columns = df.columns.str.strip().str.lower()
 
-    # Normalise destination column name
+    # Normalizace názvu sloupce destination
     for col in ["destination", "dest"]:
         if col in df.columns:
             df.rename(columns={col: "destination"}, inplace=True)
@@ -83,7 +83,7 @@ def compute_route_stats(dataset_paths, sources, targets):
             df = load_form_csv(path)
         except Exception as e:
             print(f"✗ Could not load {origin} from {path}: {e}")
-            # Fill with NaN so the diagram still renders
+            # Vyplní NaN, aby se diagram i tak vykreslil
             for dest in targets:
                 route_mean[(origin, dest)]   = np.nan
                 route_median[(origin, dest)] = np.nan
@@ -118,8 +118,8 @@ route_mean, route_median, route_counts = compute_route_stats(
 print("Done.\n")
 
 # =====================================================================
-# 4. Build price tables from computed stats
-#    Layout: price_table[dest_idx][src_idx]  (same as original)
+# 4. Sestavení cenových tabulek z vypočtených statistik
+#    Rozložení: price_table[dest_idx][src_idx]  (stejné jako původně)
 # =====================================================================
 def build_price_table(stat_dict, sources, targets):
     """Convert route stat dict → 2-D list [dest][source]."""
@@ -128,7 +128,7 @@ def build_price_table(stat_dict, sources, targets):
         row = []
         for src in sources:
             val = stat_dict.get((src, dest), np.nan)
-            row.append(val if not np.isnan(val) else 0.0)  # 0 = invisible link
+            row.append(val if not np.isnan(val) else 0.0)  # 0 = neviditelné spojení
         table.append(row)
     return table
 
@@ -137,7 +137,7 @@ mean_table   = build_price_table(route_mean,   sources_cities, targets_cities)
 median_table = build_price_table(route_median, sources_cities, targets_cities)
 
 # =====================================================================
-# 5. Sankey link builder
+# 5. Sestavení spojení Sankey grafu
 # =====================================================================
 nodes        = sources_cities + targets_cities
 city_to_idx  = {city: i for i, city in enumerate(nodes)}
@@ -165,9 +165,9 @@ def build_links(selected_sources, price_tbl, link_color):
 
 
 # =====================================================================
-# 6. Dash App
+# 6. Dash aplikace
 # =====================================================================
-from app_instance import app # share the single server instance
+from app_instance import app # sdílí jedinou instanci serveru
 server = app.server
 
 layout = html.Div([
@@ -204,10 +204,21 @@ layout = html.Div([
                 "fontFamily": "Courier New, monospace",
                 "backgroundColor": "#1f2833"
             }
+        ),
+        html.P(
+            "💡 Data not showing? The app may be warming up. Please press F5 to refresh.",
+            style={
+                "color": TEXT_MUTED,
+                "fontSize": "10px",
+                "marginTop": "8px",
+                "marginBottom": "14px",
+                "opacity": "0.7",
+                "fontStyle": "italic"
+            }
         )
     ], style={"position": "relative", "marginBottom": "16px"}),
 
-    # ── Sankey chart ──────────────────────────────────────────────────
+    # ── Sankey graf ───────────────────────────────────────────────────
     html.Div([
         dcc.Graph(
             id="sankey-chart",
@@ -220,10 +231,10 @@ layout = html.Div([
         "boxShadow": f"0 0 20px {NEON_CYAN}40"
     }),
 
-    # ── Filter bar ────────────────────────────────────────────────────
+    # ── Lišta filtrů ───────────────────────────────────────────────────
     html.Div([
 
-        # Source filter
+        # Filtr zdroje
         html.Div([
             html.Label("ORIGIN", style=LABEL_STYLE),
             dcc.Dropdown(
@@ -238,7 +249,7 @@ layout = html.Div([
             )
         ], style=FILTER_CELL),
 
-        # Destination filter
+        # Filtr cíle
         html.Div([
             html.Label("DESTINATION", style=LABEL_STYLE),
             dcc.Dropdown(
@@ -253,14 +264,14 @@ layout = html.Div([
             )
         ], style=FILTER_CELL),
 
-        # Divider
+        # Oddělovač
         html.Span(style={
             "display": "inline-block", "width": "1px", "height": "44px",
             "backgroundColor": NEON_BLUE, "verticalAlign": "middle",
             "opacity": "0.4", "marginRight": "20px"
         }),
 
-        # Stat method toggle
+        # Přepínač statistické metody
         html.Div([
             html.Label("PRICE STATISTIC", style=LABEL_STYLE),
             dcc.RadioItems(
@@ -290,7 +301,7 @@ layout = html.Div([
         "flexWrap": "wrap"
     }),
 
-    # ── Stats summary row ─────────────────────────────────────────────
+    # ── Řádek souhrnných statistik ─────────────────────────────────────
     html.Div(id="stats-bar", style={
         "backgroundColor": PANEL_BG,
         "padding": "10px 20px",
@@ -313,7 +324,7 @@ layout = html.Div([
 })
 
 # =====================================================================
-# 7. Callbacks
+# 7. Callbacky
 # =====================================================================
 @app.callback(
     Output("sankey-chart", "figure"),
@@ -324,11 +335,11 @@ layout = html.Div([
 )
 def update_sankey(selected_source, selected_dest, stat_method):
 
-    # Resolve which sources/destinations are active
+    # Určí, které zdroje/destinace jsou aktivní
     active_sources = sources_cities if selected_source == "ALL" else [selected_source]
     active_targets = targets_cities if selected_dest   == "ALL" else [selected_dest]
 
-    # Pick the right price table and link colour
+    # Vybere správnou cenovou tabulku a barvu spojení
     if stat_method == "mean":
         price_tbl  = mean_table
         link_color = LINK_COLOR_MEAN
@@ -340,8 +351,8 @@ def update_sankey(selected_source, selected_dest, stat_method):
         stat_label = "MEDIAN"
         stat_color = NEON_PINK
 
-    # When a single destination is selected we zero-out all other dest columns
-    # so only the chosen route appears in the diagram
+    # Při výběru jedné destinace vynuluje všechny ostatní sloupce destinací,
+    # aby se v diagramu zobrazila pouze zvolená trasa
     if selected_dest != "ALL":
         filtered_table = []
         for j, dest in enumerate(targets_cities):
@@ -360,7 +371,7 @@ def update_sankey(selected_source, selected_dest, stat_method):
     )
 
     if not val_list:
-        # Nothing to show
+        # Nic k zobrazení
         fig = go.Figure()
         fig.update_layout(
             paper_bgcolor=PANEL_BG,
@@ -395,7 +406,7 @@ def update_sankey(selected_source, selected_dest, stat_method):
         )
     ))
 
-    # Build title
+    # Sestaví titulek
     src_part  = selected_source if selected_source != "ALL" else "All Origins"
     dest_part = selected_dest   if selected_dest   != "ALL" else "All Destinations"
     title_txt = (
@@ -408,10 +419,10 @@ def update_sankey(selected_source, selected_dest, stat_method):
         paper_bgcolor=PANEL_BG,
         font=dict(color=TEXT_MUTED, family="Segoe UI", size=13),
         margin=dict(l=30, r=30, t=55, b=30),
-        height=None   # let the container control height
+        height=None   # výšku nechá řídit kontejner
     )
 
-    # ── Stats summary bar content ──────────────────────────────────────
+    # ── Obsah lišty souhrnných statistik ───────────────────────────────
     stats_items = []
     for src in active_sources:
         for dest in active_targets:
@@ -446,8 +457,8 @@ def update_sankey(selected_source, selected_dest, stat_method):
 
 
 # =====================================================================
-# 8. Run
+# 8. Spuštění
 # =====================================================================
-# Remove or comment out:
+# Odstraňte nebo zakomentujte:
 if __name__ == '__main__':
     app.run(debug=True)
