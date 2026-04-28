@@ -2,12 +2,11 @@ import os
 import pandas as pd
 import numpy as np
 from dash import html, dcc, Input, Output
-from app_instance import app, server   # noqa — server exported for gunicorn
+from app_instance import app, server   
 from config import DATASET_PATHS
 
-# =====================================================================
-# Cyberpunk theme
-# =====================================================================
+
+
 BG_COLOR    = "#0b0c10"
 PANEL_BG    = "#1f2833"
 NEON_CYAN   = "#66fcf1"
@@ -61,9 +60,8 @@ PAGES = [
     },
 ]
 
-# =====================================================================
-# KPI computation — runs once at startup
-# =====================================================================
+# Výpočet KPI — spouští se jednou při spuštění
+
 def compute_kpis():
     total_records  = 0
     total_routes   = set()
@@ -109,16 +107,13 @@ def compute_kpis():
         "avg_price":     round(float(np.mean(all_prices)), 2) if all_prices else 0,
         "min_price":     round(float(np.min(all_prices)),  2) if all_prices else 0,
         "max_price":     round(float(np.max(all_prices)),  2) if all_prices else 0,
-        "canceled":      int(canceled_count),
-        "cancel_pct":    round(canceled_count / total_records * 100, 1)
+        "canceled":      int(canceled_count)
         if total_records > 0 else 0,
     }
 
 KPI = compute_kpis()
 
-# =====================================================================
-# Main page layout (landing page)
-# =====================================================================
+# Rozložení hlavní stránky
 def make_kpi_card(label, value, unit="", accent=NEON_CYAN):
     return html.Div([
         html.Div(label, style={
@@ -192,7 +187,7 @@ def make_card(page):
 main_layout = html.Div([
     html.Div([
 
-        # ── Title ─────────────────────────────────────────────────────
+        # Nadpis
         html.H1("✈  FLIGHT ANALYTICS PLATFORM", style={
             "color":        NEON_CYAN,
             "textShadow":   f"0 0 20px {NEON_CYAN}",
@@ -209,7 +204,7 @@ main_layout = html.Div([
             "marginBottom":  "28px"
         }),
 
-        # ── KPI bar ───────────────────────────────────────────────────
+        # KPI tabulky
         html.Div([
             make_kpi_card("ORIGIN AIRPORTS",   KPI["origins"],
                           "origins",  NEON_CYAN),
@@ -222,8 +217,6 @@ main_layout = html.Div([
             make_kpi_card("PRICE RANGE",
                           f"${KPI['min_price']}–${KPI['max_price']}",
                           "USD",      "#39ff14"),
-            make_kpi_card("CANCELED FLIGHTS",  KPI["canceled"],
-                          f"({KPI['cancel_pct']}%)", NEON_PINK),
         ], style={
             "display":         "flex",
             "gap":             "12px",
@@ -232,7 +225,7 @@ main_layout = html.Div([
             "marginBottom":    "28px"
         }),
 
-        # ── Live data tracker window ──────────────────────────────────
+        # Živé sledování dat
         html.Div([
             html.Div("◈  SYSTEM STATUS  //  DATA TRACKING", style={
                 "color":         NEON_BLUE,
@@ -251,10 +244,7 @@ main_layout = html.Div([
                           style={"color": TEXT_MUTED}),
                 html.Span(f"avg price ${KPI['avg_price']}  ·  ",
                           style={"color": "#f5c518"}),
-                html.Span(
-                    f"canceled {KPI['cancel_pct']}%",
-                    style={"color": NEON_PINK}
-                ),
+
             ], style={
                 "fontSize":   "11px",
                 "fontFamily": "Courier New, monospace",
@@ -274,7 +264,7 @@ main_layout = html.Div([
             "boxShadow":    f"0 0 12px {NEON_BLUE}20"
         }),
 
-        # ── Module cards — 3 top + 2 bottom centred ───────────────────
+        # Karty modulů — 3 nahoře + 2 dole vycentrované
         html.Div(
             [make_card(p) for p in PAGES[:3]],
             style={
@@ -312,19 +302,13 @@ main_layout = html.Div([
     "fontFamily":      "Courier New, monospace"
 })
 
-# =====================================================================
-# Root layout — URL router
-# =====================================================================
+# Hlavní layout — směrovač URL
 app.layout = html.Div([
     dcc.Location(id="url", refresh=False),
     html.Div(id="page-content")
 ])
 
-# =====================================================================
-# Routing callback — LAZY imports inside the function
-# This is the key fix: viz modules are imported only when first needed,
-# not at startup, which breaks the circular import completely.
-# =====================================================================
+# Routing callback — načítá obsah podle URL
 @app.callback(
     Output("page-content", "children"),
     Input("url", "pathname")
@@ -351,15 +335,13 @@ def route(pathname):
         return vizualizationGini.layout
 
     if pathname == "/info":
-        import vizualizationmanual
-        return vizualizationmanual.layout
+        import vizualizationManual
+        return vizualizationManual.layout
 
     return main_layout
 
 
-# =====================================================================
-# Entry point (local dev only — production uses gunicorn)
-# =====================================================================
+# Spuštění serveru
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port, debug=False)
