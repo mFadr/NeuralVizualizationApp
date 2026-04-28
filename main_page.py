@@ -2,7 +2,7 @@ import os
 import pandas as pd
 import numpy as np
 from dash import html, dcc, Input, Output
-from app_instance import app, server   
+from app_instance import app, server
 from config import DATASET_PATHS
 
 
@@ -264,7 +264,7 @@ main_layout = html.Div([
             "boxShadow":    f"0 0 12px {NEON_BLUE}20"
         }),
 
-        # Karty modulů — 3 nahoře + 2 dole vycentrované
+        # Karty modulů — 3 nahoře + 3 dole
         html.Div(
             [make_card(p) for p in PAGES[:3]],
             style={
@@ -279,10 +279,9 @@ main_layout = html.Div([
             [make_card(p) for p in PAGES[3:]],
             style={
                 "display":             "grid",
-                "gridTemplateColumns": "1fr 1fr",
+                "gridTemplateColumns": "1fr 1fr 1fr",
                 "gap":                 "20px",
-                "width":               "60%",
-                "margin":              "0 auto"
+                "width":               "100%"
             }
         )
 

@@ -4,12 +4,12 @@ from dash import dcc, html, Input, Output
 from app_instance import app
 
 # =====================================================================
-# 1. Configuration
+# 1. Konfigurace
 # =====================================================================
 from config import DATASET_PATHS
 
 # =====================================================================
-# 2. Cyberpunk Theme
+# 2. Cyberpunk téma
 # =====================================================================
 BG_COLOR       = "#0b0c10"
 PANEL_BG       = "#1f2833"
@@ -27,7 +27,7 @@ MONTH_NAMES = {
 }
 
 # =====================================================================
-# 3. Data Loading
+# 3. Načítání dat
 # =====================================================================
 def load_data(file_path):
     df = pd.read_csv(file_path, sep=r"[\t;,]", engine="python")
@@ -48,10 +48,10 @@ def load_data(file_path):
     df["flight_date"]  = pd.to_datetime(df["flight_date"],  errors='coerce')
     df = df.dropna(subset=['price', 'search_date', 'flight_date'])
 
-    # Derive month from flight_date — dynamically, no hardcoded list
+    # Odvodí měsíc z flight_date dynamicky, bez natvrdo zadaného seznamu
     df["flight_month"] = df["flight_date"].dt.month
 
-    # Unified airline column regardless of source naming
+    # Sjednocený sloupec aerolinky bez ohledu na pojmenování ve zdroji
     airline_col = next(
         (c for c in ['airline_details', 'airline'] if c in df.columns), None
     )
@@ -78,7 +78,7 @@ if not datasets:
 origins = list(datasets.keys())
 
 # =====================================================================
-# 4. Helpers
+# 4. Pomocné funkce
 # =====================================================================
 def get_destinations(origin):
     if origin not in datasets or "destination" not in datasets[origin].columns:
@@ -110,7 +110,7 @@ def get_aircraft(origin, dest, airline):
 
 
 # =====================================================================
-# 5. Layout — one-line filter bar + full-width chart
+# 5. Rozložení — jednoradková lišta filtrů + graf přes plnou šířku
 # =====================================================================
 LABEL_STYLE = {
     "color": NEON_BLUE,
@@ -127,26 +127,26 @@ FILTER_CELL = {
 
 layout = html.Div([
 
-    # ── Back button ───────────────────────────────────────────────────
+    # ── Tlačítko zpět ──────────────────────────────────────────────────
     html.A(
         "← BACK TO MAIN",
         href="/",
         style={
-            "display": "inline-block",
-            "color": NEON_CYAN,
-            "border": f"1px solid {NEON_BLUE}",
-            "padding": "6px 16px",
-            "borderRadius": "6px",
+            "display":        "inline-block",
+            "color":          NEON_CYAN,
+            "border":         f"1px solid {NEON_BLUE}",
+            "padding":        "6px 16px",
+            "borderRadius":   "6px",
             "textDecoration": "none",
-            "fontSize": "11px",
-            "letterSpacing": "2px",
-            "marginBottom": "12px",
-            "fontFamily": "Courier New, monospace",
+            "fontSize":       "11px",
+            "letterSpacing":  "2px",
+            "marginBottom":   "14px",
+            "fontFamily":     "Courier New, monospace",
             "backgroundColor": PANEL_BG
         }
     ),
 
-    # ── Title ─────────────────────────────────────────────────────────
+    # ── Titulek ────────────────────────────────────────────────────────
     html.H2(
         "✈️  NEURAL FLIGHT TRACKER — BOOKING CURVE ANALYZER",
         style={
@@ -159,7 +159,7 @@ layout = html.Div([
         }
     ),
 
-    # ── Filter Bar ────────────────────────────────────────────────────
+    # ── Lišta filtrů ───────────────────────────────────────────────────
     html.Div([
 
         html.Div([
@@ -203,7 +203,7 @@ layout = html.Div([
             )
         ], style=FILTER_CELL),
 
-        # Visual divider
+        # Vizuální oddělovač
         html.Span(style={
             "display": "inline-block",
             "width": "1px", "height": "44px",
@@ -272,7 +272,7 @@ layout = html.Div([
         "gap": "0px"
     }),
 
-    # ── Full-width Chart ───────────────────────────────────────────────
+    # ── Graf přes plnou šířku ──────────────────────────────────────────
     html.Div([
         dcc.Graph(
             id="price-chart",
@@ -301,7 +301,7 @@ layout = html.Div([
 })
 
 # =====================================================================
-# 6. Callbacks
+# 6. Callbacky
 # =====================================================================
 @app.callback(
     Output("filter-dest", "options"),
@@ -369,7 +369,7 @@ def update_chart(origin, dest, airline, aircraft, date_mode, agg_method):
 
 
 # =====================================================================
-# 7. Chart Builders
+# 7. Sestavení grafů
 # =====================================================================
 def _empty_fig(msg):
     fig = go.Figure()
@@ -400,8 +400,8 @@ def _apply_theme(fig, title=""):
 
 def _build_daily_chart(dff, origin, dest):
     """
-    Daily mode — one line per departure date.
-    X = observation/search date, Y = price, colour = flight departure date.
+    Denní režim — jedna čára pro každé datum odletu.
+    X = datum pozorování/vyhledání, Y = cena, barva = datum odletu letu.
     """
     dff = dff.copy()
     dff["flight_date_str"] = dff["flight_date"].dt.strftime("%Y-%m-%d")
@@ -431,22 +431,23 @@ def _build_daily_chart(dff, origin, dest):
 
 def _build_monthly_chart(dff, origin, dest, agg_method):
     """
-    Monthly mode — aggregates prices using all months present in the
-    filtered data. No hardcoded month list — works for any date range.
+    Měsíční režim — agreguje ceny přes všechny měsíce, které jsou
+    přítomné ve filtrovaných datech. Bez natvrdo zadaného seznamu
+    měsíců, funguje pro libovolný rozsah dat.
 
-    Both Mean and Median are plotted. The selected aggregation is
-    highlighted (thicker solid line, bigger markers); the other becomes
-    a faint dotted line. A Δ annotation shows the gap at each month.
+    Vykreslí se jak průměr (Mean), tak medián (Median). Vybraná agregace
+    je zvýrazněná (silnější plná čára, větší značky), druhá je tlumená
+    tečkovaná čára. Poznámka Δ ukazuje rozdíl pro každý měsíc.
     """
     dff = dff.copy()
 
-    # All months actually present in this filtered slice, sorted chronologically
+    # Všechny měsíce skutečně přítomné v tomto filtrovaném výřezu, chronologicky seřazené
     available_months = sorted(dff["flight_month"].dropna().unique().astype(int))
 
     if not available_months:
         return _empty_fig("NO SIGNAL — no flight_date data in filtered selection")
 
-    # Aggregate per month across the whole filtered slice
+    # Agregace po měsících přes celý filtrovaný výřez
     agg = (
         dff.groupby("flight_month")["price"]
         .agg(mean_price="mean", median_price="median", count="count")
@@ -459,7 +460,7 @@ def _build_monthly_chart(dff, origin, dest, agg_method):
 
     fig = go.Figure()
 
-    # ── Mean ──────────────────────────────────────────────────────────
+    # ── Průměr ─────────────────────────────────────────────────────────
     mean_on = agg_method == "mean"
     fig.add_trace(go.Scatter(
         x=agg["month_name"],
@@ -485,7 +486,7 @@ def _build_monthly_chart(dff, origin, dest, agg_method):
         )
     ))
 
-    # ── Median ────────────────────────────────────────────────────────
+    # ── Medián ─────────────────────────────────────────────────────────
     med_on = agg_method == "median"
     fig.add_trace(go.Scatter(
         x=agg["month_name"],
@@ -511,7 +512,7 @@ def _build_monthly_chart(dff, origin, dest, agg_method):
         )
     ))
 
-    # ── Δ gap annotations ─────────────────────────────────────────────
+    # ── Poznámky k rozdílu Δ ───────────────────────────────────────────
     for _, row in agg.iterrows():
         if pd.notna(row["mean_price"]) and pd.notna(row["median_price"]):
             diff = abs(row["mean_price"] - row["median_price"])
@@ -531,7 +532,7 @@ def _build_monthly_chart(dff, origin, dest, agg_method):
         f"MEAN vs MEDIAN  (active: {agg_method.upper()})"
     )
 
-    # Lock X axis to the chronological order of months present in data
+    # Uzamkne osu X na chronologické pořadí měsíců přítomných v datech
     fig.update_xaxes(
         categoryorder="array",
         categoryarray=agg["month_name"].tolist()
@@ -541,7 +542,7 @@ def _build_monthly_chart(dff, origin, dest, agg_method):
 
 
 # =====================================================================
-# 8. Entry point (local dev only)
+# 8. Vstupní bod (jen pro lokální vývoj)
 # =====================================================================
 if __name__ == '__main__':
     import os
