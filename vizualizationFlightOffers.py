@@ -120,9 +120,9 @@ LABEL_STYLE = {
     "display": "block"
 }
 FILTER_CELL = {
-    "display": "block",
-    "marginBottom": "14px",
-    "width": "100%"
+    "display": "inline-block",
+    "verticalAlign": "top",
+    "marginRight": "18px"
 }
 
 layout = html.Div([
@@ -172,129 +172,101 @@ layout = html.Div([
         }
     ),
 
-    # ── Hlavní obsah: Sidebar filtrů (vlevo) + Graf (vpravo) ──────────
+    # ── Lišta filtrů ───────────────────────────────────────────────────
     html.Div([
-
-        # ── Sidebar filtrů (banner vlevo) ──────────────────────────────
+        # ... (dropdowns remain the same)
         html.Div([
-            # Hlavička sidebaru
-            html.Div("◈  FILTERS", style={
-                "color": NEON_CYAN,
-                "fontSize": "11px",
-                "letterSpacing": "3px",
-                "fontWeight": "bold",
-                "fontFamily": "Courier New, monospace",
-                "marginBottom": "16px",
-                "paddingBottom": "10px",
-                "borderBottom": f"1px solid {NEON_BLUE}30",
-                "textShadow": f"0 0 8px {NEON_CYAN}"
-            }),
-
-            html.Div([
-                html.Label("ORIGIN", style=LABEL_STYLE),
-                dcc.Dropdown(
-                    id="filter-origin",
-                    options=[{"label": o, "value": o} for o in origins],
-                    value=origins[0] if origins else None,
-                    clearable=False,
-                    style={**DROPDOWN_STYLE, "width": "100%"}
-                )
-            ], style=FILTER_CELL),
-
-            html.Div([
-                html.Label("DESTINATION", style=LABEL_STYLE),
-                dcc.Dropdown(
-                    id="filter-dest",
-                    value="All",
-                    clearable=False,
-                    style={**DROPDOWN_STYLE, "width": "100%"}
-                )
-            ], style=FILTER_CELL),
-
-            html.Div([
-                html.Label("AIRLINE", style=LABEL_STYLE),
-                dcc.Dropdown(
-                    id="filter-airline",
-                    value="All",
-                    clearable=False,
-                    style={**DROPDOWN_STYLE, "width": "100%"}
-                )
-            ], style=FILTER_CELL),
-
-            html.Div([
-                html.Label("AIRCRAFT", style=LABEL_STYLE),
-                dcc.Dropdown(
-                    id="filter-aircraft",
-                    value="All",
-                    clearable=False,
-                    style={**DROPDOWN_STYLE, "width": "100%"}
-                )
-            ], style=FILTER_CELL),
-
-            html.Hr(style={"border": "none", "borderTop": f"1px solid {NEON_BLUE}", "opacity": "0.4", "margin": "8px 0 14px 0"}),
-
-            html.Div([
-                html.Label("VIEW MODE", style=LABEL_STYLE),
-                dcc.RadioItems(
-                    id="filter-date-mode",
-                    options=[{"label": "  Daily", "value": "daily"}, {"label": "  Monthly", "value": "monthly"}],
-                    value="daily",
-                    labelStyle={"display": "block", "color": TEXT_MUTED, "marginBottom": "4px", "fontSize": "13px"}
-                )
-            ], style=FILTER_CELL),
-
-            html.Hr(style={"border": "none", "borderTop": f"1px solid {NEON_BLUE}", "opacity": "0.4", "margin": "8px 0 14px 0"}),
-
-            html.Div([
-                html.Label("AGGREGATION  (monthly mode)", style=LABEL_STYLE),
-                dcc.RadioItems(
-                    id="filter-agg",
-                    options=[{"label": "  Mean", "value": "mean"}, {"label": "  Median", "value": "median"}],
-                    value="mean",
-                    labelStyle={"display": "block", "color": TEXT_MUTED, "marginBottom": "4px", "fontSize": "13px"}
-                )
-            ], style=FILTER_CELL),
-
-        ], style={
-            "backgroundColor": PANEL_BG,
-            "padding": "16px 18px",
-            "borderRadius": "12px",
-            "boxShadow": f"0 0 16px {NEON_BLUE}50",
-            "width": "240px",
-            "flexShrink": "0",
-            "overflowY": "auto",
-            "overflowX": "visible",
-            "marginRight": "14px",
-            # --- CRITICAL FIX START ---
-            "position": "relative",
-            "zIndex": "9999"
-            # --- CRITICAL FIX END ---
-        }),
-
-        # ── Graf (vpravo, vyplňuje zbylý prostor) ──────────────────────
-        html.Div([
-            dcc.Graph(
-                id="price-chart",
-                style={"height": "100%", "width": "100%"},
-                config={"displayModeBar": True, "responsive": True}
+            html.Label("ORIGIN", style=LABEL_STYLE),
+            dcc.Dropdown(
+                id="filter-origin",
+                options=[{"label": o, "value": o} for o in origins],
+                value=origins[0] if origins else None,
+                clearable=False,
+                style={**DROPDOWN_STYLE, "width": "100px"}
             )
-        ], style={
-            "borderRadius": "15px",
-            "overflow": "hidden",
-            "boxShadow": f"0 0 20px {NEON_CYAN}40",
-            "flex": "1",
-            "minWidth": "0",
-            "minHeight": "0",
-            "position": "relative",
-            "zIndex": "1"
-        })
+        ], style=FILTER_CELL),
+
+        html.Div([
+            html.Label("DESTINATION", style=LABEL_STYLE),
+            dcc.Dropdown(
+                id="filter-dest",
+                value="All",
+                clearable=False,
+                style={**DROPDOWN_STYLE, "width": "120px"}
+            )
+        ], style=FILTER_CELL),
+
+        html.Div([
+            html.Label("AIRLINE", style=LABEL_STYLE),
+            dcc.Dropdown(
+                id="filter-airline",
+                value="All",
+                clearable=False,
+                style={**DROPDOWN_STYLE, "width": "175px"}
+            )
+        ], style=FILTER_CELL),
+
+        html.Div([
+            html.Label("AIRCRAFT", style=LABEL_STYLE),
+            dcc.Dropdown(
+                id="filter-aircraft",
+                value="All",
+                clearable=False,
+                style={**DROPDOWN_STYLE, "width": "110px"}
+            )
+        ], style=FILTER_CELL),
+
+        html.Span(style={"display": "inline-block", "width": "1px", "height": "44px", "backgroundColor": NEON_BLUE, "verticalAlign": "middle", "opacity": "0.4", "marginRight": "18px"}),
+
+        html.Div([
+            html.Label("VIEW MODE", style=LABEL_STYLE),
+            dcc.RadioItems(
+                id="filter-date-mode",
+                options=[{"label": "  Daily", "value": "daily"}, {"label": "  Monthly", "value": "monthly"}],
+                value="daily",
+                labelStyle={"display": "inline-block", "color": TEXT_MUTED, "marginRight": "12px", "fontSize": "13px"}
+            )
+        ], style=FILTER_CELL),
+
+        html.Span(style={"display": "inline-block", "width": "1px", "height": "44px", "backgroundColor": NEON_BLUE, "verticalAlign": "middle", "opacity": "0.4", "marginRight": "18px"}),
+
+
 
     ], style={
+        "backgroundColor": PANEL_BG,
+        "padding": "12px 20px",
+        "borderRadius": "12px",
+        "marginBottom": "8px",
+        "boxShadow": f"0 0 16px {NEON_BLUE}50",
+        "whiteSpace": "nowrap",
+        "overflowX": "auto",
+        "overflowY": "visible",
         "display": "flex",
-        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "gap": "0px",
+        # --- CRITICAL FIX START ---
+        "position": "relative",
+        "zIndex": "9999"
+        # --- CRITICAL FIX END ---
+    }),
+
+    # ── Graf přes plnou šířku ──────────────────────────────────────────
+    html.Div([
+        dcc.Graph(
+            id="price-chart",
+            style={"height": "100%", "width": "100%"},
+            config={"displayModeBar": True, "responsive": True}
+        )
+    ], style={
+        "borderRadius": "15px",
+        "overflow": "hidden",
+        "boxShadow": f"0 0 20px {NEON_CYAN}40",
+        "width": "100%",
         "flex": "1",
         "minHeight": "0",
-        "alignItems": "stretch"
+        "position": "relative",
+        "zIndex": "1"
     })
 
 ], style={
