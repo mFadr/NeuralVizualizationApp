@@ -24,7 +24,7 @@ PAGES = [
         "icon":     "📈"
     },
     {
-        "title":    "JANUARY FLIGHT TRACKER",
+        "title":    "JANUARY 2026 FLIGHT TRACKER",
         "subtitle": "Multi-origin price comparison — Jan 2026",
         "href":     "/january",
         "accent":   NEON_PINK,
