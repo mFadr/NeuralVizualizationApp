@@ -248,13 +248,14 @@ layout = html.Div([
         "boxShadow": f"0 0 16px {NEON_BLUE}50",
         "whiteSpace": "nowrap",
         "overflowX": "auto",
+        "overflowY": "visible",
         "display": "flex",
         "alignItems": "center",
         "flexWrap": "wrap",
         "gap": "0px",
         # --- CRITICAL FIX START ---
         "position": "relative",
-        "zIndex": "1000"
+        "zIndex": "9999"
         # --- CRITICAL FIX END ---
     }),
 
@@ -273,7 +274,7 @@ layout = html.Div([
         "flex": "1",
         "minHeight": "0",
         "position": "relative",
-        "zIndex": "1" # Lower than the filter bar
+        "zIndex": "1"
     })
 
 ], style={
