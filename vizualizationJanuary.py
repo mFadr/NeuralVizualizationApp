@@ -148,20 +148,6 @@ layout = html.Div([_back_btn,
                        html.Div([
                            html.H3("SYSTEM PARAMETERS", style={"color": NEON_BLUE, "borderBottom": f"1px solid {NEON_BLUE}", "paddingBottom": "10px"}),
 
-                           # Aggregation Method Toggle
-                           html.Div([
-                               html.Label("Aggregation Method", style={"color": TEXT_MUTED, "fontSize": "12px"}),
-                               dcc.RadioItems(
-                                   id="agg-method",
-                                   options=[
-                                       {"label": "  Mean",   "value": "mean"},
-                                       {"label": "  Median", "value": "median"}
-                                   ],
-                                   value="mean",
-                                   labelStyle={"display": "inline-block", "color": NEON_CYAN, "marginRight": "16px", "fontSize": "13px"},
-                                   style={"marginTop": "6px", "marginBottom": "16px"}
-                               )
-                           ], style={"borderBottom": f"1px solid {NEON_BLUE}40", "paddingBottom": "12px", "marginBottom": "8px"}),
 
                            # Filters Chart 1
                            html.Div([
