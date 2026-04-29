@@ -167,114 +167,134 @@ layout = html.Div([
             "color": NEON_CYAN,
             "textShadow": f"0 0 12px {NEON_CYAN}",
             "letterSpacing": "3px",
-            "margin": "0 0 8px 0",
+            "margin": "0 0 14px 0",
             "fontSize": "17px"
         }
     ),
 
-    # ── Lišta filtrů ───────────────────────────────────────────────────
+    # ── Main Container s LEFT PANEL (filtery) a RIGHT PANEL (graf) ──────
     html.Div([
-        # ... (dropdowns remain the same)
+
+        # 🎛️ LEFT PANEL: Filtery
         html.Div([
-            html.Label("ORIGIN", style=LABEL_STYLE),
-            dcc.Dropdown(
-                id="filter-origin",
-                options=[{"label": o, "value": o} for o in origins],
-                value=origins[0] if origins else None,
-                clearable=False,
-                style={**DROPDOWN_STYLE, "width": "100px"}
-            )
-        ], style=FILTER_CELL),
+            html.H3("SYSTEM PARAMETERS", style={
+                "color": NEON_BLUE,
+                "borderBottom": f"1px solid {NEON_BLUE}",
+                "paddingBottom": "10px"
+            }),
 
+            html.Div([
+                html.Label("ORIGIN", style=LABEL_STYLE),
+                dcc.Dropdown(
+                    id="filter-origin",
+                    options=[{"label": o, "value": o} for o in origins],
+                    value=origins[0] if origins else None,
+                    clearable=False,
+                    style={**DROPDOWN_STYLE, "width": "100%"}
+                )
+            ], style={"marginBottom": "12px"}),
+
+            html.Div([
+                html.Label("DESTINATION", style=LABEL_STYLE),
+                dcc.Dropdown(
+                    id="filter-dest",
+                    value="All",
+                    clearable=False,
+                    style={**DROPDOWN_STYLE, "width": "100%"}
+                )
+            ], style={"marginBottom": "12px"}),
+
+            html.Div([
+                html.Label("AIRLINE", style=LABEL_STYLE),
+                dcc.Dropdown(
+                    id="filter-airline",
+                    value="All",
+                    clearable=False,
+                    style={**DROPDOWN_STYLE, "width": "100%"}
+                )
+            ], style={"marginBottom": "12px"}),
+
+            html.Div([
+                html.Label("AIRCRAFT", style=LABEL_STYLE),
+                dcc.Dropdown(
+                    id="filter-aircraft",
+                    value="All",
+                    clearable=False,
+                    style={**DROPDOWN_STYLE, "width": "100%"}
+                )
+            ], style={"marginBottom": "16px"}),
+
+            html.Hr(style={"borderColor": f"{NEON_BLUE}40", "marginBottom": "14px"}),
+
+            html.Div([
+                html.Label("VIEW MODE", style=LABEL_STYLE),
+                dcc.RadioItems(
+                    id="filter-date-mode",
+                    options=[
+                        {"label": "  Daily",   "value": "daily"},
+                        {"label": "  Monthly", "value": "monthly"}
+                    ],
+                    value="daily",
+                    labelStyle={
+                        "display": "block",
+                        "color": TEXT_MUTED,
+                        "marginBottom": "6px",
+                        "fontSize": "12px"
+                    }
+                )
+            ], style={"marginBottom": "14px"}),
+
+            html.Div([
+                html.Label("AGGREGATION (monthly mode)", style=LABEL_STYLE),
+                dcc.RadioItems(
+                    id="filter-agg",
+                    options=[
+                        {"label": "  Mean",   "value": "mean"},
+                        {"label": "  Median", "value": "median"}
+                    ],
+                    value="mean",
+                    labelStyle={
+                        "display": "block",
+                        "color": TEXT_MUTED,
+                        "marginBottom": "6px",
+                        "fontSize": "12px"
+                    }
+                )
+            ])
+
+        ], style={
+            "width": "25%",
+            "backgroundColor": PANEL_BG,
+            "padding": "20px",
+            "borderRadius": "15px",
+            "boxShadow": f"0 0 20px {NEON_BLUE}60",
+            "height": "760px",
+            "overflowY": "auto",
+            "position": "relative",
+            "zIndex": "100"
+        }),
+
+        # 📈 RIGHT PANEL: Graf
         html.Div([
-            html.Label("DESTINATION", style=LABEL_STYLE),
-            dcc.Dropdown(
-                id="filter-dest",
-                value="All",
-                clearable=False,
-                style={**DROPDOWN_STYLE, "width": "120px"}
+            dcc.Graph(
+                id="price-chart",
+                style={"height": "100%", "width": "100%"},
+                config={"displayModeBar": True, "responsive": True}
             )
-        ], style=FILTER_CELL),
-
-        html.Div([
-            html.Label("AIRLINE", style=LABEL_STYLE),
-            dcc.Dropdown(
-                id="filter-airline",
-                value="All",
-                clearable=False,
-                style={**DROPDOWN_STYLE, "width": "175px"}
-            )
-        ], style=FILTER_CELL),
-
-        html.Div([
-            html.Label("AIRCRAFT", style=LABEL_STYLE),
-            dcc.Dropdown(
-                id="filter-aircraft",
-                value="All",
-                clearable=False,
-                style={**DROPDOWN_STYLE, "width": "110px"}
-            )
-        ], style=FILTER_CELL),
-
-        html.Span(style={"display": "inline-block", "width": "1px", "height": "44px", "backgroundColor": NEON_BLUE, "verticalAlign": "middle", "opacity": "0.4", "marginRight": "18px"}),
-
-        html.Div([
-            html.Label("VIEW MODE", style=LABEL_STYLE),
-            dcc.RadioItems(
-                id="filter-date-mode",
-                options=[{"label": "  Daily", "value": "daily"}, {"label": "  Monthly", "value": "monthly"}],
-                value="daily",
-                labelStyle={"display": "inline-block", "color": TEXT_MUTED, "marginRight": "12px", "fontSize": "13px"}
-            )
-        ], style=FILTER_CELL),
-
-        html.Span(style={"display": "inline-block", "width": "1px", "height": "44px", "backgroundColor": NEON_BLUE, "verticalAlign": "middle", "opacity": "0.4", "marginRight": "18px"}),
-
-        html.Div([
-            html.Label("AGGREGATION  (monthly mode)", style=LABEL_STYLE),
-            dcc.RadioItems(
-                id="filter-agg",
-                options=[{"label": "  Mean", "value": "mean"}, {"label": "  Median", "value": "median"}],
-                value="mean",
-                labelStyle={"display": "inline-block", "color": TEXT_MUTED, "marginRight": "12px", "fontSize": "13px"}
-            )
-        ], style=FILTER_CELL),
+        ], style={
+            "height": "760px",
+            "width": "75%",
+            "borderRadius": "15px",
+            "overflow": "hidden",
+            "boxShadow": f"0 0 20px {NEON_CYAN}40",
+            "position": "relative",
+            "zIndex": "1"
+        })
 
     ], style={
-        "backgroundColor": PANEL_BG,
-        "padding": "12px 20px",
-        "borderRadius": "12px",
-        "marginBottom": "8px",
-        "boxShadow": f"0 0 16px {NEON_BLUE}50",
-        "whiteSpace": "nowrap",
-        "overflowX": "auto",
-        "overflowY": "visible",
         "display": "flex",
-        "alignItems": "center",
-        "flexWrap": "wrap",
-        "gap": "0px",
-        # --- CRITICAL FIX START ---
-        "position": "relative",
-        "zIndex": "9999"
-        # --- CRITICAL FIX END ---
-    }),
-
-    # ── Graf přes plnou šířku ──────────────────────────────────────────
-    html.Div([
-        dcc.Graph(
-            id="price-chart",
-            style={"height": "100%", "width": "100%"},
-            config={"displayModeBar": True, "responsive": True}
-        )
-    ], style={
-        "borderRadius": "15px",
-        "overflow": "hidden",
-        "boxShadow": f"0 0 20px {NEON_CYAN}40",
-        "width": "100%",
-        "flex": "1",
-        "minHeight": "0",
-        "position": "relative",
-        "zIndex": "1"
+        "gap": "30px",
+        "justifyContent": "flex-start"
     })
 
 ], style={
@@ -283,10 +303,7 @@ layout = html.Div([
     "padding": "12px 22px",
     "fontFamily": "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
     "boxSizing": "border-box",
-    "display": "flex",
-    "flexDirection": "column",
-    "height": "100vh",
-    "overflow": "hidden"
+    "minHeight": "100vh"
 })
 # =====================================================================
 # 6. Callbacky
