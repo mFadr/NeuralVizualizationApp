@@ -309,10 +309,19 @@ def build_main_layout():
                 "marginBottom":  "28px"
             }),
 
-            # Hlavní flex layout s levým bannérem KPI a pravým obsahem
+            # Hlavní flex layout s levým panelem analytiky a pravým obsahem s KPI
             html.Div([
-                # Levý panel - KPI karty jako vertikální banner
+                # Levý panel - Analytics panel jako vertikální banner
                 html.Div([
+                    make_analytics_panel(),
+                ], style={
+                    "width":       "20%",
+                    "marginRight": "24px"
+                }),
+
+                # Pravý panel - Obsah a karty modulů
+                html.Div([
+                    # KPI karty - horizontální orientace
                     html.Div([
                         make_kpi_card("ORIGIN AIRPORTS",   KPI["origins"],
                                       "origins",  NEON_CYAN),
@@ -327,16 +336,11 @@ def build_main_layout():
                                       "USD",      "#39ff14"),
                     ], style={
                         "display":        "flex",
-                        "flexDirection":  "column",
-                        "gap":            "12px"
-                    })
-                ], style={
-                    "width":       "20%",
-                    "marginRight": "24px"
-                }),
+                        "flexWrap":       "wrap",
+                        "gap":            "12px",
+                        "marginBottom":   "20px"
+                    }),
 
-                # Pravý panel - Obsah a karty modulů
-                html.Div([
                     # Stávající stavová lišta
                     html.Div([
                         html.Div("◈  SYSTEM STATUS  //  DATA TRACKING", style={
@@ -375,8 +379,6 @@ def build_main_layout():
                         "boxShadow":    f"0 0 12px {NEON_BLUE}20"
                     }),
 
-                    # === NOVÝ PANEL === Analytiky návštěvnosti
-                    make_analytics_panel(),
 
                     # Karty modulů - 3+3 layout
                     html.Div(
