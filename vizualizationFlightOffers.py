@@ -227,29 +227,6 @@ layout = html.Div([
                 )
             ], style=FILTER_CELL),
 
-            html.Hr(style={"border": "none", "borderTop": f"1px solid {NEON_BLUE}", "opacity": "0.4", "margin": "8px 0 14px 0"}),
-
-            html.Div([
-                html.Label("VIEW MODE", style=LABEL_STYLE),
-                dcc.RadioItems(
-                    id="filter-date-mode",
-                    options=[{"label": "  Daily", "value": "daily"}, {"label": "  Monthly", "value": "monthly"}],
-                    value="daily",
-                    labelStyle={"display": "block", "color": TEXT_MUTED, "marginBottom": "4px", "fontSize": "13px"}
-                )
-            ], style=FILTER_CELL),
-
-            html.Hr(style={"border": "none", "borderTop": f"1px solid {NEON_BLUE}", "opacity": "0.4", "margin": "8px 0 14px 0"}),
-
-            html.Div([
-                html.Label("AGGREGATION  (monthly mode)", style=LABEL_STYLE),
-                dcc.RadioItems(
-                    id="filter-agg",
-                    options=[{"label": "  Mean", "value": "mean"}, {"label": "  Median", "value": "median"}],
-                    value="mean",
-                    labelStyle={"display": "block", "color": TEXT_MUTED, "marginBottom": "4px", "fontSize": "13px"}
-                )
-            ], style=FILTER_CELL),
 
         ], style={
             "backgroundColor": PANEL_BG,
@@ -342,11 +319,9 @@ def update_aircraft(origin, dest, airline):
     Input("filter-origin",    "value"),
     Input("filter-dest",      "value"),
     Input("filter-airline",   "value"),
-    Input("filter-aircraft",  "value"),
-    Input("filter-date-mode", "value"),
-    Input("filter-agg",       "value")
+    Input("filter-aircraft",  "value")
 )
-def update_chart(origin, dest, airline, aircraft, date_mode, agg_method):
+def update_chart(origin, dest, airline, aircraft):
     if origin not in datasets:
         return _empty_fig("NO SIGNAL — dataset not loaded")
 
@@ -364,10 +339,8 @@ def update_chart(origin, dest, airline, aircraft, date_mode, agg_method):
     if dff.empty:
         return _empty_fig("NO SIGNAL — no flights match selected filters")
 
-    if date_mode == "daily":
-        return _build_daily_chart(dff, origin, dest)
-    else:
-        return _build_monthly_chart(dff, origin, dest, agg_method)
+
+    return _build_daily_chart(dff, origin, dest)
 
 
 # =====================================================================
