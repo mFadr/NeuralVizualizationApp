@@ -31,49 +31,46 @@ MONTH_NAMES = {
 # =====================================================================
 def load_data(file_path):
     df = pd.read_csv(file_path, sep=r"[\t;,]", engine="python")
-df.columns = df.columns.str.strip().str.lower()
+    df.columns = df.columns.str.strip().str.lower()
 
-required = ['search_date', 'flight_date', 'price']
-missing = [c for c in required if c not in df.columns]
-if missing:
-    raise ValueError(f"Missing columns: {missing}")
+    required = ['search_date', 'flight_date', 'price']
+    missing = [c for c in required if c not in df.columns]
+    if missing:
+        raise ValueError(f"Missing columns: {missing}")
 
-df = df.dropna(subset=required)
+    df = df.dropna(subset=required)
 
-df["price"] = pd.to_numeric(
-    df["price"].astype(str).str.replace(r"[^\d.]", "", regex=True),
-    errors='coerce'
-)
-df["search_date"] = pd.to_datetime(df["search_date"], errors='coerce')
-df["flight_date"]  = pd.to_datetime(df["flight_date"],  errors='coerce')
-df = df.dropna(subset=['price', 'search_date', 'flight_date'])
+    df["price"] = pd.to_numeric(
+        df["price"].astype(str).str.replace(r"[^\d.]", "", regex=True),
+        errors='coerce'
+    )
+    df["search_date"] = pd.to_datetime(df["search_date"], errors='coerce')
+    df["flight_date"]  = pd.to_datetime(df["flight_date"],  errors='coerce')
+    df = df.dropna(subset=['price', 'search_date', 'flight_date'])
 
-# Odvodí měsíc z flight_date dynamicky, bez natvrdo zadaného seznamu
-df["flight_month"] = df["flight_date"].dt.month
+    # Odvodí měsíc z flight_date dynamicky, bez natvrdo zadaného seznamu
+    df["flight_month"] = df["flight_date"].dt.month
 
-# Sjednocený sloupec aerolinky bez ohledu na pojmenování ve zdroji
-airline_col = next(
-    (c for c in ['airline_details', 'airline'] if c in df.columns), None
-)
-df["_airline_col"]   = df[airline_col].astype(str) if airline_col else ""
-df["_aircraft_col"] = df["aircraft"].astype(str) if "aircraft" in df.columns else ""
+    # Sjednocený sloupec aerolinky bez ohledu na pojmenování ve zdroji
+    airline_col = next(
+        (c for c in ['airline_details', 'airline'] if c in df.columns), None
+    )
+    df["_airline_col"]   = df[airline_col].astype(str) if airline_col else ""
+    df["_aircraft_col"] = df["aircraft"].astype(str) if "aircraft" in df.columns else ""
 
-return df
+    return df
 
 
 print("Loading datasets...")
 datasets = {}
 for code, path in DATASET_PATHS.items():
     try:
-    datasets[code] = load_data(path)
-months_present = sorted(datasets[code]["flight_month"].unique())
-month_labels   = [MONTH_NAMES.get(m, str(m)) for m in months_present]
-print(f"✓ {code}: {len(datasets[code])} records | months in data: {month_labels}")
-except Exception as e:
-print(f"✗ {code}: {e}")
-
-if not datasets:
-    print("WARNING: No datasets loaded — app will show empty state.")
+        datasets[code] = load_data(path)
+        months_present = sorted(datasets[code]["flight_month"].unique())
+        month_labels   = [MONTH_NAMES.get(m, str(m)) for m in months_present]
+        print(f"✓ {code}: {len(datasets[code])} records | months in data: {month_labels}")
+    except Exception as e:
+        print(f"✗ {code}: {e}")
 
 origins = list(datasets.keys())
 
@@ -82,31 +79,31 @@ origins = list(datasets.keys())
 # =====================================================================
 def get_destinations(origin):
     if origin not in datasets or "destination" not in datasets[origin].columns:
-    return [{"label": "All", "value": "All"}]
-vals = sorted(datasets[origin]["destination"].dropna().astype(str).unique())
-return [{"label": "All", "value": "All"}] + [{"label": v, "value": v} for v in vals]
+        return [{"label": "All", "value": "All"}]
+    vals = sorted(datasets[origin]["destination"].dropna().astype(str).unique())
+    return [{"label": "All", "value": "All"}] + [{"label": v, "value": v} for v in vals]
 
 
 def get_airlines(origin, dest):
     if origin not in datasets:
-    return [{"label": "All", "value": "All"}]
-df = datasets[origin].copy()
-if dest != "All" and "destination" in df.columns:
-    df = df[df["destination"].astype(str) == dest]
-vals = sorted(v for v in df["_airline_col"].dropna().unique() if v and v != "nan")
-return [{"label": "All", "value": "All"}] + [{"label": v, "value": v} for v in vals]
+        return [{"label": "All", "value": "All"}]
+    df = datasets[origin].copy()
+    if dest != "All" and "destination" in df.columns:
+        df = df[df["destination"].astype(str) == dest]
+    vals = sorted(v for v in df["_airline_col"].dropna().unique() if v and v != "nan")
+    return [{"label": "All", "value": "All"}] + [{"label": v, "value": v} for v in vals]
 
 
 def get_aircraft(origin, dest, airline):
     if origin not in datasets:
-    return [{"label": "All", "value": "All"}]
-df = datasets[origin].copy()
-if dest != "All" and "destination" in df.columns:
-    df = df[df["destination"].astype(str) == dest]
-if airline != "All":
-    df = df[df["_airline_col"] == airline]
-vals = sorted(v for v in df["_aircraft_col"].dropna().unique() if v and v != "nan")
-return [{"label": "All", "value": "All"}] + [{"label": v, "value": v} for v in vals]
+        return [{"label": "All", "value": "All"}]
+    df = datasets[origin].copy()
+    if dest != "All" and "destination" in df.columns:
+        df = df[df["destination"].astype(str) == dest]
+    if airline != "All":
+        df = df[df["_airline_col"] == airline]
+    vals = sorted(v for v in df["_aircraft_col"].dropna().unique() if v and v != "nan")
+    return [{"label": "All", "value": "All"}] + [{"label": v, "value": v} for v in vals]
 
 
 # =====================================================================
@@ -123,9 +120,6 @@ FILTER_CELL = {
     "display": "block",
     "marginBottom": "14px",
     "width": "100%"
-             "display": "inline-block",
-"verticalAlign": "top",
-"marginRight": "18px"
 }
 
 layout = html.Div([
@@ -175,22 +169,9 @@ layout = html.Div([
         }
     ),
 
-    # ── Hlavní obsah: Sidebar filtrů (vlevo) + Graf (vpravo) ──────────
-    # ── Lišta filtrů ───────────────────────────────────────────────────
+    # ── Hlavní flex layout: Sidebar filtrů (vlevo) + Graf (vpravo) ──────────
     html.Div([
-        # ... (dropdowns remain the same)
-        html.Div([
-            html.Label("ORIGIN", style=LABEL_STYLE),
-            dcc.Dropdown(
-                id="filter-origin",
-                options=[{"label": o, "value": o} for o in origins],
-                value=origins[0] if origins else None,
-                clearable=False,
-                style={**DROPDOWN_STYLE, "width": "100px"}
-            )
-        ], style=FILTER_CELL),
-
-        # ── Sidebar filtrů (banner vlevo) ──────────────────────────────
+        # ── Sidebar filtrů (banner vlevo, 25% width) ──────────────────────────
         html.Div([
             # Hlavička sidebaru
             html.Div("◈  FILTERS", style={
@@ -275,115 +256,40 @@ layout = html.Div([
             "padding": "16px 18px",
             "borderRadius": "12px",
             "boxShadow": f"0 0 16px {NEON_BLUE}50",
-            "width": "240px",
+            "width": "25%",
             "flexShrink": "0",
             "overflowY": "auto",
             "overflowX": "visible",
-            "marginRight": "14px",
-            # --- CRITICAL FIX START ---
+            "marginRight": "20px",
             "position": "relative",
             "zIndex": "9999"
-            # --- CRITICAL FIX END ---
         }),
 
-        # ── Graf (vpravo, vyplňuje zbylý prostor) ──────────────────────
-        html.Label("DESTINATION", style=LABEL_STYLE),
-        dcc.Dropdown(
-            id="filter-dest",
-            value="All",
-            clearable=False,
-            style={**DROPDOWN_STYLE, "width": "120px"}
-        )
-    ], style=FILTER_CELL),
+        # ── Graf (vpravo, 75% width, vyplňuje zbylý prostor) ──────────────────────
+        html.Div([
+            dcc.Graph(
+                id="price-chart",
+                style={"height": "100%", "width": "100%"},
+                config={"displayModeBar": True, "responsive": True}
+            )
+        ], style={
+            "borderRadius": "15px",
+            "overflow": "hidden",
+            "boxShadow": f"0 0 20px {NEON_CYAN}40",
+            "flex": "1",
+            "minWidth": "0",
+            "minHeight": "0",
+            "position": "relative",
+            "zIndex": "1"
+        })
 
-    html.Div([
-        dcc.Graph(
-            id="price-chart",
-            style={"height": "100%", "width": "100%"},
-            config={"displayModeBar": True, "responsive": True}
-        html.Label("AIRLINE", style=LABEL_STYLE),
-        dcc.Dropdown(
-            id="filter-airline",
-            value="All",
-            clearable=False,
-            style={**DROPDOWN_STYLE, "width": "175px"}
-        )
     ], style={
-        "borderRadius": "15px",
-        "overflow": "hidden",
-        "boxShadow": f"0 0 20px {NEON_CYAN}40",
+        "display": "flex",
+        "gap": "20px",
+        "width": "100%",
         "flex": "1",
-        "minWidth": "0",
-        "minHeight": "0",
-        "position": "relative",
-        "zIndex": "1"
+        "minHeight": "0"
     })
-], style=FILTER_CELL),
-
-html.Div([
-    html.Label("AIRCRAFT", style=LABEL_STYLE),
-    dcc.Dropdown(
-        id="filter-aircraft",
-        value="All",
-        clearable=False,
-        style={**DROPDOWN_STYLE, "width": "110px"}
-    )
-], style=FILTER_CELL),
-
-html.Span(style={"display": "inline-block", "width": "1px", "height": "44px", "backgroundColor": NEON_BLUE, "verticalAlign": "middle", "opacity": "0.4", "marginRight": "18px"}),
-
-html.Div([
-    html.Label("VIEW MODE", style=LABEL_STYLE),
-    dcc.RadioItems(
-        id="filter-date-mode",
-        options=[{"label": "  Daily", "value": "daily"}, {"label": "  Monthly", "value": "monthly"}],
-        value="daily",
-        labelStyle={"display": "inline-block", "color": TEXT_MUTED, "marginRight": "12px", "fontSize": "13px"}
-    )
-], style=FILTER_CELL),
-
-html.Span(style={"display": "inline-block", "width": "1px", "height": "44px", "backgroundColor": NEON_BLUE, "verticalAlign": "middle", "opacity": "0.4", "marginRight": "18px"}),
-
-
-
-], style={
-    "backgroundColor": PANEL_BG,
-    "padding": "12px 20px",
-    "borderRadius": "12px",
-    "marginBottom": "8px",
-    "boxShadow": f"0 0 16px {NEON_BLUE}50",
-    "whiteSpace": "nowrap",
-    "overflowX": "auto",
-    "overflowY": "visible",
-    "display": "flex",
-    "flexDirection": "row",
-    "alignItems": "center",
-    "flexWrap": "wrap",
-    "gap": "0px",
-    # --- CRITICAL FIX START ---
-    "position": "relative",
-    "zIndex": "9999"
-    # --- CRITICAL FIX END ---
-}),
-
-# ── Graf přes plnou šířku ──────────────────────────────────────────
-html.Div([
-    dcc.Graph(
-        id="price-chart",
-        style={"height": "100%", "width": "100%"},
-        config={"displayModeBar": True, "responsive": True}
-    )
-], style={
-    "borderRadius": "15px",
-    "overflow": "hidden",
-    "boxShadow": f"0 0 20px {NEON_CYAN}40",
-    "width": "100%",
-    "flex": "1",
-    "minHeight": "0",
-    "alignItems": "stretch"
-                  "position": "relative",
-"zIndex": "1"
-})
 
 ], style={
     "backgroundColor": BG_COLOR,
@@ -406,8 +312,8 @@ html.Div([
 )
 def update_destinations(origin):
     opts = get_destinations(origin)
-default = opts[1]["value"] if len(opts) > 1 else "All"
-return opts, default
+    default = opts[1]["value"] if len(opts) > 1 else "All"
+    return opts, default
 
 
 @app.callback(
@@ -442,26 +348,26 @@ def update_aircraft(origin, dest, airline):
 )
 def update_chart(origin, dest, airline, aircraft, date_mode, agg_method):
     if origin not in datasets:
-    return _empty_fig("NO SIGNAL — dataset not loaded")
+        return _empty_fig("NO SIGNAL — dataset not loaded")
 
-dff = datasets[origin].copy()
+    dff = datasets[origin].copy()
 
-if dest != "All" and "destination" in dff.columns:
-    dff = dff[dff["destination"].astype(str) == dest]
+    if dest != "All" and "destination" in dff.columns:
+        dff = dff[dff["destination"].astype(str) == dest]
 
-if airline != "All":
-    dff = dff[dff["_airline_col"] == airline]
+    if airline != "All":
+        dff = dff[dff["_airline_col"] == airline]
 
-if aircraft != "All":
-    dff = dff[dff["_aircraft_col"] == aircraft]
+    if aircraft != "All":
+        dff = dff[dff["_aircraft_col"] == aircraft]
 
-if dff.empty:
-    return _empty_fig("NO SIGNAL — no flights match selected filters")
+    if dff.empty:
+        return _empty_fig("NO SIGNAL — no flights match selected filters")
 
-if date_mode == "daily":
-    return _build_daily_chart(dff, origin, dest)
-else:
-return _build_monthly_chart(dff, origin, dest, agg_method)
+    if date_mode == "daily":
+        return _build_daily_chart(dff, origin, dest)
+    else:
+        return _build_monthly_chart(dff, origin, dest, agg_method)
 
 
 # =====================================================================
@@ -469,12 +375,12 @@ return _build_monthly_chart(dff, origin, dest, agg_method)
 # =====================================================================
 def _empty_fig(msg):
     fig = go.Figure()
-fig.add_annotation(
-    text=msg, xref="paper", yref="paper",
-    x=0.5, y=0.5, showarrow=False,
-    font=dict(color=NEON_PINK, size=16)
-)
-return _apply_theme(fig, msg)
+    fig.add_annotation(
+        text=msg, xref="paper", yref="paper",
+        x=0.5, y=0.5, showarrow=False,
+        font=dict(color=NEON_PINK, size=16)
+    )
+    return _apply_theme(fig, msg)
 
 
 def _apply_theme(fig, title=""):
@@ -491,150 +397,150 @@ def _apply_theme(fig, title=""):
         legend=dict(bgcolor="rgba(0,0,0,0)", bordercolor="#333"),
         hovermode="x unified"
     )
-return fig
+    return fig
 
 
 def _build_daily_chart(dff, origin, dest):
     """
-       Denní režim — jedna čára pro každé datum odletu.
-       X = datum pozorování/vyhledání, Y = cena, barva = datum odletu letu.
-       """
-dff = dff.copy()
-dff["flight_date_str"] = dff["flight_date"].dt.strftime("%Y-%m-%d")
+    Denní režim — jedna čára pro každé datum odletu.
+    X = datum pozorování/vyhledání, Y = cena, barva = datum odletu letu.
+    """
+    dff = dff.copy()
+    dff["flight_date_str"] = dff["flight_date"].dt.strftime("%Y-%m-%d")
 
-fig = go.Figure()
-for fdate, grp in dff.groupby("flight_date_str"):
-    grp = grp.sort_values("search_date")
-fig.add_trace(go.Scatter(
-    x=grp["search_date"],
-    y=grp["price"],
-    mode="lines+markers",
-    name=fdate,
-    customdata=grp[["_airline_col", "_aircraft_col"]].values,
-    hovertemplate=(
-        "<b>Obs. date:</b> %{x|%b %d, %Y}<br>"
-        "<b>Price:</b> $%{y:.2f}<br>"
-        "<b>Airline:</b> %{customdata[0]}<br>"
-        "<b>Aircraft:</b> %{customdata[1]}"
-        "<extra></extra>"
-    ),
-    marker=dict(size=5),
-    line=dict(width=2)
-))
+    fig = go.Figure()
+    for fdate, grp in dff.groupby("flight_date_str"):
+        grp = grp.sort_values("search_date")
+        fig.add_trace(go.Scatter(
+            x=grp["search_date"],
+            y=grp["price"],
+            mode="lines+markers",
+            name=fdate,
+            customdata=grp[["_airline_col", "_aircraft_col"]].values,
+            hovertemplate=(
+                "<b>Obs. date:</b> %{x|%b %d, %Y}<br>"
+                "<b>Price:</b> $%{y:.2f}<br>"
+                "<b>Airline:</b> %{customdata[0]}<br>"
+                "<b>Aircraft:</b> %{customdata[1]}"
+                "<extra></extra>"
+            ),
+            marker=dict(size=5),
+            line=dict(width=2)
+        ))
 
-return _apply_theme(fig, f"BOOKING CURVE — {origin} → {dest}  |  DAILY")
+    return _apply_theme(fig, f"BOOKING CURVE — {origin} → {dest}  |  DAILY")
 
 
 def _build_monthly_chart(dff, origin, dest, agg_method):
     """
-       Měsíční režim — agreguje ceny přes všechny měsíce, které jsou
-       přítomné ve filtrovaných datech. Bez natvrdo zadaného seznamu
-       měsíců, funguje pro libovolný rozsah dat.
+    Měsíční režim — agreguje ceny přes všechny měsíce, které jsou
+    přítomné ve filtrovaných datech. Bez natvrdo zadaného seznamu
+    měsíců, funguje pro libovolný rozsah dat.
 
-       Vykreslí se jak průměr (Mean), tak medián (Median). Vybraná agregace
-       je zvýrazněná (silnější plná čára, větší značky), druhá je tlumená
-       tečkovaná čára. Poznámka Δ ukazuje rozdíl pro každý měsíc.
-       """
-dff = dff.copy()
+    Vykreslí se jak průměr (Mean), tak medián (Median). Vybraná agregace
+    je zvýrazněná (silnější plná čára, větší značky), druhá je tlumená
+    tečkovaná čára. Poznámka Δ ukazuje rozdíl pro každý měsíc.
+    """
+    dff = dff.copy()
 
-# Všechny měsíce skutečně přítomné v tomto filtrovaném výřezu, chronologicky seřazené
-available_months = sorted(dff["flight_month"].dropna().unique().astype(int))
+    # Všechny měsíce skutečně přítomné v tomto filtrovaném výřezu, chronologicky seřazené
+    available_months = sorted(dff["flight_month"].dropna().unique().astype(int))
 
-if not available_months:
-    return _empty_fig("NO SIGNAL — no flight_date data in filtered selection")
+    if not available_months:
+        return _empty_fig("NO SIGNAL — no flight_date data in filtered selection")
 
-# Agregace po měsících přes celý filtrovaný výřez
-agg = (
-    dff.groupby("flight_month")["price"]
-    .agg(mean_price="mean", median_price="median", count="count")
-    .reindex(available_months)
-    .reset_index()
-)
-agg["month_name"] = agg["flight_month"].map(
-    lambda m: MONTH_NAMES.get(int(m), str(m))
-)
-
-fig = go.Figure()
-
-# ── Průměr ─────────────────────────────────────────────────────────
-mean_on = agg_method == "mean"
-fig.add_trace(go.Scatter(
-    x=agg["month_name"],
-    y=agg["mean_price"],
-    mode="lines+markers",
-    name="Mean price",
-    line=dict(
-        color=NEON_CYAN if mean_on else "#1a4a48",
-        width=3 if mean_on else 1.5,
-        dash="solid" if mean_on else "dot"
-    ),
-    marker=dict(
-        size=10 if mean_on else 5,
-        color=NEON_CYAN if mean_on else "#1a4a48",
-        line=dict(width=2, color=BG_COLOR)
-    ),
-    customdata=agg[["count"]].values,
-    hovertemplate=(
-        "<b>%{x}</b><br>"
-        "<b>Mean:</b> $%{y:.2f}<br>"
-        "<b>Observations:</b> %{customdata[0]}<br>"
-        "<extra></extra>"
+    # Agregace po měsících přes celý filtrovaný výřez
+    agg = (
+        dff.groupby("flight_month")["price"]
+        .agg(mean_price="mean", median_price="median", count="count")
+        .reindex(available_months)
+        .reset_index()
     )
-))
-
-# ── Medián ─────────────────────────────────────────────────────────
-med_on = agg_method == "median"
-fig.add_trace(go.Scatter(
-    x=agg["month_name"],
-    y=agg["median_price"],
-    mode="lines+markers",
-    name="Median price",
-    line=dict(
-        color=NEON_PINK if med_on else "#5a0030",
-        width=3 if med_on else 1.5,
-        dash="solid" if med_on else "dot"
-    ),
-    marker=dict(
-        size=10 if med_on else 5,
-        color=NEON_PINK if med_on else "#5a0030",
-        line=dict(width=2, color=BG_COLOR)
-    ),
-    customdata=agg[["count"]].values,
-    hovertemplate=(
-        "<b>%{x}</b><br>"
-        "<b>Median:</b> $%{y:.2f}<br>"
-        "<b>Observations:</b> %{customdata[0]}<br>"
-        "<extra></extra>"
+    agg["month_name"] = agg["flight_month"].map(
+        lambda m: MONTH_NAMES.get(int(m), str(m))
     )
-))
 
-# ── Poznámky k rozdílu Δ ───────────────────────────────────────────
-for _, row in agg.iterrows():
-    if pd.notna(row["mean_price"]) and pd.notna(row["median_price"]):
-    diff = abs(row["mean_price"] - row["median_price"])
-top  = max(row["mean_price"], row["median_price"])
-fig.add_annotation(
-    x=row["month_name"],
-    y=top,
-    text=f"Δ ${diff:.0f}",
-    showarrow=False,
-    yshift=16,
-    font=dict(color=NEON_YELLOW, size=10)
-)
+    fig = go.Figure()
 
-fig = _apply_theme(
-    fig,
-    f"MONTHLY AGGREGATION — {origin} → {dest}  |  "
-    f"MEAN vs MEDIAN  (active: {agg_method.upper()})"
-)
+    # ── Průměr ─────────────────────────────────────────────────────────
+    mean_on = agg_method == "mean"
+    fig.add_trace(go.Scatter(
+        x=agg["month_name"],
+        y=agg["mean_price"],
+        mode="lines+markers",
+        name="Mean price",
+        line=dict(
+            color=NEON_CYAN if mean_on else "#1a4a48",
+            width=3 if mean_on else 1.5,
+            dash="solid" if mean_on else "dot"
+        ),
+        marker=dict(
+            size=10 if mean_on else 5,
+            color=NEON_CYAN if mean_on else "#1a4a48",
+            line=dict(width=2, color=BG_COLOR)
+        ),
+        customdata=agg[["count"]].values,
+        hovertemplate=(
+            "<b>%{x}</b><br>"
+            "<b>Mean:</b> $%{y:.2f}<br>"
+            "<b>Observations:</b> %{customdata[0]}<br>"
+            "<extra></extra>"
+        )
+    ))
 
-# Uzamkne osu X na chronologické pořadí měsíců přítomných v datech
-fig.update_xaxes(
-    categoryorder="array",
-    categoryarray=agg["month_name"].tolist()
-)
+    # ── Medián ─────────────────────────────────────────────────────────
+    med_on = agg_method == "median"
+    fig.add_trace(go.Scatter(
+        x=agg["month_name"],
+        y=agg["median_price"],
+        mode="lines+markers",
+        name="Median price",
+        line=dict(
+            color=NEON_PINK if med_on else "#5a0030",
+            width=3 if med_on else 1.5,
+            dash="solid" if med_on else "dot"
+        ),
+        marker=dict(
+            size=10 if med_on else 5,
+            color=NEON_PINK if med_on else "#5a0030",
+            line=dict(width=2, color=BG_COLOR)
+        ),
+        customdata=agg[["count"]].values,
+        hovertemplate=(
+            "<b>%{x}</b><br>"
+            "<b>Median:</b> $%{y:.2f}<br>"
+            "<b>Observations:</b> %{customdata[0]}<br>"
+            "<extra></extra>"
+        )
+    ))
 
-return fig
+    # ── Poznámky k rozdílu Δ ───────────────────────────────────────────
+    for _, row in agg.iterrows():
+        if pd.notna(row["mean_price"]) and pd.notna(row["median_price"]):
+            diff = abs(row["mean_price"] - row["median_price"])
+            top  = max(row["mean_price"], row["median_price"])
+            fig.add_annotation(
+                x=row["month_name"],
+                y=top,
+                text=f"Δ ${diff:.0f}",
+                showarrow=False,
+                yshift=16,
+                font=dict(color=NEON_YELLOW, size=10)
+            )
+
+    fig = _apply_theme(
+        fig,
+        f"MONTHLY AGGREGATION — {origin} → {dest}  |  "
+        f"MEAN vs MEDIAN  (active: {agg_method.upper()})"
+    )
+
+    # Uzamkne osu X na chronologické pořadí měsíců přítomných v datech
+    fig.update_xaxes(
+        categoryorder="array",
+        categoryarray=agg["month_name"].tolist()
+    )
+
+    return fig
 
 
 # =====================================================================
@@ -642,5 +548,5 @@ return fig
 # =====================================================================
 if __name__ == '__main__':
     import os
-port = int(os.environ.get("PORT", 8050))
-app.run(host="0.0.0.0", port=port, debug=False)
+    port = int(os.environ.get("PORT", 8050))
+    app.run(host="0.0.0.0", port=port, debug=False)
