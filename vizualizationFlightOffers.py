@@ -233,7 +233,7 @@ layout = html.Div([
             "padding": "16px 18px",
             "borderRadius": "12px",
             "boxShadow": f"0 0 16px {NEON_BLUE}50",
-            "width": "12%",
+            "width": "8%",
             "flexShrink": "0",
             "overflowY": "auto",
             "overflowX": "visible",
@@ -242,7 +242,7 @@ layout = html.Div([
             "zIndex": "9999"
         }),
 
-        # ── Graf (vpravo, 75% width, vyplňuje zbylý prostor) ──────────────────────
+        # ── Graf (vpravo, vyplňuje zbylý prostor) ──────────────────────
         html.Div([
             dcc.Graph(
                 id="price-chart",

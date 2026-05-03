@@ -5,7 +5,7 @@ from dash import dcc, html, Input, Output
 from app_instance import app
 from config import DATASET_PATHS
 # =====================================================================
-# 1️⃣ Function: Load CSV data from file
+# 1️⃣ Funkce: Načítání dat CSV ze souboru
 # =====================================================================
 def load_data_from_file(file_path):
     df = pd.read_csv(
@@ -17,15 +17,15 @@ def load_data_from_file(file_path):
         dtype=str
     )
 
-    # Clean price
+    # Vyčištění ceny
     df["price"] = pd.to_numeric(df["price"].astype(str).str.replace(r"[^\d.]", "", regex=True), errors="coerce")
 
-    # Ensure expected columns exist
+    # Zajištění existence očekávaných sloupců
     for col in ["departure_time", "duration", "Est. CO2 (kg)", "AVG CO2 (kg/hr)"]:
         if col not in df.columns:
             df[col] = None
 
-    # Convert departure_time
+    # Konverze departure_time
     if "departure_time" in df.columns and df["departure_time"].notna().any():
         def normalize_time(time_str):
             if pd.isna(time_str):
@@ -42,14 +42,14 @@ def load_data_from_file(file_path):
 
         df["departure_time"] = df["departure_time"].apply(normalize_time)
 
-    # Convert to datetime
+    # Konverze na datetime
     df["flight_date"] = pd.to_datetime(df["flight_date"], errors="coerce")
     df["search_date"] = pd.to_datetime(df["search_date"], errors="coerce")
 
-    # Clean airline name
+    # Vyčištění názvu aerolinky
     df["airline"] = df["airline_details"].astype(str).str.strip()
 
-    # Parse CO2 data - handle various formats
+    # Zpracování dat CO2 - zpracování různých formátů
     for col in ["Est. CO2 (kg)", "AVG CO2 (kg/hr)"]:
         if col in df.columns:
             df[col] = pd.to_numeric(
@@ -57,7 +57,7 @@ def load_data_from_file(file_path):
                 errors="coerce"
             )
 
-    # Rename columns
+    # Přejmenování sloupců
     df.rename(
         columns={
             "flight_date": "Date",
@@ -76,48 +76,61 @@ def load_data_from_file(file_path):
     return df
 
 # =====================================================================
-# 2️⃣ Theme Configuration (Cyberpunk Style)
+# 2️⃣ Konfigurace tématu (Cyberpunk styl)
 # =====================================================================
-# Color Palette
-BG_COLOR = "#0b0c10"        # Deep void black
-GWHITE = "#F8F8FF"             # Light gray for text and gridlines
-PANEL_BG = "#1f2833"        # Dark gray for panels
-NEON_CYAN = "#66fcf1"       # Primary text/accents
-NEON_BLUE = "#45a29e"       # Secondary accents
-NEON_PINK = "#ff007f"       # Contrast color for charts
-TEXT_MUTED = "#c5c6c7"      # Muted text
-DROPDOWN_STYLE = {"color": "black", "marginBottom": "15px"} # Dropdowns need dark text to be readable without complex CSS
+# Barevná paleta
+BG_COLOR = "#0b0c10"        # Hluboká černá
+GWHITE = "#F8F8FF"             # Světle šedá pro text a mřížky
+PANEL_BG = "#1f2833"        # Tmavě šedá pro panely
+NEON_CYAN = "#66fcf1"       # Primární text/akcenty
+NEON_BLUE = "#45a29e"       # Sekundární akcenty
+NEON_PINK = "#ff007f"       # Kontrastní barva pro grafy
+TEXT_MUTED = "#c5c6c7"      # Tlumený text
+DROPDOWN_STYLE = {"color": "black", "marginBottom": "15px"} # Rozbalovací nabídky potřebují tmavý text pro čitelnost
 
-# New colors for horizontal bar charts
-TRUE_PURPLE = "#9D4EDD"      # 1st chart
-ELECTRIC_PURPLE = "#7209B7"  # 2nd chart
-CHART_CYAN = "#00D9FF"       # 3rd chart
+# Nové barvy pro vodorovné sloupcové grafy
+TRUE_PURPLE = "#9D4EDD"      # 1. graf
+ELECTRIC_PURPLE = "#7209B7"  # 2. graf
+CHART_CYAN = "#00D9FF"       # 3. graf
 
-# Shared height so filter panel and main chart end on the same bottom line
+# Sdílená výška tak, aby filtrační panel a hlavní graf skončily na stejné spodní čáře
 MAIN_PANEL_HEIGHT = "760px"
 
 # =====================================================================
-# 3️⃣ Layout
+# 3️⃣ Rozložení
 # =====================================================================
 
-# ── Back button ──────────────────────────────────────────────────────
-_back_btn = html.A(
-    "← BACK TO MAIN",
-    href="/",
-    style={
-        "display":        "inline-block",
-        "color":          NEON_CYAN,
-        "border":         f"1px solid {NEON_BLUE}",
-        "padding":        "6px 16px",
-        "borderRadius":   "6px",
-        "textDecoration": "none",
-        "fontSize":       "11px",
-        "letterSpacing":  "2px",
-        "marginBottom":   "14px",
-        "fontFamily":     "Courier New, monospace",
-        "backgroundColor": PANEL_BG
-    }
-)
+# ── Tlačítko zpět ──────────────────────────────────────────────────────
+_back_btn = html.Div([
+    html.A(
+        "← BACK TO MAIN",
+        href="/",
+        style={
+            "display":        "inline-block",
+            "color":          NEON_CYAN,
+            "border":         f"1px solid {NEON_BLUE}",
+            "padding":        "6px 16px",
+            "borderRadius":   "6px",
+            "textDecoration": "none",
+            "fontSize":       "11px",
+            "letterSpacing":  "2px",
+            "marginBottom":   "14px",
+            "fontFamily":     "Courier New, monospace",
+            "backgroundColor": PANEL_BG
+        }
+    ),
+    html.P(
+        "💡 Data not showing? The app may be warming up. Please press F5 to refresh.",
+        style={
+            "color": TEXT_MUTED,
+            "fontSize": "10px",
+            "marginTop": "8px",
+            "marginBottom": "14px",
+            "opacity": "0.7",
+            "fontStyle": "italic"
+        }
+    )
+])
 
 layout = html.Div([_back_btn,
                    html.H2(
@@ -130,15 +143,15 @@ layout = html.Div([_back_btn,
                        }
                    ),
 
-                   # Main Container
+                   # Hlavní kontejner
                    html.Div([
 
-                       # 🎛️ LEFT PANEL: Filters
+                       # 🎛️ LEVÝ PANEL: Filtry
                        html.Div([
                            html.H3("SYSTEM PARAMETERS", style={"color": NEON_BLUE, "borderBottom": f"1px solid {NEON_BLUE}", "paddingBottom": "10px"}),
 
 
-                           # Aggregation Method Toggle
+                           # Přepínač metody agregace
                            html.Div([
                                html.Label("Aggregation Method", style={"color": TEXT_MUTED, "fontSize": "12px"}),
                                dcc.RadioItems(
@@ -153,7 +166,7 @@ layout = html.Div([_back_btn,
                                )
                            ], style={"borderBottom": f"1px solid {NEON_BLUE}40", "paddingBottom": "12px", "marginBottom": "8px"}),
 
-                           # Filters Chart 1
+                           # Filtry Graf 1
                            html.Div([
                                html.H4("TRACKER ALPHA", style={"color": NEON_CYAN, "marginTop": "20px"}),
                                html.Label("Dataset Origin"),
@@ -171,7 +184,7 @@ layout = html.Div([_back_btn,
                                dcc.Dropdown(id="search-date-filter-1", value="All", style=DROPDOWN_STYLE)
                            ], style={"border": f"1px solid {NEON_CYAN}", "padding": "15px", "borderRadius": "10px", "marginBottom": "20px", "boxShadow": f"0 0 10px {NEON_CYAN}40"}),
 
-                           # Filters Chart 2
+                           # Filtry Graf 2
                            html.Div([
                                html.H4("TRACKER BETA", style={"color": NEON_PINK}),
                                html.Label("Dataset Origin"),
@@ -199,10 +212,10 @@ layout = html.Div([_back_btn,
                            "overflowY": "auto"
                        }),
 
-                       # 📈 RIGHT PANEL: Charts
+                       # 📈 PRAVÝ PANEL: Grafy
                        html.Div([
 
-                           # Merged Chart Container - Both trackers on same chart
+                           # Sloučený graf - Oba trackery na stejném grafu
                            html.Div([
                                dcc.Graph(
                                    id="merged-price-chart",
@@ -217,9 +230,9 @@ layout = html.Div([_back_btn,
 
                    ], style={"display": "flex", "gap": "30px"}),
 
-                   # 📊 BOTTOM HORIZONTAL BAR CHARTS (3 in one line)
+                   # 📊 SPODNÍ VODOROVNÉ SLOUPCOVÉ GRAFY (3 v jednom řádku)
                    html.Div([
-                       # Chart 3: 10 Cheapest Routes
+                       # Graf 3: 10 Nejlevnějších tras
                        html.Div([
                            html.Div([
                                html.Label("Destination Filters:", style={"color": NEON_CYAN, "marginBottom": "10px"}),
@@ -239,7 +252,7 @@ layout = html.Div([_back_btn,
                            dcc.Graph(id="cheapest-routes-chart")
                        ], style={"flex": "1", "borderRadius": "15px", "overflow": "hidden", "boxShadow": f"0 0 15px {TRUE_PURPLE}80"}),
 
-                       # Chart 4: 10 Most Expensive Routes
+                       # Graf 4: 10 Nejdražších tras
                        html.Div([
                            html.Div([
                                html.Label("Destination Filters:", style={"color": NEON_CYAN, "marginBottom": "10px"}),
@@ -259,7 +272,7 @@ layout = html.Div([_back_btn,
                            dcc.Graph(id="expensive-routes-chart")
                        ], style={"flex": "1", "borderRadius": "15px", "overflow": "hidden", "boxShadow": f"0 0 15px {ELECTRIC_PURPLE}80"}),
 
-                       # Chart 5: Origin Airport Comparison with filters
+                       # Graf 5: Srovnání letiště původu s filtry
                        html.Div([
                            html.Div([
                                html.Label("Destination Filters:", style={"color": NEON_CYAN, "marginBottom": "10px"}),
@@ -290,9 +303,9 @@ layout = html.Div([_back_btn,
 })
 
 # =====================================================================
-# 4️⃣ Callbacks & Chart Styling
+# 4️⃣ Callbacky & Stylizace grafů
 # =====================================================================
-# Define allowed airlines mapping (IATA code to full name)
+# Definice mapování povolených leteckých společností (IATA kód na plný název)
 ALLOWED_AIRLINES = {
     'BA': 'British Airways',
     'FR': 'Ryanair',
@@ -317,11 +330,11 @@ def filter_allowed_airlines(available_airlines):
         airline = str(airline).strip()
         if not airline:
             continue
-        # Check if airline matches any code or full name in ALLOWED_AIRLINES
+        # Zkontroluj, zda se letecká společnost shoduje s jakýmkoli kódem nebo úplným názvem v ALLOWED_AIRLINES
         airline_upper = airline.upper()
         if airline in ALLOWED_AIRLINES or airline in ALLOWED_AIRLINES.values():
             filtered.append(airline)
-        # Also check if airline contains the code or name
+        # Ověř také, zda letecká společnost obsahuje kód nebo název
         elif any(code in airline_upper for code in ALLOWED_AIRLINES.keys()):
             filtered.append(airline)
         elif any(name.upper() in airline_upper for name in ALLOWED_AIRLINES.values()):
@@ -338,7 +351,7 @@ def clean_sorted_unique(series):
     cleaned = cleaned[cleaned.ne("")]
     return sorted(cleaned.unique().tolist(), key=str.casefold)
 
-# Callback to update destination options when dataset origin changes (Chart 1)
+# Callback pro aktualizaci možností cíl při změně původního datasetu (Graf 1)
 @app.callback(
     Output("destination-filter-1", "options"),
     Output("destination-filter-1", "value"),
@@ -353,7 +366,7 @@ def update_destinations_1(selected_dataset_origin):
     default_value = destinations[1] if len(destinations) > 1 else "All"
     return destinations, default_value
 
-# Callback to update destination options when dataset origin changes (Chart 2)
+# Callback pro aktualizaci možností cíl při změně původního datasetu (Graf 2)
 @app.callback(
     Output("destination-filter-2", "options"),
     Output("destination-filter-2", "value"),
@@ -368,7 +381,7 @@ def update_destinations_2(selected_dataset_origin):
     default_value = destinations[1] if len(destinations) > 1 else "All"
     return destinations, default_value
 
-# Callback to update airline options (Chart 1)
+# Callback pro aktualizaci možností leteckých společností (Graf 1)
 @app.callback(
     Output("airline-filter-1", "options"),
     Output("airline-filter-1", "value"),
@@ -383,16 +396,16 @@ def update_airline_options_1(selected_dataset_origin, selected_destination):
     if selected_destination != "All":
         filtered = filtered[filtered["Destination"] == selected_destination]
 
-    # Get unique airlines for this route
+    # Získat jedinečné letecké společnosti pro tuto trasu
     available_airlines = filtered["Airline"].unique().tolist()
 
-    # Filter to only allowed airlines
+    # Filtrovat pouze povolené letecké společnosti
     allowed_route_airlines = filter_allowed_airlines(available_airlines)
 
     airlines = ["All"] + sorted(allowed_route_airlines)
     return airlines, "All"
 
-# Callback to update airline options (Chart 2)
+# Callback pro aktualizaci možností leteckých společností (Graf 2)
 @app.callback(
     Output("airline-filter-2", "options"),
     Output("airline-filter-2", "value"),
@@ -407,16 +420,16 @@ def update_airline_options_2(selected_dataset_origin, selected_destination):
     if selected_destination != "All":
         filtered = filtered[filtered["Destination"] == selected_destination]
 
-    # Get unique airlines for this route
+    # Získat jedinečné letecké společnosti pro tuto trasu
     available_airlines = filtered["Airline"].unique().tolist()
 
-    # Filter to only allowed airlines
+    # Filtrovat pouze povolené letecké společnosti
     allowed_route_airlines = filter_allowed_airlines(available_airlines)
 
     airlines = ["All"] + sorted(allowed_route_airlines)
     return airlines, "All"
 
-# Callback to update search date options (Chart 1)
+# Callback pro aktualizaci možností data vyhledávání (Graf 1)
 @app.callback(
     Output("search-date-filter-1", "options"),
     Output("search-date-filter-1", "value"),
@@ -428,16 +441,16 @@ def update_search_dates_1(selected_dataset_origin):
 
     df = datasets[selected_dataset_origin]
 
-    # Extract months from search_date
+    # Extrahuj měsíce z search_date
     df_temp = df.copy()
     df_temp['SearchMonth'] = df_temp['search_date'].dt.month
     df_temp['SearchMonthName'] = df_temp['search_date'].dt.strftime('%B')
 
-    # Filter for Sep(9), Oct(10), Nov(11), Dec(12), Jan(1)
+    # Filtruj pro září(9), říjen(10), listopad(11), prosinec(12), leden(1)
     valid_months = [1, 9, 10, 11, 12]
     valid_data = df_temp[df_temp['SearchMonth'].isin(valid_months)][['SearchMonth', 'SearchMonthName']].drop_duplicates()
 
-    # Sort months properly
+    # Seřadit měsíce správně
     month_order = {1: 0, 9: 1, 10: 2, 11: 3, 12: 4}
     valid_data['SortOrder'] = valid_data['SearchMonth'].map(month_order)
     valid_data = valid_data.sort_values('SortOrder')
@@ -445,7 +458,7 @@ def update_search_dates_1(selected_dataset_origin):
     month_options = ["All"] + valid_data['SearchMonthName'].unique().tolist()
     return month_options, "All"
 
-# Callback to update search date options (Chart 2)
+# Callback pro aktualizaci možností data vyhledávání (Graf 2)
 @app.callback(
     Output("search-date-filter-2", "options"),
     Output("search-date-filter-2", "value"),
@@ -457,16 +470,16 @@ def update_search_dates_2(selected_dataset_origin):
 
     df = datasets[selected_dataset_origin]
 
-    # Extract months from search_date
+    # Extrahuj měsíce z search_date
     df_temp = df.copy()
     df_temp['SearchMonth'] = df_temp['search_date'].dt.month
     df_temp['SearchMonthName'] = df_temp['search_date'].dt.strftime('%B')
 
-    # Filter for Sep(9), Oct(10), Nov(11), Dec(12), Jan(1)
+    # Filtruj pro září(9), říjen(10), listopad(11), prosinec(12), leden(1)
     valid_months = [1, 9, 10, 11, 12]
     valid_data = df_temp[df_temp['SearchMonth'].isin(valid_months)][['SearchMonth', 'SearchMonthName']].drop_duplicates()
 
-    # Sort months properly
+    # Seřadit měsíce správně
     month_order = {1: 0, 9: 1, 10: 2, 11: 3, 12: 4}
     valid_data['SortOrder'] = valid_data['SearchMonth'].map(month_order)
     valid_data = valid_data.sort_values('SortOrder')
@@ -479,8 +492,8 @@ def style_cyberpunk_figure(fig, line_color=None, title=""):
     fig.update_layout(
         title=title,
         template="plotly_dark",
-        plot_bgcolor="rgba(0,0,0,0)",  # Transparent plot background
-        paper_bgcolor=PANEL_BG,        # Match panel background
+        plot_bgcolor="rgba(0,0,0,0)",  # Průsvitné pozadí grafu
+        paper_bgcolor=PANEL_BG,        # Shoduj se s pozadím panelu
         font=dict(color=TEXT_MUTED, family="Segoe UI"),
         margin=dict(l=50, r=30, t=60, b=50),
         xaxis=dict(showgrid=True, gridcolor="#333", zeroline=False),
@@ -503,7 +516,7 @@ def filter_by_month_name(df, month_name):
         return df[df['search_date'].dt.strftime('%B') == month_name]
 
 # =====================================================================
-# 6️⃣ AGGREGATION FUNCTION WITH CO2 DATA
+# 6️⃣ FUNKCE AGREGACE S DATY CO2
 # =====================================================================
 def aggregate_price_data(filtered_df, agg_method='mean'):
     """
@@ -515,8 +528,8 @@ def aggregate_price_data(filtered_df, agg_method='mean'):
 
     agg_dict = {
         'Price': agg_method,
-        'Airline': lambda x: ', '.join(x.dropna().unique()),  # Concatenate unique airlines
-        'AvgCO2': 'mean'  # Average CO2 per hour
+        'Airline': lambda x: ', '.join(x.dropna().unique()),  # Zřetěz jedinečné aerolinky
+        'AvgCO2': 'mean'  # Průměr CO2 za hodinu
     }
 
     agg_df = filtered_df.groupby('Date').agg(agg_dict).reset_index()
@@ -543,11 +556,11 @@ def update_merged_chart(orig1, dest1, air1, month1, orig2, dest2, air2, month2, 
     fig = go.Figure()
 
     hover_template = (
-        "<b>Date:</b> %{x|%b %d, %Y}<br>" +
-        "<b>Airline:</b> %{customdata[0]}<br>" +
-        "<b>Price:</b> $%{y:.2f}<br>" +
-        "<b>AVG CO2:</b> %{customdata[1]:.2f} kg/hr<br>" +
-        "<extra></extra>"
+            "<b>Date:</b> %{x|%b %d, %Y}<br>" +
+            "<b>Airline:</b> %{customdata[0]}<br>" +
+            "<b>Price:</b> $%{y:.2f}<br>" +
+            "<b>AVG CO2:</b> %{customdata[1]:.2f} kg/hr<br>" +
+            "<extra></extra>"
     )
 
     def process(orig, dest, air, month_name):
@@ -556,35 +569,35 @@ def update_merged_chart(orig1, dest1, air1, month1, orig2, dest2, air2, month2, 
 
         df = datasets[orig].copy()
 
-        # Filter by destination
+        # Filtruj podle cíle
         if dest != "All":
             df = df[df["Destination"] == dest]
 
-        # Filter by airline
+        # Filtruj podle letecké společnosti
         if air != "All":
             df = df[df["Airline"] == air]
 
-        # Filter by month
+        # Filtruj podle měsíce
         df = filter_by_month_name(df, month_name)
 
         if df.empty:
             return df
 
-        # Aggregate by date ONLY (one point per date across all airlines)
+        # Agreguj podle data POUZE (jeden bod na datum přes všechny aerolinky)
         agg_dict = {
             'Price': agg_method,
-            'Airline': lambda x: ', '.join(x.dropna().unique()),  # Concatenate unique airlines
-            'AvgCO2': 'mean'  # Average CO2 per hour
+            'Airline': lambda x: ', '.join(x.dropna().unique()),  # Zřetěz jedinečné aerolinky
+            'AvgCO2': 'mean'  # Průměr CO2 za hodinu
         }
         agg_data = df.groupby('Date').agg(agg_dict).reset_index()
 
         return agg_data
 
-    # Get data for both trackers
+    # Getuj data pro oba trackery
     agg1 = process(orig1, dest1, air1, month1)
     agg2 = process(orig2, dest2, air2, month2)
 
-    # Add TRACKER ALPHA
+    # Přidej TRACKER ALPHA
     if not agg1.empty:
         label = f"ALPHA ({orig1} → {dest1})" if dest1 != "All" else f"ALPHA ({orig1})"
         fig.add_trace(go.Scatter(
@@ -598,7 +611,7 @@ def update_merged_chart(orig1, dest1, air1, month1, orig2, dest2, air2, month2, 
             marker=dict(size=8, color=NEON_CYAN, line=dict(width=2, color=BG_COLOR))
         ))
 
-    # Add TRACKER BETA
+    # Přidej TRACKER BETA
     if not agg2.empty:
         label = f"BETA ({orig2} → {dest2})" if dest2 != "All" else f"BETA ({orig2})"
         fig.add_trace(go.Scatter(
@@ -633,7 +646,7 @@ def update_merged_chart(orig1, dest1, air1, month1, orig2, dest2, air2, month2, 
     return fig
 
 # =====================================================================
-# 6️⃣ MONTHLY AGGREGATION FUNCTION
+# 6️⃣ FUNKCE MĚSÍČNÍ AGREGACE
 # =====================================================================
 def aggregate_price_by_month(filtered_df, agg_method='mean'):
     """
@@ -643,19 +656,19 @@ def aggregate_price_by_month(filtered_df, agg_method='mean'):
     if filtered_df.empty:
         return pd.DataFrame()
 
-    # Extract month from Date column
+    # Extrahuj měsíc ze sloupce Date
     filtered_df = filtered_df.copy()
     filtered_df['Month'] = filtered_df['Date'].dt.month
     filtered_df['MonthName'] = filtered_df['Date'].dt.strftime('%B')
 
-    # Filter for months Sep(9), Oct(10), Nov(11), Dec(12), Jan(1)
+    # Filtruj pro měsíce září(9), říjen(10), listopad(11), prosinec(12), leden(1)
     valid_months = [1, 9, 10, 11, 12]
     filtered_df = filtered_df[filtered_df['Month'].isin(valid_months)]
 
     if filtered_df.empty:
         return pd.DataFrame()
 
-    # Aggregate by month
+    # Agreguj podle měsíce
     agg_dict = {
         'Price': agg_method,
     }
@@ -663,7 +676,7 @@ def aggregate_price_by_month(filtered_df, agg_method='mean'):
     monthly_agg = filtered_df.groupby(['Month', 'MonthName']).agg(agg_dict).reset_index()
     monthly_agg.columns = ['Month', 'MonthName', 'Price']
 
-    # Sort by month (Jan first, then Sep-Dec)
+    # Seřadit měsíce (leden nejdřív, pak září-prosinec)
     month_order = {1: 0, 9: 1, 10: 2, 11: 3, 12: 4}
     monthly_agg['SortOrder'] = monthly_agg['Month'].map(month_order)
     monthly_agg = monthly_agg.sort_values('SortOrder').drop('SortOrder', axis=1)
@@ -671,10 +684,10 @@ def aggregate_price_by_month(filtered_df, agg_method='mean'):
     return monthly_agg
 
 # =====================================================================
-# 7️⃣ ROUTE ANALYTICS - Calculate AVG prices for all routes
+# 7️⃣ ANALÝZA TRAS - Výpočet průměrných cen pro všechny trasy
 # =====================================================================
 
-# Helper: Generate color gradients
+# Helper: Vygeneruj barevné přechody
 def interpolate_color(color1, color2, factor):
     """Linear interpolation between two colors (hex format)"""
     c1_rgb = tuple(int(color1[i:i+2], 16) for i in (1, 3, 5))
@@ -707,7 +720,7 @@ def calculate_route_analytics(datasets):
     return route_prices
 
 
-# Callback for cheapest routes chart
+# Callback pro graf levnějších tras
 @app.callback(
     Output("cheapest-routes-chart", "figure"),
     Input("destination-checklist-cheapest", "value")
@@ -715,21 +728,21 @@ def calculate_route_analytics(datasets):
 def update_cheapest_routes(selected_destinations):
     route_prices = calculate_route_analytics(datasets)
 
-    # Filter by selected destinations
+    # Filtruj podle vybraných cílů
     if selected_destinations:
         filtered_routes = {k: v for k, v in route_prices.items()
                            if k.split('-')[1] in selected_destinations}
     else:
         filtered_routes = route_prices
 
-    # Sort and get 10 cheapest, reverse to show cheapest at the top
+    # Seřadit a získat 10 nejlevnějších, obrátit tak aby levnější byl na vrcholu
     sorted_routes = sorted(filtered_routes.items(), key=lambda x: x[1])[:10]
-    sorted_routes.reverse()  # Reverse so cheapest is at the top
+    sorted_routes.reverse()  # Obrátit tak aby levnější byl na vrcholu
     routes = [r[0] for r in sorted_routes]
     prices = [r[1] for r in sorted_routes]
 
 
-    # White for cheapest (top), dark purple for more expensive
+    # Bílá pro nejlevnější (vrchol), tmavá fialová pro dražší
     colors = get_color_gradient(prices, '#ffffff', '#3d1a4d')
 
     fig = px.bar(
@@ -760,7 +773,7 @@ def update_cheapest_routes(selected_destinations):
 
     return fig
 
-# Callback for most expensive routes chart
+# Callback pro graf nejdražších tras
 @app.callback(
     Output("expensive-routes-chart", "figure"),
     Input("destination-checklist-expensive", "value")
@@ -768,20 +781,20 @@ def update_cheapest_routes(selected_destinations):
 def update_expensive_routes(selected_destinations):
     route_prices = calculate_route_analytics(datasets)
 
-    # Filter by selected destinations
+    # Filtruj podle vybraných cílů
     if selected_destinations:
         filtered_routes = {k: v for k, v in route_prices.items()
                            if k.split('-')[1] in selected_destinations}
     else:
         filtered_routes = route_prices
 
-    # Sort and get 10 most expensive, reverse to show most expensive at the top
+    # Seřadit a získat 10 nejdražších, obrátit tak aby nejdražší byl na vrcholu
     sorted_routes = sorted(filtered_routes.items(), key=lambda x: x[1], reverse=True)[:10]
-    sorted_routes.reverse()  # Reverse so most expensive is at the top
+    sorted_routes.reverse()  # Obrátit tak aby nejdražší byl na vrcholu
     routes = [r[0] for r in sorted_routes]
     prices = [r[1] for r in sorted_routes]
 
-    # Dark magenta for most expensive (top), light magenta for cheaper
+    # Tmavá purpurová pro nejdražší (vrchol), světlá purpurová pro levnější
     colors = get_color_gradient(prices, '#6b0080', '#e6b3ff')
 
     fig = px.bar(
@@ -812,7 +825,7 @@ def update_expensive_routes(selected_destinations):
 
     return fig
 
-# Callback for origin comparison chart with destination filters
+# Callback pro graf srovnání letiště původu s filtry cílů
 @app.callback(
     Output("origin-comparison-chart", "figure"),
     Input("destination-checklist", "value")
@@ -822,10 +835,10 @@ def update_origin_comparison(selected_destinations):
 
     for origin_code, df in datasets.items():
         if selected_destinations:
-            # Filter by selected destinations
+            # Filtruj podle vybraných cílů
             filtered_df = df[df['Destination'].isin(selected_destinations)]
         else:
-            # If no destinations selected, use all
+            # Pokud nejsou vybrány žádné cíle, použij všechny
             filtered_df = df
 
         if not filtered_df.empty:
@@ -835,7 +848,7 @@ def update_origin_comparison(selected_destinations):
     origins = list(origin_avg_prices.keys())
     prices = list(origin_avg_prices.values())
 
-    # Dark cyan for most expensive, light cyan for cheaper
+    # Tmavě modrá pro nejdražší, světlá modrá pro levnější
     colors = get_color_gradient(prices, '#003d4d', '#99e6f0')
 
     fig = px.bar(
@@ -867,7 +880,7 @@ def update_origin_comparison(selected_destinations):
     return fig
 
 # =====================================================================
-# 5️⃣ DATASET LOADING — module level (runs on import AND on direct run)
+# 5️⃣ NAČÍTÁNÍ DATASETŮ — na úrovni modulu (běží při importu A při přímém spuštění)
 # =====================================================================
 print("Loading datasets (edit5)...")
 datasets = {}
@@ -885,7 +898,7 @@ if not datasets:
 print(f"\n✓ Successfully loaded {len(datasets)} datasets\n")
 
 # =====================================================================
-# 6️⃣ ENTRY POINT (local dev only)
+# 6️⃣ VSTUPNÍ BOD (pouze pro místní vývoj)
 # =====================================================================
 if __name__ == "__main__":
     import os
