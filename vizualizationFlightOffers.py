@@ -3,7 +3,7 @@ import plotly.graph_objects as go
 from dash import dcc, html, Input, Output
 from app_instance import app
 
-# =====================================================================
+# ============================================================a=========
 # 1. Konfigurace
 # =====================================================================
 from config import DATASET_PATHS
@@ -233,7 +233,7 @@ layout = html.Div([
             "padding": "16px 18px",
             "borderRadius": "12px",
             "boxShadow": f"0 0 16px {NEON_BLUE}50",
-            "width": "25%",
+            "width": "12%",
             "flexShrink": "0",
             "overflowY": "auto",
             "overflowX": "visible",
