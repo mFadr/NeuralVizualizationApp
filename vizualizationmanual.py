@@ -369,66 +369,6 @@ layout = html.Div([
         "alignItems": "flex-start"
     }),
 
-    # ── Mapa sledovaných tras ─────────────────────────────────────────
-    html.Div([
-        html.Div([
-            html.Span("🗺️ ", style={"fontSize": "20px", "marginRight": "10px"}),
-            html.Span("MAPA SLEDOVANÝCH TRAS", style={
-                "color":         NEON_CYAN,
-                "fontSize":      "13px",
-                "fontWeight":    "bold",
-                "letterSpacing": "3px",
-                "fontFamily":    "Courier New, monospace",
-                "textShadow":    f"0 0 8px {NEON_CYAN}"
-            })
-        ], style={
-            "display":      "flex",
-            "alignItems":   "center",
-            "marginBottom": "10px"
-        }),
-
-        html.P(
-            "Schéma sítě sledovaných tras mezi zdrojovými letišti "
-            "(PRG, BER, BUD, VIE, WAW — zeleně) a cílovými destinacemi "
-            "(LON, AMS, BCN, FCO — růžově). Každá linka představuje jednu "
-            "sledovanou trasu, na které byly sbírány cenové údaje.",
-            style={
-                "color":        TEXT_MUTED,
-                "fontSize":     "12px",
-                "fontFamily":   "Courier New, monospace",
-                "lineHeight":   "1.6",
-                "marginBottom": "14px",
-                "borderLeft":   f"2px solid {NEON_CYAN}40",
-                "paddingLeft":  "10px"
-            }
-        ),
-
-        html.Div(
-            html.Img(
-                src="/assets/route_network.png",
-                style={
-                    "width":         "100%",
-                    "height":        "auto",
-                    "display":       "block",
-                    "borderRadius":  "8px",
-                    "border":        f"1px solid {NEON_CYAN}30"
-                }
-            ),
-            style={
-                "backgroundColor": PANEL_DARK,
-                "padding":         "8px",
-                "borderRadius":    "10px"
-            }
-        )
-    ], style={
-        "marginTop":       "32px",
-        "backgroundColor": PANEL_BG,
-        "border":          f"1px solid {NEON_CYAN}25",
-        "borderRadius":    "12px",
-        "padding":         "20px",
-        "boxShadow":       f"0 0 16px {NEON_CYAN}10"
-    }),
-
     # ── Patička ───────────────────────────────────────────────────────
     html.Div([
         html.Span("Reference: ", style={"color": NEON_BLUE}),
