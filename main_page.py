@@ -299,7 +299,9 @@ def build_main_layout():
                 "letterSpacing":"5px",
                 "fontSize":     "22px",
                 "fontFamily":   "Courier New, monospace",
-                "margin":       "0 0 150px 0"
+                "margin":       "0 0 150px 0",
+                "width":        "100%",
+                "textAlign":    "center"
             }),
             html.Div("CENTRAL OPERATIONS  //  SELECT MODULE", style={
                 "color":         NEON_BLUE,
