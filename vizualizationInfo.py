@@ -8,7 +8,7 @@ from dash import html
 from app_instance import app  # noqa
 
 # =====================================================================
-# Cyberpunk theme (kopie z main_page.py)
+# Cyberpunk téma (kopie z main_page.py)
 # =====================================================================
 BG_COLOR    = "#0b0c10"
 PANEL_BG    = "#1f2833"
@@ -138,7 +138,7 @@ MANUAL_SECTIONS = [
 ]
 
 # =====================================================================
-# Helper komponenty
+# Pomocné komponenty
 # =====================================================================
 def _step_row(label: str, text: str, accent: str):
     lines = text.split("\n")
@@ -286,11 +286,11 @@ def _section(sec: dict) -> html.Div:
 
 
 # =====================================================================
-# Layout
+# Rozložení
 # =====================================================================
 layout = html.Div([
 
-    # ── Back button ───────────────────────────────────────────────────
+    # ── Tlačítko zpět ──────────────────────────────────────────────────
     html.A("← BACK TO MAIN", href="/", style={
         "display":        "inline-block",
         "color":          NEON_CYAN,
@@ -397,7 +397,7 @@ layout = html.Div([
 
 
 # =====================================================================
-# Entry point (local dev only)
+# Vstupní bod (jen pro lokální vývoj)
 # =====================================================================
 if __name__ == "__main__":
     import os
