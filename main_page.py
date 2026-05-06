@@ -293,25 +293,8 @@ def build_main_layout():
     """Sestavení hlavního layoutu, aby se analytiky obnovovaly při každé návštěvě."""
     return html.Div([
         html.Div([
-            html.H1("✈  FLIGHT ANALYTICS PLATFORM", style={
-                "color":        NEON_CYAN,
-                "textShadow":   f"0 0 20px {NEON_CYAN}",
-                "letterSpacing":"5px",
-                "fontSize":     "22px",
-                "fontFamily":   "Courier New, monospace",
-                "margin":       "0 0 150px 0",
-                "width":        "100%",
-                "textAlign":    "center"
-            }),
-            html.Div("CENTRAL OPERATIONS  //  SELECT MODULE", style={
-                "color":         NEON_BLUE,
-                "fontSize":      "10px",
-                "letterSpacing": "4px",
-                "fontFamily":    "Courier New, monospace",
-                "marginBottom":  "28px"
-            }),
 
-            # Hlavní flex layout s levým panelem analytiky a pravým obsahem s KPI
+            # Hlavní flex layout s levým panelem analytiky a pravým obsahem
             html.Div([
                 # Levý panel - Analytics panel jako vertikální banner
                 html.Div([
@@ -321,8 +304,28 @@ def build_main_layout():
                     "marginRight": "24px"
                 }),
 
-                # Pravý panel - Obsah a karty modulů
+                # Pravý panel - Title + KPI + Karty modulů
                 html.Div([
+
+                    # === Titulek a podtitulek (přesunuto do pravého sloupce) ===
+                    html.H1("✈  FLIGHT ANALYTICS PLATFORM", style={
+                        "color":         NEON_CYAN,
+                        "textShadow":    f"0 0 20px {NEON_CYAN}",
+                        "letterSpacing": "5px",
+                        "fontSize":      "22px",
+                        "fontFamily":    "Courier New, monospace",
+                        "margin":        "0 0 8px 0",
+                        "textAlign":     "center"
+                    }),
+                    html.Div("CENTRAL OPERATIONS  //  SELECT MODULE", style={
+                        "color":         NEON_BLUE,
+                        "fontSize":      "10px",
+                        "letterSpacing": "4px",
+                        "fontFamily":    "Courier New, monospace",
+                        "marginBottom":  "20px",
+                        "textAlign":     "center"
+                    }),
+
                     # KPI karty - horizontální orientace
                     html.Div([
                         make_kpi_card("ORIGIN AIRPORTS",   KPI["origins"],
