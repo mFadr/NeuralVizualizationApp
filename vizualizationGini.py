@@ -132,17 +132,23 @@ def parse_numeric(series: pd.Series) -> np.ndarray:
     ).values
 
 
-# Cache cen na trasu pro rychlý lookup v Lorenz callback
-ROUTE_PRICES = {}   # { (origin, destination): np.ndarray }
+# Cache cen na trasu pro rychlý lookup v Lorenz callback (per režim)
+ROUTE_PRICES = {"all": {}, "flown": {}}   # { mode: { (origin, destination): np.ndarray } }
 
 
-def compute_gini_table() -> pd.DataFrame:
+def compute_gini_table() -> dict:
     """
     Pro každou trasu (origin, destination) spočítá True Gini PRICE,
-    průměr, medián, std, n.
-    Současně naplní ROUTE_PRICES pro rychlý Lorenz lookup.
+    průměr, medián, std, n — a to ve dvou režimech současně:
+
+      * "all"   → všechny záznamy (včetně zrušených letů)
+      * "flown" → pouze řádky s flown_status == "flown"
+
+    Vrací dict { mode: DataFrame } a paralelně naplní ROUTE_PRICES[mode]
+    pro rychlý Lorenz lookup.
     """
-    rows = []
+    rows = {"all": [], "flown": []}
+
     for origin, path in DATASET_PATHS.items():
         try:
             df = pd.read_csv(path, sep=r"[\t;,]", engine="python")
@@ -156,45 +162,73 @@ def compute_gini_table() -> pd.DataFrame:
         if dest_col is None or price_col is None:
             continue
 
-        destinations = sorted(df[dest_col].dropna().astype(str).str.upper().unique())
+        # Sjednocený sloupec stavu letu (flown / flight canceled / ...).
+        # Pokud sloupec ve zdroji chybí, předpokládá se, že vše bylo odlétnuto.
+        if "flown_status" in df.columns:
+            status_col = (
+                df["flown_status"].astype(str).str.lower().str.strip()
+            )
+        else:
+            status_col = pd.Series(["flown"] * len(df), index=df.index)
 
-        for dest in destinations:
-            sub = df[df[dest_col].astype(str).str.upper() == dest]
-            if sub.empty:
-                continue
+        # Připraví dvě verze datového rámce: vše a pouze odlétnuté lety
+        df_by_mode = {
+            "all":   df,
+            "flown": df[status_col == "flown"]
+        }
 
-            vals = parse_numeric(sub[price_col])
-            valid = vals[~np.isnan(vals)]
-            valid = valid[valid >= 0]
-            n = len(valid)
-            if n < 2:
-                continue
+        for mode, df_mode in df_by_mode.items():
+            destinations = sorted(
+                df_mode[dest_col].dropna().astype(str).str.upper().unique()
+            )
 
-            # Cache pro Lorenzovu křivku
-            ROUTE_PRICES[(origin, dest)] = valid
+            for dest in destinations:
+                sub = df_mode[df_mode[dest_col].astype(str).str.upper() == dest]
+                if sub.empty:
+                    continue
 
-            gt = true_gini(vals)
-            rows.append({
-                "origin":         origin,
-                "destination":    dest,
-                "n":              n,
-                "true_gini":      round(gt, 6) if not np.isnan(gt) else None,
-                "mean":           round(float(np.mean(valid)), 4),
-                "median":         round(float(np.median(valid)), 4),
-                "std":            round(float(np.std(valid)), 4),
-                "interpretation": interpret_gini(gt),
-            })
+                vals = parse_numeric(sub[price_col])
+                valid = vals[~np.isnan(vals)]
+                valid = valid[valid >= 0]
+                n = len(valid)
+                if n < 2:
+                    continue
 
-    return pd.DataFrame(rows)
+                # Cache pro Lorenzovu křivku v daném režimu
+                ROUTE_PRICES[mode][(origin, dest)] = valid
+
+                gt = true_gini(vals)
+                rows[mode].append({
+                    "origin":         origin,
+                    "destination":    dest,
+                    "n":              n,
+                    "true_gini":      round(gt, 6) if not np.isnan(gt) else None,
+                    "mean":           round(float(np.mean(valid)), 4),
+                    "median":         round(float(np.median(valid)), 4),
+                    "std":            round(float(np.std(valid)), 4),
+                    "interpretation": interpret_gini(gt),
+                })
+
+    return {mode: pd.DataFrame(rows[mode]) for mode in ("all", "flown")}
 
 
-print("Computing Gini coefficients (PRICE only)...")
+print("Computing Gini coefficients (PRICE only — modes: all, flown)...")
 GINI_TABLE = compute_gini_table()
-print(f"✓ Gini table ready — {len(GINI_TABLE)} rows  ·  "
-      f"{len(ROUTE_PRICES)} routes cached for Lorenz\n")
+print(
+    f"✓ Gini table ready — "
+    f"all: {len(GINI_TABLE['all'])} rows ({len(ROUTE_PRICES['all'])} routes)  ·  "
+    f"flown: {len(GINI_TABLE['flown'])} rows ({len(ROUTE_PRICES['flown'])} routes)\n"
+)
 
-ALL_ORIGINS      = sorted(GINI_TABLE["origin"].unique())      if not GINI_TABLE.empty else []
-ALL_DESTINATIONS = sorted(GINI_TABLE["destination"].unique()) if not GINI_TABLE.empty else []
+# Sjednocené seznamy origin/destination pro dropdowny — bereme superset
+# (režim "all" pokrývá vše, co je v "flown" a navíc trasy existující jen ve zrušených letech).
+def _union_sorted(*frames, col):
+    s = pd.concat([f[col] for f in frames if not f.empty], ignore_index=True) \
+          if any(not f.empty for f in frames) else pd.Series([], dtype=str)
+    return sorted(s.dropna().unique().tolist())
+
+ALL_ORIGINS      = _union_sorted(GINI_TABLE["all"], GINI_TABLE["flown"], col="origin")
+ALL_DESTINATIONS = _union_sorted(GINI_TABLE["all"], GINI_TABLE["flown"], col="destination")
 
 # Defaultní výběr pro Lorenzův graf
 DEFAULT_LORENZ_ORIGIN = "BER" if "BER" in ALL_ORIGINS      else (ALL_ORIGINS[0]      if ALL_ORIGINS      else None)
@@ -281,6 +315,26 @@ layout = html.Div([
                 "marginRight":   "24px",
                 "fontFamily":    "Courier New, monospace"
             }),
+
+            # Přepínač datového rozsahu (zrušené lety ANO/NE)
+            html.Div([
+                html.Label("DATA SCOPE", style=LABEL_STYLE),
+                dcc.RadioItems(
+                    id="filter-status",
+                    options=[
+                        {"label": "  With canceled flights",    "value": "all"},
+                        {"label": "  Without canceled flights", "value": "flown"}
+                    ],
+                    value="all",
+                    labelStyle={
+                        "display":     "inline-block",
+                        "color":       TEXT_MUTED,
+                        "marginRight": "14px",
+                        "fontSize":    "12px"
+                    },
+                    inputStyle={"marginRight": "6px", "accentColor": NEON_CYAN}
+                )
+            ], style=FILTER_CELL),
 
             html.Div([
                 html.Label("ORIGIN", style=LABEL_STYLE),
@@ -403,7 +457,7 @@ def _apply_theme(fig, title: str, accent: str) -> go.Figure:
 # =====================================================================
 # 5a. LORENZOVA KŘIVKA — pomocná funkce (volaná z unified callback)
 # =====================================================================
-def _build_lorenz(origin, dest):
+def _build_lorenz(origin, dest, mode: str = "all"):
     fig = go.Figure()
 
     # V režimu Lorenz se nedá zobrazit "ALL" — potřebujeme konkrétní trasu
@@ -415,7 +469,7 @@ def _build_lorenz(origin, dest):
         )
         return _apply_theme(fig, "LORENZ CURVE", NEON_CYAN)
 
-    values = ROUTE_PRICES.get((origin, dest))
+    values = ROUTE_PRICES.get(mode, ROUTE_PRICES["all"]).get((origin, dest))
     if values is None or len(values) < 2:
         fig.add_annotation(
             text=f"NO DATA FOR {origin} → {dest}",
@@ -519,8 +573,8 @@ def _build_lorenz(origin, dest):
 # =====================================================================
 # 5b. PRICE GINI — Bar / Heatmap callback
 # =====================================================================
-def _filter_table(origin: str, dest: str) -> pd.DataFrame:
-    df = GINI_TABLE.copy()
+def _filter_table(origin: str, dest: str, mode: str = "all") -> pd.DataFrame:
+    df = GINI_TABLE.get(mode, GINI_TABLE["all"]).copy()
     if origin != "ALL":
         df = df[df["origin"] == origin]
     if dest != "ALL":
@@ -641,19 +695,26 @@ def _build_heatmap(df: pd.DataFrame) -> go.Figure:
     Input("gini-origin",     "value"),
     Input("gini-dest",       "value"),
     Input("gini-chart-mode", "value"),
+    Input("filter-status",   "value"),
 )
-def update_unified_chart(origin, dest, chart_mode):
+def update_unified_chart(origin, dest, chart_mode, status):
     """
     Single chart at a time. Mode is selected via CHART MODE radio.
        lorenz  → Lorenz curve for selected route (origin/dest required)
        bar     → bar chart of Gini across all routes (origin/dest filters work)
        heatmap → matrix of Gini origin × destination
+
+    The DATA SCOPE switcher (status) decides whether canceled-flight rows
+    are included ("all") or excluded ("flown").
     """
+    # Datový režim: "all" (vše) nebo "flown" (pouze odlétnuté lety)
+    data_mode = status if status in ("all", "flown") else "all"
+
     if chart_mode == "lorenz":
-        return _build_lorenz(origin, dest)
+        return _build_lorenz(origin, dest, mode=data_mode)
 
     # Pro Bar/Heatmap režim podporujeme i hodnotu "ALL".
-    df = _filter_table(origin, dest)
+    df = _filter_table(origin, dest, mode=data_mode)
     if chart_mode == "heatmap":
         return _build_heatmap(df)
     return _build_bar(df)
