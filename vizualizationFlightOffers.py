@@ -58,6 +58,13 @@ def load_data(file_path):
     df["_airline_col"]   = df[airline_col].astype(str) if airline_col else ""
     df["_aircraft_col"] = df["aircraft"].astype(str) if "aircraft" in df.columns else ""
 
+    # Sjednocený sloupec stavu letu (flown / flight canceled / ...).
+    # Pokud sloupec ve zdroji chybí, předpokládá se, že všechny záznamy byly odlétnuty.
+    if "flown_status" in df.columns:
+        df["_status_col"] = df["flown_status"].astype(str).str.lower().str.strip()
+    else:
+        df["_status_col"] = "flown"
+
     return df
 
 
@@ -77,6 +84,17 @@ origins = list(datasets.keys())
 # =====================================================================
 # 4. Pomocné funkce
 # =====================================================================
+def _apply_status(df, status):
+    """
+    Filtr podle stavu letu.
+      status == "flown"  → pouze skutečně odlétnuté lety
+      status == "all"    → všechny záznamy včetně zrušených letů
+    """
+    if status == "flown" and "_status_col" in df.columns:
+        return df[df["_status_col"] == "flown"]
+    return df
+
+
 def get_destinations(origin):
     if origin not in datasets or "destination" not in datasets[origin].columns:
         return [{"label": "All", "value": "All"}]
@@ -84,20 +102,22 @@ def get_destinations(origin):
     return [{"label": "All", "value": "All"}] + [{"label": v, "value": v} for v in vals]
 
 
-def get_airlines(origin, dest):
+def get_airlines(origin, dest, status="all"):
     if origin not in datasets:
         return [{"label": "All", "value": "All"}]
     df = datasets[origin].copy()
+    df = _apply_status(df, status)
     if dest != "All" and "destination" in df.columns:
         df = df[df["destination"].astype(str) == dest]
     vals = sorted(v for v in df["_airline_col"].dropna().unique() if v and v != "nan")
     return [{"label": "All", "value": "All"}] + [{"label": v, "value": v} for v in vals]
 
 
-def get_aircraft(origin, dest, airline):
+def get_aircraft(origin, dest, airline, status="all"):
     if origin not in datasets:
         return [{"label": "All", "value": "All"}]
     df = datasets[origin].copy()
+    df = _apply_status(df, status)
     if dest != "All" and "destination" in df.columns:
         df = df[df["destination"].astype(str) == dest]
     if airline != "All":
@@ -185,6 +205,32 @@ layout = html.Div([
                 "borderBottom": f"1px solid {NEON_BLUE}30",
                 "textShadow": f"0 0 8px {NEON_CYAN}"
             }),
+
+            # ── Přepínač datového rozsahu (zrušené lety ANO/NE) ───────────
+            html.Div([
+                html.Label("DATA SCOPE", style=LABEL_STYLE),
+                dcc.RadioItems(
+                    id="filter-status",
+                    options=[
+                        {"label": " With canceled flights",    "value": "all"},
+                        {"label": " Without canceled flights", "value": "flown"},
+                    ],
+                    value="all",
+                    labelStyle={
+                        "display": "block",
+                        "color": TEXT_MUTED,
+                        "fontSize": "10px",
+                        "marginBottom": "4px",
+                        "cursor": "pointer",
+                        "fontFamily": "Courier New, monospace",
+                        "letterSpacing": "1px"
+                    },
+                    inputStyle={
+                        "marginRight": "6px",
+                        "accentColor": NEON_CYAN
+                    }
+                )
+            ], style=FILTER_CELL),
 
             html.Div([
                 html.Label("ORIGIN", style=LABEL_STYLE),
@@ -296,11 +342,12 @@ def update_destinations(origin):
 @app.callback(
     Output("filter-airline", "options"),
     Output("filter-airline", "value"),
-    Input("filter-origin", "value"),
-    Input("filter-dest", "value")
+    Input("filter-origin",  "value"),
+    Input("filter-dest",    "value"),
+    Input("filter-status",  "value")
 )
-def update_airlines(origin, dest):
-    return get_airlines(origin, dest), "All"
+def update_airlines(origin, dest, status):
+    return get_airlines(origin, dest, status), "All"
 
 
 @app.callback(
@@ -308,10 +355,11 @@ def update_airlines(origin, dest):
     Output("filter-aircraft", "value"),
     Input("filter-origin",  "value"),
     Input("filter-dest",    "value"),
-    Input("filter-airline", "value")
+    Input("filter-airline", "value"),
+    Input("filter-status",  "value")
 )
-def update_aircraft(origin, dest, airline):
-    return get_aircraft(origin, dest, airline), "All"
+def update_aircraft(origin, dest, airline, status):
+    return get_aircraft(origin, dest, airline, status), "All"
 
 
 @app.callback(
@@ -319,13 +367,17 @@ def update_aircraft(origin, dest, airline):
     Input("filter-origin",    "value"),
     Input("filter-dest",      "value"),
     Input("filter-airline",   "value"),
-    Input("filter-aircraft",  "value")
+    Input("filter-aircraft",  "value"),
+    Input("filter-status",    "value")
 )
-def update_chart(origin, dest, airline, aircraft):
+def update_chart(origin, dest, airline, aircraft, status):
     if origin not in datasets:
         return _empty_fig("NO SIGNAL — dataset not loaded")
 
     dff = datasets[origin].copy()
+
+    # Filtr stavu letu (s/bez zrušených letů)
+    dff = _apply_status(dff, status)
 
     if dest != "All" and "destination" in dff.columns:
         dff = dff[dff["destination"].astype(str) == dest]
