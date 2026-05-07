@@ -59,59 +59,81 @@ def load_form_csv(path):
     )
     df = df.dropna(subset=["price", "destination"])
     df["destination"] = df["destination"].astype(str).str.strip().str.upper()
+
+    # Sjednocený sloupec stavu letu (flown / flight canceled / ...).
+    # Pokud sloupec ve zdroji chybí, předpokládá se, že všechny záznamy byly odlétnuty.
+    if "flown_status" in df.columns:
+        df["_status_col"] = df["flown_status"].astype(str).str.lower().str.strip()
+    else:
+        df["_status_col"] = "flown"
     return df
 
 
 def compute_route_stats(dataset_paths, sources, targets):
     """
     For every (origin, destination) pair compute mean and median
-    from the real scraped price records.
+    from the real scraped price records, in two parallel modes:
 
-    Returns two dicts keyed by (origin, destination):
-        route_mean   → float
-        route_median → float
-    Also returns the raw per-route price Series for diagnostics.
+      * "all"   → all rows (including flight canceled)
+      * "flown" → only rows with flown_status == "flown"
+
+    Returns a dict keyed by mode, each containing three dicts
+    keyed by (origin, destination):
+        route_mean[mode]   → float
+        route_median[mode] → float
+        route_counts[mode] → int
     """
-    route_mean   = {}
-    route_median = {}
-    route_counts = {}
+    modes = ("all", "flown")
+    route_mean   = {m: {} for m in modes}
+    route_median = {m: {} for m in modes}
+    route_counts = {m: {} for m in modes}
 
     for origin, path in dataset_paths.items():
         if origin not in sources:
             continue
         try:
-            df = load_form_csv(path)
+            df_full = load_form_csv(path)
         except Exception as e:
             print(f"✗ Could not load {origin} from {path}: {e}")
-            # Vyplní NaN, aby se diagram i tak vykreslil
-            for dest in targets:
-                route_mean[(origin, dest)]   = np.nan
-                route_median[(origin, dest)] = np.nan
-                route_counts[(origin, dest)] = 0
+            # Vyplní NaN pro oba režimy, aby se diagram i tak vykreslil
+            for m in modes:
+                for dest in targets:
+                    route_mean[m][(origin, dest)]   = np.nan
+                    route_median[m][(origin, dest)] = np.nan
+                    route_counts[m][(origin, dest)] = 0
             continue
 
-        for dest in targets:
-            prices = df.loc[df["destination"] == dest, "price"].dropna()
-            n = len(prices)
-            route_counts[(origin, dest)] = n
-            if n > 0:
-                route_mean[(origin, dest)]   = float(prices.mean())
-                route_median[(origin, dest)] = float(prices.median())
-            else:
-                route_mean[(origin, dest)]   = np.nan
-                route_median[(origin, dest)] = np.nan
-            print(
-                f"  {origin}→{dest}: n={n:>5}  "
-                f"mean=${route_mean[(origin,dest)]:.2f}  "
-                f"median=${route_median[(origin,dest)]:.2f}"
-                if n > 0 else
-                f"  {origin}→{dest}: NO DATA"
-            )
+        # Připraví dvě verze datového rámce: vše a pouze odlétnuté lety
+        df_by_mode = {
+            "all":   df_full,
+            "flown": df_full[df_full["_status_col"] == "flown"]
+            if "_status_col" in df_full.columns else df_full
+        }
+
+        for m, df in df_by_mode.items():
+            for dest in targets:
+                prices = df.loc[df["destination"] == dest, "price"].dropna()
+                n = len(prices)
+                route_counts[m][(origin, dest)] = n
+                if n > 0:
+                    route_mean[m][(origin, dest)]   = float(prices.mean())
+                    route_median[m][(origin, dest)] = float(prices.median())
+                else:
+                    route_mean[m][(origin, dest)]   = np.nan
+                    route_median[m][(origin, dest)] = np.nan
+                if m == "all":
+                    print(
+                        f"  {origin}→{dest}: n_all={n:>5}  "
+                        f"mean=${route_mean[m][(origin,dest)]:.2f}  "
+                        f"median=${route_median[m][(origin,dest)]:.2f}"
+                        if n > 0 else
+                        f"  {origin}→{dest}: NO DATA"
+                    )
 
     return route_mean, route_median, route_counts
 
 
-print("Computing route statistics from real data...")
+print("Computing route statistics from real data (modes: all, flown)...")
 route_mean, route_median, route_counts = compute_route_stats(
     DATASET_PATHS, sources_cities, targets_cities
 )
@@ -133,8 +155,14 @@ def build_price_table(stat_dict, sources, targets):
     return table
 
 
-mean_table   = build_price_table(route_mean,   sources_cities, targets_cities)
-median_table = build_price_table(route_median, sources_cities, targets_cities)
+mean_table = {
+    m: build_price_table(route_mean[m],   sources_cities, targets_cities)
+    for m in ("all", "flown")
+}
+median_table = {
+    m: build_price_table(route_median[m], sources_cities, targets_cities)
+    for m in ("all", "flown")
+}
 
 # =====================================================================
 # 5. Sestavení spojení Sankey grafu
@@ -249,6 +277,26 @@ layout = html.Div([
             )
         ], style=FILTER_CELL),
 
+        # Přepínač datového rozsahu (zrušené lety ANO/NE)
+        html.Div([
+            html.Label("DATA SCOPE", style=LABEL_STYLE),
+            dcc.RadioItems(
+                id="filter-status",
+                options=[
+                    {"label": "  With canceled flights",    "value": "all"},
+                    {"label": "  Without canceled flights", "value": "flown"}
+                ],
+                value="all",
+                labelStyle={
+                    "display": "inline-block",
+                    "color": TEXT_MUTED,
+                    "marginRight": "16px",
+                    "fontSize": "13px"
+                },
+                inputStyle={"marginRight": "6px", "accentColor": NEON_CYAN}
+            )
+        ], style=FILTER_CELL),
+
         # Filtr cíle
         html.Div([
             html.Label("DESTINATION", style=LABEL_STYLE),
@@ -331,22 +379,26 @@ layout = html.Div([
     Output("stats-bar",    "children"),
     Input("filter-source", "value"),
     Input("filter-dest",   "value"),
-    Input("filter-stat",   "value")
+    Input("filter-stat",   "value"),
+    Input("filter-status", "value")
 )
-def update_sankey(selected_source, selected_dest, stat_method):
+def update_sankey(selected_source, selected_dest, stat_method, status):
 
     # Určí, které zdroje/destinace jsou aktivní
     active_sources = sources_cities if selected_source == "ALL" else [selected_source]
     active_targets = targets_cities if selected_dest   == "ALL" else [selected_dest]
 
+    # Datový režim: "all" (vše) nebo "flown" (pouze odlétnuté lety)
+    mode = status if status in ("all", "flown") else "all"
+
     # Vybere správnou cenovou tabulku a barvu spojení
     if stat_method == "mean":
-        price_tbl  = mean_table
+        price_tbl  = mean_table[mode]
         link_color = LINK_COLOR_MEAN
         stat_label = "MEAN"
         stat_color = NEON_CYAN
     else:
-        price_tbl  = median_table
+        price_tbl  = median_table[mode]
         link_color = LINK_COLOR_MEDIAN
         stat_label = "MEDIAN"
         stat_color = NEON_PINK
@@ -426,9 +478,9 @@ def update_sankey(selected_source, selected_dest, stat_method):
     stats_items = []
     for src in active_sources:
         for dest in active_targets:
-            m  = route_mean.get((src, dest), np.nan)
-            md = route_median.get((src, dest), np.nan)
-            n  = route_counts.get((src, dest), 0)
+            m  = route_mean[mode].get((src, dest), np.nan)
+            md = route_median[mode].get((src, dest), np.nan)
+            n  = route_counts[mode].get((src, dest), 0)
             if np.isnan(m):
                 continue
             diff      = m - md
