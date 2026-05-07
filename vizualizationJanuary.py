@@ -49,6 +49,13 @@ def load_data_from_file(file_path):
     # Vyčištění názvu aerolinky
     df["airline"] = df["airline_details"].astype(str).str.strip()
 
+    # Sjednocený sloupec stavu letu (flown / flight canceled / ...).
+    # Pokud sloupec ve zdroji chybí, předpokládá se, že všechny záznamy byly odlétnuty.
+    if "flown_status" in df.columns:
+        df["_status_col"] = df["flown_status"].astype(str).str.lower().str.strip()
+    else:
+        df["_status_col"] = "flown"
+
     # Zpracování dat CO2 - zpracování různých formátů
     for col in ["Est. CO2 (kg)", "AVG CO2 (kg/hr)"]:
         if col in df.columns:
@@ -150,6 +157,21 @@ layout = html.Div([_back_btn,
                        html.Div([
                            html.H3("SYSTEM PARAMETERS", style={"color": NEON_BLUE, "borderBottom": f"1px solid {NEON_BLUE}", "paddingBottom": "10px"}),
 
+                           # Přepínač datového rozsahu (zrušené lety ANO/NE)
+                           html.Div([
+                               html.Label("Data Scope", style={"color": TEXT_MUTED, "fontSize": "12px"}),
+                               dcc.RadioItems(
+                                   id="filter-status",
+                                   options=[
+                                       {"label": "  With canceled flights",    "value": "all"},
+                                       {"label": "  Without canceled flights", "value": "flown"}
+                                   ],
+                                   value="all",
+                                   labelStyle={"display": "block", "color": NEON_CYAN, "fontSize": "13px", "marginBottom": "4px"},
+                                   inputStyle={"marginRight": "6px", "accentColor": NEON_CYAN},
+                                   style={"marginTop": "6px", "marginBottom": "16px"}
+                               )
+                           ], style={"borderBottom": f"1px solid {NEON_BLUE}40", "paddingBottom": "12px", "marginBottom": "8px"}),
 
                            # Přepínač metody agregace
                            html.Div([
@@ -351,17 +373,29 @@ def clean_sorted_unique(series):
     cleaned = cleaned[cleaned.ne("")]
     return sorted(cleaned.unique().tolist(), key=str.casefold)
 
+
+def _apply_status_filter(df, status):
+    """
+    Filtr podle stavu letu (data scope switcher).
+      status == "flown"  → pouze skutečně odlétnuté lety
+      status == "all"    → všechny záznamy včetně zrušených letů
+    """
+    if status == "flown" and "_status_col" in df.columns:
+        return df[df["_status_col"] == "flown"]
+    return df
+
 # Callback pro aktualizaci možností cíl při změně původního datasetu (Graf 1)
 @app.callback(
     Output("destination-filter-1", "options"),
     Output("destination-filter-1", "value"),
-    Input("dataset-origin-1", "value")
+    Input("dataset-origin-1", "value"),
+    Input("filter-status", "value")
 )
-def update_destinations_1(selected_dataset_origin):
+def update_destinations_1(selected_dataset_origin, status):
     if selected_dataset_origin not in datasets:
         return [], None
 
-    df = datasets[selected_dataset_origin]
+    df = _apply_status_filter(datasets[selected_dataset_origin], status)
     destinations = ["All"] + clean_sorted_unique(df["Destination"])
     default_value = destinations[1] if len(destinations) > 1 else "All"
     return destinations, default_value
@@ -370,13 +404,14 @@ def update_destinations_1(selected_dataset_origin):
 @app.callback(
     Output("destination-filter-2", "options"),
     Output("destination-filter-2", "value"),
-    Input("dataset-origin-2", "value")
+    Input("dataset-origin-2", "value"),
+    Input("filter-status", "value")
 )
-def update_destinations_2(selected_dataset_origin):
+def update_destinations_2(selected_dataset_origin, status):
     if selected_dataset_origin not in datasets:
         return [], None
 
-    df = datasets[selected_dataset_origin]
+    df = _apply_status_filter(datasets[selected_dataset_origin], status)
     destinations = ["All"] + clean_sorted_unique(df["Destination"])
     default_value = destinations[1] if len(destinations) > 1 else "All"
     return destinations, default_value
@@ -386,13 +421,14 @@ def update_destinations_2(selected_dataset_origin):
     Output("airline-filter-1", "options"),
     Output("airline-filter-1", "value"),
     Input("dataset-origin-1", "value"),
-    Input("destination-filter-1", "value")
+    Input("destination-filter-1", "value"),
+    Input("filter-status", "value")
 )
-def update_airline_options_1(selected_dataset_origin, selected_destination):
+def update_airline_options_1(selected_dataset_origin, selected_destination, status):
     if selected_dataset_origin not in datasets:
         return [], None
 
-    filtered = datasets[selected_dataset_origin].copy()
+    filtered = _apply_status_filter(datasets[selected_dataset_origin], status).copy()
     if selected_destination != "All":
         filtered = filtered[filtered["Destination"] == selected_destination]
 
@@ -410,13 +446,14 @@ def update_airline_options_1(selected_dataset_origin, selected_destination):
     Output("airline-filter-2", "options"),
     Output("airline-filter-2", "value"),
     Input("dataset-origin-2", "value"),
-    Input("destination-filter-2", "value")
+    Input("destination-filter-2", "value"),
+    Input("filter-status", "value")
 )
-def update_airline_options_2(selected_dataset_origin, selected_destination):
+def update_airline_options_2(selected_dataset_origin, selected_destination, status):
     if selected_dataset_origin not in datasets:
         return [], None
 
-    filtered = datasets[selected_dataset_origin].copy()
+    filtered = _apply_status_filter(datasets[selected_dataset_origin], status).copy()
     if selected_destination != "All":
         filtered = filtered[filtered["Destination"] == selected_destination]
 
@@ -547,9 +584,10 @@ def aggregate_price_data(filtered_df, agg_method='mean'):
     Input("destination-filter-2", "value"),
     Input("airline-filter-2", "value"),
     Input("search-date-filter-2", "value"),
-    Input("agg-method", "value")
+    Input("agg-method", "value"),
+    Input("filter-status", "value")
 )
-def update_merged_chart(orig1, dest1, air1, month1, orig2, dest2, air2, month2, agg_method):
+def update_merged_chart(orig1, dest1, air1, month1, orig2, dest2, air2, month2, agg_method, status):
     """
     Display both TRACKER ALPHA and TRACKER BETA on the same chart for direct comparison
     """
@@ -567,7 +605,7 @@ def update_merged_chart(orig1, dest1, air1, month1, orig2, dest2, air2, month2, 
         if orig not in datasets:
             return pd.DataFrame()
 
-        df = datasets[orig].copy()
+        df = _apply_status_filter(datasets[orig], status).copy()
 
         # Filtruj podle cíle
         if dest != "All":
@@ -706,11 +744,13 @@ def get_color_gradient(values, dark_color, light_color):
         colors.append(color)
     return colors
 
-def calculate_route_analytics(datasets):
-    """Calculate average prices for all routes across all datasets"""
+def calculate_route_analytics(datasets, status="all"):
+    """Calculate average prices for all routes across all datasets,
+    optionally restricted to actually flown flights."""
     route_prices = {}
 
     for origin_code, df in datasets.items():
+        df = _apply_status_filter(df, status)
         for destination in df['Destination'].unique():
             route_key = f"{origin_code}-{destination}"
             route_data = df[df['Destination'] == destination]
@@ -723,10 +763,11 @@ def calculate_route_analytics(datasets):
 # Callback pro graf levnějších tras
 @app.callback(
     Output("cheapest-routes-chart", "figure"),
-    Input("destination-checklist-cheapest", "value")
+    Input("destination-checklist-cheapest", "value"),
+    Input("filter-status", "value")
 )
-def update_cheapest_routes(selected_destinations):
-    route_prices = calculate_route_analytics(datasets)
+def update_cheapest_routes(selected_destinations, status):
+    route_prices = calculate_route_analytics(datasets, status)
 
     # Filtruj podle vybraných cílů
     if selected_destinations:
@@ -776,10 +817,11 @@ def update_cheapest_routes(selected_destinations):
 # Callback pro graf nejdražších tras
 @app.callback(
     Output("expensive-routes-chart", "figure"),
-    Input("destination-checklist-expensive", "value")
+    Input("destination-checklist-expensive", "value"),
+    Input("filter-status", "value")
 )
-def update_expensive_routes(selected_destinations):
-    route_prices = calculate_route_analytics(datasets)
+def update_expensive_routes(selected_destinations, status):
+    route_prices = calculate_route_analytics(datasets, status)
 
     # Filtruj podle vybraných cílů
     if selected_destinations:
@@ -828,12 +870,14 @@ def update_expensive_routes(selected_destinations):
 # Callback pro graf srovnání letiště původu s filtry cílů
 @app.callback(
     Output("origin-comparison-chart", "figure"),
-    Input("destination-checklist", "value")
+    Input("destination-checklist", "value"),
+    Input("filter-status", "value")
 )
-def update_origin_comparison(selected_destinations):
+def update_origin_comparison(selected_destinations, status):
     origin_avg_prices = {}
 
     for origin_code, df in datasets.items():
+        df = _apply_status_filter(df, status)
         if selected_destinations:
             # Filtruj podle vybraných cílů
             filtered_df = df[df['Destination'].isin(selected_destinations)]
