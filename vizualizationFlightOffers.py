@@ -27,6 +27,33 @@ MONTH_NAMES = {
 }
 
 # =====================================================================
+# Pevný seznam dat odletu (Leden 2026) s českými zkratkami dnů v týdnu
+# =====================================================================
+WEEKDAY_ABBR_CZ = {0: "PO", 1: "ÚT", 2: "ST", 3: "ČT", 4: "PÁ", 5: "SO", 6: "NE"}
+
+
+def _build_departure_date_options():
+    """Sestaví pevný seznam možností pro filtr data odletu (1.–31. leden 2026).
+
+    Vrací seznam slovníků pro dcc.Dropdown ve formátu
+    [{"label": "2026-01-01 : ČT", "value": "2026-01-01"}, ...]
+    s úvodní položkou "Vše".
+    """
+    options = [{"label": "Vše", "value": "All"}]
+    for day in range(1, 32):
+        date = pd.Timestamp(year=2026, month=1, day=day)
+        weekday_cz = WEEKDAY_ABBR_CZ[date.weekday()]
+        date_str = date.strftime("%Y-%m-%d")
+        options.append({
+            "label": f"{date_str} : {weekday_cz}",
+            "value": date_str
+        })
+    return options
+
+
+DEPARTURE_DATE_OPTIONS = _build_departure_date_options()
+
+# =====================================================================
 # Klasifikace leteckých společností (Tradiční vs. Nízkonákladové)
 # =====================================================================
 TRADITIONAL_AIRLINES = [
@@ -147,33 +174,6 @@ def get_destinations(origin):
     if origin not in datasets or "destination" not in datasets[origin].columns:
         return [{"label": "All", "value": "All"}]
     vals = sorted(datasets[origin]["destination"].dropna().astype(str).unique())
-    return [{"label": "All", "value": "All"}] + [{"label": v, "value": v} for v in vals]
-
-
-def get_aircraft(origin, dest, airlines, status="all"):
-    """Vrátí seznam typů letadel pro zvolenou kombinaci.
-
-    Parametr airlines je seznam vybraných aerolinek (může být prázdný).
-    Pokud je seznam prázdný, ponechá se chování ekvivalentní původnímu "All",
-    tedy bez filtrace podle aerolinky.
-    """
-    if origin not in datasets:
-        return [{"label": "All", "value": "All"}]
-    df = datasets[origin].copy()
-    df = _apply_status(df, status)
-    if dest != "All" and "destination" in df.columns:
-        df = df[df["destination"].astype(str) == dest]
-
-    # Zpětná kompatibilita: pokud někdo zavolá s řetězcem, převede se
-    if isinstance(airlines, str):
-        airlines = [] if airlines == "All" else [airlines]
-    elif airlines is None:
-        airlines = []
-
-    if airlines:
-        df = df[df["_airline_col"].isin(airlines)]
-
-    vals = sorted(v for v in df["_aircraft_col"].dropna().unique() if v and v != "nan")
     return [{"label": "All", "value": "All"}] + [{"label": v, "value": v} for v in vals]
 
 
@@ -367,9 +367,10 @@ layout = html.Div([
             ], style=FILTER_CELL),
 
             html.Div([
-                html.Label("Typ letadla", style=LABEL_STYLE),
+                html.Label("Datum odletu spoje", style=LABEL_STYLE),
                 dcc.Dropdown(
-                    id="filter-aircraft",
+                    id="filter-departure-date",
+                    options=DEPARTURE_DATE_OPTIONS,
                     value="All",
                     clearable=False,
                     style={**DROPDOWN_STYLE, "width": "100%"}
@@ -511,29 +512,15 @@ def update_airlines(origin, dest, status, select_all):
 
 
 @app.callback(
-    Output("filter-aircraft", "options"),
-    Output("filter-aircraft", "value"),
-    Input("filter-origin",  "value"),
-    Input("filter-dest",    "value"),
-    Input("airline-traditional", "value"),
-    Input("airline-lowcost",     "value"),
-    Input("filter-status",  "value")
-)
-def update_aircraft(origin, dest, air_trad, air_low, status):
-    selected_airlines = list(air_trad or []) + list(air_low or [])
-    return get_aircraft(origin, dest, selected_airlines, status), "All"
-
-
-@app.callback(
     Output("price-chart", "figure"),
-    Input("filter-origin",       "value"),
-    Input("filter-dest",         "value"),
-    Input("airline-traditional", "value"),
-    Input("airline-lowcost",     "value"),
-    Input("filter-aircraft",     "value"),
-    Input("filter-status",       "value")
+    Input("filter-origin",         "value"),
+    Input("filter-dest",           "value"),
+    Input("airline-traditional",   "value"),
+    Input("airline-lowcost",       "value"),
+    Input("filter-departure-date", "value"),
+    Input("filter-status",         "value")
 )
-def update_chart(origin, dest, air_trad, air_low, aircraft, status):
+def update_chart(origin, dest, air_trad, air_low, departure_date, status):
     if origin not in datasets:
         return _empty_fig("ŽÁDNÝ SIGNÁL — dataset není načten")
 
@@ -552,8 +539,15 @@ def update_chart(origin, dest, air_trad, air_low, aircraft, status):
     if selected_airlines:
         dff = dff[dff["_airline_col"].isin(selected_airlines)]
 
-    if aircraft != "All":
-        dff = dff[dff["_aircraft_col"] == aircraft]
+    # Filtr data odletu (jeden vybraný datum nebo "Vše").
+    # Sloupec flight_date je pandas datetime, hodnota z dropdownu je řetězec
+    # ve formátu YYYY-MM-DD; porovnává se proto datová část (date()).
+    if departure_date and departure_date != "All":
+        try:
+            target_date = pd.to_datetime(departure_date).date()
+            dff = dff[dff["flight_date"].dt.date == target_date]
+        except (ValueError, TypeError):
+            pass
 
     if dff.empty:
         return _empty_fig("ŽÁDNÝ SIGNÁL — žádné lety neodpovídají vybraným filtrům")
