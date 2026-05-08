@@ -43,11 +43,11 @@ LORENZ_EQUALITY = NEON_PINK
 # Konfigurace pouze pro PRICE
 PRICE_CONFIG = {
     "id":      "price",
-    "label":   "PRICE",
+    "label":   "Cena",
     "unit":    "USD",
     "col_key": "price",
     "accent":  NEON_CYAN,
-    "desc":    "Ticket price inequality across flights"
+    "desc":    "Nerovnost cen letenek napříč lety"
 }
 
 LABEL_STYLE = {
@@ -224,7 +224,7 @@ print(
 # (režim "all" pokrývá vše, co je v "flown" a navíc trasy existující jen ve zrušených letech).
 def _union_sorted(*frames, col):
     s = pd.concat([f[col] for f in frames if not f.empty], ignore_index=True) \
-          if any(not f.empty for f in frames) else pd.Series([], dtype=str)
+        if any(not f.empty for f in frames) else pd.Series([], dtype=str)
     return sorted(s.dropna().unique().tolist())
 
 ALL_ORIGINS      = _union_sorted(GINI_TABLE["all"], GINI_TABLE["flown"], col="origin")
@@ -241,7 +241,7 @@ layout = html.Div([
 
     # ── Tlačítko zpět ──────────────────────────────────────────────────
     html.A(
-        "← BACK TO MAIN",
+        "← ZPĚT",
         href="/",
         style={
             "display":         "inline-block",
@@ -258,7 +258,7 @@ layout = html.Div([
         }
     ),
     html.P(
-        "💡 Data not showing? The app may be warming up. Please press F5 to refresh.",
+        "💡 Data se nezobrazují? Prosím stiskněte F5 pro obnovení stránky.",
         style={
             "color": TEXT_MUTED,
             "fontSize": "10px",
@@ -272,7 +272,7 @@ layout = html.Div([
     # ── Titulek ────────────────────────────────────────────────────────
     html.Div([
         html.H2(
-            "◈  GINI INEQUALITY ANALYZER  ·  PRICE",
+            "◈  Analyzátor Gini nerovnosti  ·  Cena",
             style={
                 "color":         NEON_CYAN,
                 "textShadow":    f"0 0 16px {NEON_CYAN}",
@@ -284,7 +284,7 @@ layout = html.Div([
             }
         ),
         html.Div(
-            "TRUE GINI COEFFICIENT  ·  Santos & Dias (2024)  ·  Lorenz Curve & Distribution",
+            "Skutečný koeficient Gini  ·  Santos & Dias (2024)  ·  Lorenzova křivka a Distribuce",
             style={
                 "color":         NEON_BLUE,
                 "fontSize":      "10px",
@@ -307,7 +307,7 @@ layout = html.Div([
         # Lišta filtrů (společná pro všechny režimy)
         html.Div([
 
-            html.Span("◈  PRICE INEQUALITY", style={
+            html.Span("◈  Nerovnost cen", style={
                 "color":         NEON_CYAN,
                 "fontSize":      "11px",
                 "letterSpacing": "2px",
@@ -318,12 +318,12 @@ layout = html.Div([
 
             # Přepínač datového rozsahu (zrušené lety ANO/NE)
             html.Div([
-                html.Label("DATA SCOPE", style=LABEL_STYLE),
+                html.Label("Rozsah dat", style=LABEL_STYLE),
                 dcc.RadioItems(
                     id="filter-status",
                     options=[
-                        {"label": "  With canceled flights",    "value": "all"},
-                        {"label": "  Without canceled flights", "value": "flown"}
+                        {"label": "  Zahrnout i zrušené lety",    "value": "all"},
+                        {"label": "  Pouze uskutečněné lety", "value": "flown"}
                     ],
                     value="all",
                     labelStyle={
@@ -337,10 +337,10 @@ layout = html.Div([
             ], style=FILTER_CELL),
 
             html.Div([
-                html.Label("ORIGIN", style=LABEL_STYLE),
+                html.Label("Výchozí letiště", style=LABEL_STYLE),
                 dcc.Dropdown(
                     id="gini-origin",
-                    options=[{"label": "All Origins", "value": "ALL"}] +
+                    options=[{"label": "Všechna letiště", "value": "ALL"}] +
                             [{"label": o, "value": o} for o in ALL_ORIGINS],
                     value=DEFAULT_LORENZ_ORIGIN,
                     clearable=False,
@@ -349,10 +349,10 @@ layout = html.Div([
             ], style=FILTER_CELL),
 
             html.Div([
-                html.Label("DESTINATION", style=LABEL_STYLE),
+                html.Label("Destinace", style=LABEL_STYLE),
                 dcc.Dropdown(
                     id="gini-dest",
-                    options=[{"label": "All Destinations", "value": "ALL"}] +
+                    options=[{"label": "Všechny destinace", "value": "ALL"}] +
                             [{"label": d, "value": d} for d in ALL_DESTINATIONS],
                     value=DEFAULT_LORENZ_DEST,
                     clearable=False,
@@ -373,13 +373,13 @@ layout = html.Div([
 
             # Režim grafu — defaultní je Lorenz
             html.Div([
-                html.Label("CHART MODE", style=LABEL_STYLE),
+                html.Label("Režim grafu", style=LABEL_STYLE),
                 dcc.RadioItems(
                     id="gini-chart-mode",
                     options=[
                         {"label": "  Lorenz",  "value": "lorenz"},
-                        {"label": "  Bar",     "value": "bar"},
-                        {"label": "  Heatmap", "value": "heatmap"},
+                        {"label": "  Sloupcový",     "value": "bar"},
+                        {"label": "  Tepelná mapa", "value": "heatmap"},
                     ],
                     value="lorenz",
                     labelStyle={
@@ -463,29 +463,29 @@ def _build_lorenz(origin, dest, mode: str = "all"):
     # V režimu Lorenz se nedá zobrazit "ALL" — potřebujeme konkrétní trasu
     if origin is None or dest is None or origin == "ALL" or dest == "ALL":
         fig.add_annotation(
-            text="SELECT SPECIFIC ORIGIN AND DESTINATION (not 'All')\nLorenz curve requires a single route",
+            text="Vyberte konkrétní výchozí letiště a destinaci\nLorenzova křivka vyžaduje jednu konkrétní trasu",
             xref="paper", yref="paper", x=0.5, y=0.5,
             showarrow=False, font=dict(color=NEON_PINK, size=13)
         )
-        return _apply_theme(fig, "LORENZ CURVE", NEON_CYAN)
+        return _apply_theme(fig, "Lorenzova křivka", NEON_CYAN)
 
     values = ROUTE_PRICES.get(mode, ROUTE_PRICES["all"]).get((origin, dest))
     if values is None or len(values) < 2:
         fig.add_annotation(
-            text=f"NO DATA FOR {origin} → {dest}",
+            text=f"Žádná data pro {origin} → {dest}",
             xref="paper", yref="paper", x=0.5, y=0.5,
             showarrow=False, font=dict(color=NEON_PINK, size=14)
         )
-        return _apply_theme(fig, f"LORENZ CURVE  ·  {origin} → {dest}", NEON_CYAN)
+        return _apply_theme(fig, f"Lorenzova křivka  ·  {origin} → {dest}", NEON_CYAN)
 
     x_lc, y_lc = lorenz_points(values)
     if x_lc is None:
         fig.add_annotation(
-            text=f"INSUFFICIENT DATA FOR {origin} → {dest}",
+            text=f"Nedostatečná data pro {origin} → {dest}",
             xref="paper", yref="paper", x=0.5, y=0.5,
             showarrow=False, font=dict(color=NEON_PINK, size=14)
         )
-        return _apply_theme(fig, f"LORENZ CURVE  ·  {origin} → {dest}", NEON_CYAN)
+        return _apply_theme(fig, f"Lorenzova křivka  ·  {origin} → {dest}", NEON_CYAN)
 
     g_value = true_gini(values)
     g_text  = f"{g_value:.4f}" if not np.isnan(g_value) else "N/A"
@@ -495,7 +495,7 @@ def _build_lorenz(origin, dest, mode: str = "all"):
     fig.add_trace(go.Scatter(
         x=x_lc, y=y_lc,
         mode="lines",
-        name="Area B  (under Lorenz curve)",
+        name="Plocha B  (pod Lorenzovou křivkou)",
         line=dict(color="rgba(0,0,0,0)", width=0),
         fill="tozeroy",
         fillcolor=LORENZ_AREA_B,
@@ -510,11 +510,11 @@ def _build_lorenz(origin, dest, mode: str = "all"):
     fig.add_trace(go.Scatter(
         x=x_lc, y=y_lc,
         mode="lines",
-        name=f"Lorenz Curve  (Gini = {g_text})",
+        name=f"Lorenzova křivka  (Gini = {g_text})",
         line=dict(color=LORENZ_CURVE, width=3),
         hovertemplate=(
-            "<b>Cumulative population:</b> %{x:.2%}<br>"
-            "<b>Cumulative price share:</b> %{y:.2%}"
+            "<b>Kumulativní podíl populace:</b> %{x:.2%}<br>"
+            "<b>Kumulativní podíl ceny:</b> %{y:.2%}"
             "<extra></extra>"
         )
     ))
@@ -523,11 +523,11 @@ def _build_lorenz(origin, dest, mode: str = "all"):
     fig.add_trace(go.Scatter(
         x=[0, 1], y=[0, 1],
         mode="lines",
-        name="Line of Equality",
+        name="Linie rovnosti",
         line=dict(color=LORENZ_EQUALITY, width=2, dash="dash"),
         fill="tonexty",
         fillcolor=LORENZ_AREA_A,
-        hovertemplate="Perfect equality<br>x=%{x:.2f}, y=%{y:.2f}<extra></extra>"
+        hovertemplate="Dokonalá rovnost<br>x=%{x:.2f}, y=%{y:.2f}<extra></extra>"
     ))
 
     # Anotace s metadaty v levém horním rohu
@@ -536,11 +536,11 @@ def _build_lorenz(origin, dest, mode: str = "all"):
     median_v = float(np.median(values))
 
     info_text = (
-        f"<b>Route:</b> {origin} → {dest}<br>"
-        f"<b>True Gini:</b> {g_text}  ({g_label})<br>"
+        f"<b>Trasa:</b> {origin} → {dest}<br>"
+        f"<b>Skutečný Gini:</b> {g_text}  ({g_label})<br>"
         f"<b>n:</b> {n_obs:,}  ·  "
-        f"<b>mean:</b> ${mean_v:.2f}  ·  "
-        f"<b>median:</b> ${median_v:.2f}"
+        f"<b>průměr:</b> ${mean_v:.2f}  ·  "
+        f"<b>medián:</b> ${median_v:.2f}"
     )
     fig.add_annotation(
         xref="paper", yref="paper",
@@ -557,16 +557,16 @@ def _build_lorenz(origin, dest, mode: str = "all"):
 
     fig.update_xaxes(
         range=[0, 1],
-        title="Cumulative Share of Population (flights, sorted by price)",
+        title="Kumulativní podíl populace (lety, třídění podle ceny)",
         tickformat=".0%"
     )
     fig.update_yaxes(
         range=[0, 1],
-        title="Cumulative Share of Price",
+        title="Kumulativní podíl ceny",
         tickformat=".0%"
     )
 
-    title = f"LORENZ CURVE  ·  {origin} → {dest}  ·  Gini = {g_text}  ({g_label})"
+    title = f"Lorenzova křivka  ·  {origin} → {dest}  ·  Gini = {g_text}  ({g_label})"
     return _apply_theme(fig, title, NEON_CYAN)
 
 
@@ -586,7 +586,7 @@ def _build_bar(df: pd.DataFrame) -> go.Figure:
     if df.empty:
         fig = go.Figure()
         fig.add_annotation(
-            text="NO DATA", xref="paper", yref="paper",
+            text="Žádná data", xref="paper", yref="paper",
             x=0.5, y=0.5, showarrow=False,
             font=dict(color=NEON_PINK, size=14)
         )
@@ -606,12 +606,12 @@ def _build_bar(df: pd.DataFrame) -> go.Figure:
         customdata=df[["mean", "median", "std", "n", "interpretation"]].values,
         hovertemplate=(
             "<b>%{y}</b><br>"
-            "<b>True Gini:</b> %{x:.4f}<br>"
-            "<b>Mean:</b> $%{customdata[0]:.2f}<br>"
-            "<b>Median:</b> $%{customdata[1]:.2f}<br>"
-            "<b>Std:</b> %{customdata[2]:.2f}<br>"
+            "<b>Skutečný Gini:</b> %{x:.4f}<br>"
+            "<b>Průměr:</b> $%{customdata[0]:.2f}<br>"
+            "<b>Medián:</b> $%{customdata[1]:.2f}<br>"
+            "<b>Směrodatná odch.:</b> %{customdata[2]:.2f}<br>"
             "<b>n:</b> %{customdata[3]}<br>"
-            "<b>Inequality:</b> %{customdata[4]}"
+            "<b>Nerovnost:</b> %{customdata[4]}"
             "<extra></extra>"
         ),
         text=df["true_gini"].apply(lambda v: f"{v:.3f}" if pd.notna(v) else ""),
@@ -621,9 +621,9 @@ def _build_bar(df: pd.DataFrame) -> go.Figure:
 
     # Referenční čáry
     for val, label, color in [
-        (0.2, "Low",      "#2a5a48"),
-        (0.3, "Moderate", "#5a5a20"),
-        (0.4, "High",     "#7a2a20"),
+        (0.2, "Nízká",      "#2a5a48"),
+        (0.3, "Střední", "#5a5a20"),
+        (0.4, "Vysoká",     "#7a2a20"),
     ]:
         fig.add_vline(
             x=val, line_dash="dot", line_color=color, line_width=1,
@@ -637,7 +637,7 @@ def _build_bar(df: pd.DataFrame) -> go.Figure:
         if not df.empty else 1.0]
     )
 
-    title = "PRICE  ·  TRUE GINI  (0 = equality, 1 = max inequality)"
+    title = "Cena  ·  Skutečný Gini  (0 = rovnost, 1 = maximální nerovnost)"
     return _apply_theme(fig, title, PRICE_CONFIG["accent"])
 
 
@@ -645,7 +645,7 @@ def _build_heatmap(df: pd.DataFrame) -> go.Figure:
     if df.empty:
         fig = go.Figure()
         fig.add_annotation(
-            text="NO DATA", xref="paper", yref="paper",
+            text="Žádná data", xref="paper", yref="paper",
             x=0.5, y=0.5, showarrow=False,
             font=dict(color=NEON_PINK, size=14)
         )
@@ -676,7 +676,7 @@ def _build_heatmap(df: pd.DataFrame) -> go.Figure:
         textfont=dict(size=10, color="white"),
         hovertemplate=(
             "<b>%{y} → %{x}</b><br>"
-            "<b>True Gini:</b> %{z:.4f}"
+            "<b>Skutečný Gini:</b> %{z:.4f}"
             "<extra></extra>"
         ),
         colorbar=dict(
@@ -686,7 +686,7 @@ def _build_heatmap(df: pd.DataFrame) -> go.Figure:
         )
     ))
 
-    title = "PRICE  ·  HEATMAP  (origin × destination)"
+    title = "Cena  ·  Tepelná mapa  (výchozí letiště × destinace)"
     return _apply_theme(fig, title, PRICE_CONFIG["accent"])
 
 
@@ -699,13 +699,13 @@ def _build_heatmap(df: pd.DataFrame) -> go.Figure:
 )
 def update_unified_chart(origin, dest, chart_mode, status):
     """
-    Single chart at a time. Mode is selected via CHART MODE radio.
-       lorenz  → Lorenz curve for selected route (origin/dest required)
-       bar     → bar chart of Gini across all routes (origin/dest filters work)
-       heatmap → matrix of Gini origin × destination
+    Jeden graf najednou. Režim se vybírá přes REŽIM GRAFU radio.
+       lorenz  → Lorenzova křivka pro vybranou trasu (origin/dest povinné)
+       bar     → sloupcový graf Gini přes všechny trasy (filtry origin/dest fungují)
+       heatmap → matice Gini výchozí letiště × destinace
 
-    The DATA SCOPE switcher (status) decides whether canceled-flight rows
-    are included ("all") or excluded ("flown").
+    Datový přepínač ROZSAH DAT (status) rozhoduje, zda jsou řádky se zrušenými
+    lety zahrnuty ("all") nebo vyloučeny ("flown").
     """
     # Datový režim: "all" (vše) nebo "flown" (pouze odlétnuté lety)
     data_mode = status if status in ("all", "flown") else "all"
@@ -713,7 +713,7 @@ def update_unified_chart(origin, dest, chart_mode, status):
     if chart_mode == "lorenz":
         return _build_lorenz(origin, dest, mode=data_mode)
 
-    # Pro Bar/Heatmap režim podporujeme i hodnotu "ALL".
+    # Pro "bar"/"heatmap" režim podporujeme i hodnotu "ALL".
     df = _filter_table(origin, dest, mode=data_mode)
     if chart_mode == "heatmap":
         return _build_heatmap(df)
@@ -727,3 +727,4 @@ if __name__ == "__main__":
     import os
     port = int(os.environ.get("PORT", 8055))
     app.run(host="0.0.0.0", port=port, debug=False)
+
