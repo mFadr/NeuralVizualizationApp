@@ -234,7 +234,6 @@ def make_analytics_panel():
         "marginBottom": "12px",
         "paddingBottom": "10px",
         "borderBottom": f"1px solid {NEON_BLUE}20",
-        "marginRight": "250px", 
         "paddingRight": "250px"  # ← Changed from 60px to ~250px (60 + 190)
     })
 
@@ -279,8 +278,26 @@ def make_analytics_panel():
             "fontFamily":    "Courier New, monospace",
             "marginBottom":  "10px"
         }),
-        header_row,
-        html.Div(module_rows)
+        html.Div([
+            # Neviditelný spacer na levé straně
+            html.Div(module_rows, style={
+                "flex": "1"
+            }),
+            # Střed - header_row
+            html.Div(header_row, style={
+                "flex": "1",
+                "display": "flex",
+                "justifyContent": "center"
+            }),
+            # Neviditelný spacer na pravé straně
+            html.Div(style={
+                "flex": "1",
+                "visibility": "hidden"
+            })
+        ], style={
+            "display": "flex",
+            "gap": "12px"
+        })
     ], style={
         "padding":         "12px 16px",
         "backgroundColor": PANEL_BG,
@@ -288,7 +305,6 @@ def make_analytics_panel():
         "border":          f"1px solid {NEON_PINK}30",
         "boxShadow":       f"0 0 12px {NEON_PINK}15",
         "marginBottom":    "28px"
-        
     })
 
 
