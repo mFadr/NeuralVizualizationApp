@@ -279,7 +279,7 @@ layout = html.Div([
             "padding": "16px 18px",
             "borderRadius": "12px",
             "boxShadow": f"0 0 16px {NEON_BLUE}50",
-            "width": "8%",
+            "width": "10%",
             "flexShrink": "0",
             "overflowY": "auto",
             "overflowX": "visible",

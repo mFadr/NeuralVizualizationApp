@@ -308,7 +308,7 @@ layout = html.Div([
 
         # Režim vizualizace
         html.Div([
-            html.Label("Výběr způsobu vizualizace emisí", style=LABEL_STYLE),
+            html.Label("Režim emisí", style=LABEL_STYLE),
             dcc.RadioItems(
                 id="em-mode",
                 options=[
@@ -330,7 +330,7 @@ layout = html.Div([
 
         # Seskupení podle
         html.Div([
-            html.Label("Filtrovat data podle", style=LABEL_STYLE),
+            html.Label("Seskupit podle", style=LABEL_STYLE),
             dcc.RadioItems(
                 id="em-groupby",
                 options=[
@@ -537,7 +537,7 @@ def update_chart(origin, dest, airline, mode, groupby):
     stats_parts.append(
         html.Span([
             html.Span("Statistiky flotily  //  ", style={"color": NEON_BLUE}),
-            html.Span(f"Aritmetický průměr: {overall_mean:,.0f}  ", style={"color": NEON_CYAN}),
+            html.Span(f"Průměr: {overall_mean:,.0f}  ", style={"color": NEON_CYAN}),
             html.Span(f"Medián: {overall_median:,.0f}  ", style={"color": NEON_PINK}),
             html.Span(f"Min: {overall_min:,.0f}  ", style={"color": NEON_GREEN}),
             html.Span(f"Max: {overall_max:,.0f}  ", style={"color": NEON_YELLOW}),
@@ -592,7 +592,7 @@ def _apply_theme(fig, title, y_label, accent):
         font=dict(color=TEXT_MUTED, family="Courier New, monospace"),
         margin=dict(l=70, r=40, t=60, b=60),
         xaxis=dict(
-            title=dict(text="Datum odletu spoje", font=dict(color=NEON_BLUE, size=11)),
+            title=dict(text="Datum letu", font=dict(color=NEON_BLUE, size=11)),
             showgrid=True,
             gridcolor=GRID_COLOR,
             zeroline=False,

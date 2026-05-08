@@ -200,7 +200,7 @@ layout = html.Div([_back_btn,
                                ),
                                html.Label("Destinace"),
                                dcc.Dropdown(id="destination-filter-1", value="AMS", style=DROPDOWN_STYLE),
-                               html.Label("Aerolinie"),
+                               html.Label("Letecká společnost"),
                                dcc.Dropdown(id="airline-filter-1", value="All", style=DROPDOWN_STYLE),
                                html.Label("Výběr měsíců pro zobrazení"),
                                dcc.Dropdown(id="search-date-filter-1", value="All", style=DROPDOWN_STYLE)
@@ -218,7 +218,7 @@ layout = html.Div([_back_btn,
                                ),
                                html.Label("Destinace"),
                                dcc.Dropdown(id="destination-filter-2", value="FCO", style=DROPDOWN_STYLE),
-                               html.Label("Aerolinie"),
+                               html.Label("Letecká společnost"),
                                dcc.Dropdown(id="airline-filter-2", value="All", style=DROPDOWN_STYLE),
                                html.Label("Výběr měsíců pro zobrazení"),
                                dcc.Dropdown(id="search-date-filter-2", value="All", style=DROPDOWN_STYLE)
@@ -801,14 +801,14 @@ def update_cheapest_routes(selected_destinations, status):
     )
 
     fig.update_layout(
-        title="10 CHEAPEST ROUTES",
+        title="10 Nejlevnějších leteckých linek",
         template="plotly_dark",
         plot_bgcolor="rgba(0,0,0,0)",
         paper_bgcolor=PANEL_BG,
         font=dict(color=TEXT_MUTED, family="Segoe UI"),
         margin=dict(l=80, r=80, t=60, b=50),
-        xaxis=dict(showgrid=True, gridcolor="#333", title="Price ($)"),
-        yaxis=dict(showgrid=False, title="Route"),
+        xaxis=dict(showgrid=True, gridcolor="#333", title="Cena ($)"),
+        yaxis=dict(showgrid=False, title="Letecké linky"),
         height=400
     )
 
@@ -854,14 +854,14 @@ def update_expensive_routes(selected_destinations, status):
     )
 
     fig.update_layout(
-        title="10 MOST EXPENSIVE ROUTES",
+        title="10 Nejdražších leteckých linek",
         template="plotly_dark",
         plot_bgcolor="rgba(0,0,0,0)",
         paper_bgcolor=PANEL_BG,
         font=dict(color=TEXT_MUTED, family="Segoe UI"),
         margin=dict(l=80, r=80, t=60, b=50),
-        xaxis=dict(showgrid=True, gridcolor="#333", title="Price ($)"),
-        yaxis=dict(showgrid=False, title="Route"),
+        xaxis=dict(showgrid=True, gridcolor="#333", title="Cena ($)"),
+        yaxis=dict(showgrid=False, title="Letecké linky"),
         height=400
     )
 
@@ -910,14 +910,14 @@ def update_origin_comparison(selected_destinations, status):
     )
 
     fig.update_layout(
-        title="ORIGIN AIRPORT AVG PRICE COMPARISON",
+        title="Porovnání cenových úrovní výchozích letišť",
         template="plotly_dark",
         plot_bgcolor="rgba(0,0,0,0)",
         paper_bgcolor=PANEL_BG,
         font=dict(color=TEXT_MUTED, family="Segoe UI"),
         margin=dict(l=80, r=80, t=60, b=50),
-        xaxis=dict(showgrid=True, gridcolor="#333", title="Average Price ($)"),
-        yaxis=dict(showgrid=False, title="Origin Airport"),
+        xaxis=dict(showgrid=True, gridcolor="#333", title="Cena ($)"),
+        yaxis=dict(showgrid=False, title="Výchozí letiště"),
         height=400
     )
 

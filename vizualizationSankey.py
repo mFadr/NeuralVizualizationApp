@@ -133,11 +133,11 @@ def compute_route_stats(dataset_paths, sources, targets):
     return route_mean, route_median, route_counts
 
 
-print("Computing route statistics from real data (modes: all, flown)...")
+print("Počítám statistiky tras z reálných dat (režimy: vše, uskutečněné)...")
 route_mean, route_median, route_counts = compute_route_stats(
     DATASET_PATHS, sources_cities, targets_cities
 )
-print("Done.\n")
+print("Hotovo.\n")
 
 # =====================================================================
 # 4. Sestavení cenových tabulek z vypočtených statistik
@@ -202,7 +202,7 @@ layout = html.Div([
 
     html.Div([
         html.H2(
-            "✈️  NEURAL FLIGHT TRACKER — ROUTE PRICE SANKEY",
+            "✈️  Neural flight tracker — Sankey diagram cen tras",
             style={
                 "textAlign": "center",
                 "color": NEON_CYAN,
@@ -215,7 +215,7 @@ layout = html.Div([
             }
         ),
         html.A(
-            "← BACK TO MAIN",
+            "← Zpět",
             href="/",
             style={
                 "position": "absolute",
@@ -234,7 +234,7 @@ layout = html.Div([
             }
         ),
         html.P(
-            "💡 Data not showing? The app may be warming up. Please press F5 to refresh.",
+            "💡 Data se nezobrazují? Prosím stiskněte F5 pro obnovení stránky.",
             style={
                 "color": TEXT_MUTED,
                 "fontSize": "10px",
@@ -264,11 +264,11 @@ layout = html.Div([
 
         # Filtr zdroje
         html.Div([
-            html.Label("ORIGIN", style=LABEL_STYLE),
+            html.Label("Výchozí letiště", style=LABEL_STYLE),
             dcc.Dropdown(
                 id="filter-source",
                 options=(
-                        [{"label": "All Origins", "value": "ALL"}] +
+                        [{"label": "Všechna výchozí letiště", "value": "ALL"}] +
                         [{"label": c, "value": c} for c in sources_cities]
                 ),
                 value="ALL",
@@ -277,33 +277,13 @@ layout = html.Div([
             )
         ], style=FILTER_CELL),
 
-        # Přepínač datového rozsahu (zrušené lety ANO/NE)
-        html.Div([
-            html.Label("DATA SCOPE", style=LABEL_STYLE),
-            dcc.RadioItems(
-                id="filter-status",
-                options=[
-                    {"label": "  With canceled flights",    "value": "all"},
-                    {"label": "  Without canceled flights", "value": "flown"}
-                ],
-                value="all",
-                labelStyle={
-                    "display": "inline-block",
-                    "color": TEXT_MUTED,
-                    "marginRight": "16px",
-                    "fontSize": "13px"
-                },
-                inputStyle={"marginRight": "6px", "accentColor": NEON_CYAN}
-            )
-        ], style=FILTER_CELL),
-
         # Filtr cíle
         html.Div([
-            html.Label("DESTINATION", style=LABEL_STYLE),
+            html.Label("Destinace", style=LABEL_STYLE),
             dcc.Dropdown(
                 id="filter-dest",
                 options=(
-                        [{"label": "All Destinations", "value": "ALL"}] +
+                        [{"label": "Všechny destinace", "value": "ALL"}] +
                         [{"label": c, "value": c} for c in targets_cities]
                 ),
                 value="ALL",
@@ -319,14 +299,36 @@ layout = html.Div([
             "opacity": "0.4", "marginRight": "20px"
         }),
 
+
+        # Přepínač datového rozsahu (zrušené lety ANO/NE)
+        html.Div([
+            html.Label("Rozsah dat", style=LABEL_STYLE),
+            dcc.RadioItems(
+                id="filter-status",
+                options=[
+                    {"label": "  Se zrušenými lety",    "value": "all"},
+                    {"label": "  Bez zrušených letů", "value": "flown"}
+                ],
+                value="all",
+                labelStyle={
+                    "display": "inline-block",
+                    "color": TEXT_MUTED,
+                    "marginRight": "16px",
+                    "fontSize": "13px"
+                },
+                inputStyle={"marginRight": "6px", "accentColor": NEON_CYAN}
+            )
+        ], style=FILTER_CELL),
+
+
         # Přepínač statistické metody
         html.Div([
-            html.Label("PRICE STATISTIC", style=LABEL_STYLE),
+            html.Label("Cenová statistika", style=LABEL_STYLE),
             dcc.RadioItems(
                 id="filter-stat",
                 options=[
-                    {"label": "  Mean",   "value": "mean"},
-                    {"label": "  Median", "value": "median"}
+                    {"label": "  Průměr",   "value": "mean"},
+                    {"label": "  Medián", "value": "median"}
                 ],
                 value="mean",
                 labelStyle={
@@ -395,12 +397,12 @@ def update_sankey(selected_source, selected_dest, stat_method, status):
     if stat_method == "mean":
         price_tbl  = mean_table[mode]
         link_color = LINK_COLOR_MEAN
-        stat_label = "MEAN"
+        stat_label = "Aritmetický průměr"
         stat_color = NEON_CYAN
     else:
         price_tbl  = median_table[mode]
         link_color = LINK_COLOR_MEDIAN
-        stat_label = "MEDIAN"
+        stat_label = "Medián"
         stat_color = NEON_PINK
 
     # Při výběru jedné destinace vynuluje všechny ostatní sloupce destinací,
@@ -429,10 +431,10 @@ def update_sankey(selected_source, selected_dest, stat_method, status):
             paper_bgcolor=PANEL_BG,
             plot_bgcolor="rgba(0,0,0,0)",
             font=dict(color=TEXT_MUTED),
-            title=dict(text="NO DATA FOR SELECTED FILTERS",
+            title=dict(text="Žádná data pro vybrané filtry",
                        font=dict(color=NEON_PINK))
         )
-        return fig, "No data available for the selected combination."
+        return fig, "Pro vybranou kombinaci nejsou k dispozici žádná data."
 
     fig = go.Figure(go.Sankey(
         arrangement="snap",
@@ -452,17 +454,17 @@ def update_sankey(selected_source, selected_dest, stat_method, status):
             color=col_list,
             hovertemplate=(
                 "<b>%{source.label} → %{target.label}</b><br>"
-                f"{stat_label} price: $%{{value:.2f}}<br>"
+                f"{stat_label} - cena: $%{{value:.2f}}<br>"
                 "<extra></extra>"
             )
         )
     ))
 
     # Sestaví titulek
-    src_part  = selected_source if selected_source != "ALL" else "All Origins"
-    dest_part = selected_dest   if selected_dest   != "ALL" else "All Destinations"
+    src_part  = selected_source if selected_source != "ALL" else "Všechna výchozí letiště"
+    dest_part = selected_dest   if selected_dest   != "ALL" else "Všechny destinace"
     title_txt = (
-        f"ROUTE PRICE SANKEY  |  {src_part} → {dest_part}  "
+        f"Sankey diagram cen tras  |  {src_part} → {dest_part}  "
         f"|  <span style='color:{stat_color}'>{stat_label}</span>"
     )
 
@@ -493,9 +495,9 @@ def update_sankey(selected_source, selected_dest, stat_method, status):
                     html.Span(f"{src}→{dest}",
                               style={"color": NEON_CYAN, "fontWeight": "bold",
                                      "marginRight": "6px"}),
-                    html.Span(f"mean ${m:.2f}",
+                    html.Span(f"průměr ${m:.2f}",
                               style={"color": highlight, "marginRight": "4px"}),
-                    html.Span(f"median ${md:.2f}",
+                    html.Span(f"medián ${md:.2f}",
                               style={"color": h_med, "marginRight": "4px"}),
                     html.Span(f"Δ {diff_sign}${abs(diff):.2f}",
                               style={"color": NEON_YELLOW, "marginRight": "4px"}),
@@ -504,7 +506,7 @@ def update_sankey(selected_source, selected_dest, stat_method, status):
                 ])
             )
 
-    stats_content = stats_items if stats_items else "No statistics available."
+    stats_content = stats_items if stats_items else "Žádné statistiky nejsou k dispozici."
     return fig, stats_content
 
 

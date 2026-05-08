@@ -139,7 +139,7 @@ ROUTE_PRICES = {"all": {}, "flown": {}}   # { mode: { (origin, destination): np.
 def compute_gini_table() -> dict:
     """
     Pro každou trasu (origin, destination) spočítá True Gini PRICE,
-    průměr, medián, std, n — a to ve dvou režimech současně:
+    Aritmetický průměr, medián, std, n — a to ve dvou režimech současně:
 
       * "all"   → všechny záznamy (včetně zrušených letů)
       * "flown" → pouze řádky s flown_status == "flown"
@@ -284,7 +284,7 @@ layout = html.Div([
             }
         ),
         html.Div(
-            "Skutečný koeficient Gini  ·  Santos & Dias (2024)  ·  Lorenzova křivka a Distribuce",
+            "Koeficient True Gini  ·  Santos & Dias (2024)  ·  Lorenzova křivka a Distribuce",
             style={
                 "color":         NEON_BLUE,
                 "fontSize":      "10px",
@@ -379,7 +379,7 @@ layout = html.Div([
                     options=[
                         {"label": "  Lorenz",  "value": "lorenz"},
                         {"label": "  Sloupcový",     "value": "bar"},
-                        {"label": "  Tepelná mapa", "value": "heatmap"},
+                        {"label": "  Heatmap", "value": "heatmap"},
                     ],
                     value="lorenz",
                     labelStyle={
@@ -537,9 +537,9 @@ def _build_lorenz(origin, dest, mode: str = "all"):
 
     info_text = (
         f"<b>Trasa:</b> {origin} → {dest}<br>"
-        f"<b>Skutečný Gini:</b> {g_text}  ({g_label})<br>"
+        f"<b>True Gini:</b> {g_text}  ({g_label})<br>"
         f"<b>n:</b> {n_obs:,}  ·  "
-        f"<b>průměr:</b> ${mean_v:.2f}  ·  "
+        f"<b>Aritmetický průměr:</b> ${mean_v:.2f}  ·  "
         f"<b>medián:</b> ${median_v:.2f}"
     )
     fig.add_annotation(
@@ -606,8 +606,8 @@ def _build_bar(df: pd.DataFrame) -> go.Figure:
         customdata=df[["mean", "median", "std", "n", "interpretation"]].values,
         hovertemplate=(
             "<b>%{y}</b><br>"
-            "<b>Skutečný Gini:</b> %{x:.4f}<br>"
-            "<b>Průměr:</b> $%{customdata[0]:.2f}<br>"
+            "<b>True Gini:</b> %{x:.4f}<br>"
+            "<b>Aritmetický průměr:</b> $%{customdata[0]:.2f}<br>"
             "<b>Medián:</b> $%{customdata[1]:.2f}<br>"
             "<b>Směrodatná odch.:</b> %{customdata[2]:.2f}<br>"
             "<b>n:</b> %{customdata[3]}<br>"
@@ -637,7 +637,7 @@ def _build_bar(df: pd.DataFrame) -> go.Figure:
         if not df.empty else 1.0]
     )
 
-    title = "Cena  ·  Skutečný Gini  (0 = rovnost, 1 = maximální nerovnost)"
+    title = "Cena  ·  True Gini  (0 = rovnost, 1 = maximální nerovnost)"
     return _apply_theme(fig, title, PRICE_CONFIG["accent"])
 
 
@@ -676,7 +676,7 @@ def _build_heatmap(df: pd.DataFrame) -> go.Figure:
         textfont=dict(size=10, color="white"),
         hovertemplate=(
             "<b>%{y} → %{x}</b><br>"
-            "<b>Skutečný Gini:</b> %{z:.4f}"
+            "<b>True Gini:</b> %{z:.4f}"
             "<extra></extra>"
         ),
         colorbar=dict(
@@ -686,7 +686,7 @@ def _build_heatmap(df: pd.DataFrame) -> go.Figure:
         )
     ))
 
-    title = "Cena  ·  Tepelná mapa  (výchozí letiště × destinace)"
+    title = "Cena  ·  Heatmap  (výchozí letiště × destinace)"
     return _apply_theme(fig, title, PRICE_CONFIG["accent"])
 
 
