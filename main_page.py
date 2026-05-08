@@ -286,7 +286,9 @@ def make_analytics_panel():
         "borderRadius":    "10px",
         "border":          f"1px solid {NEON_PINK}30",
         "boxShadow":       f"0 0 12px {NEON_PINK}15",
+        "paddingRight": "250px", 
         "marginBottom":    "28px"
+        
     })
 
 
