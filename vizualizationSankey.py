@@ -39,6 +39,25 @@ LABEL_STYLE = {
 }
 FILTER_CELL = {"display": "inline-block", "verticalAlign": "top", "marginRight": "20px"}
 
+# Styl pro vícenásobné zaškrtávací pole filtrů (sloupec)
+CHECKLIST_STYLE = {
+    "color": TEXT_MUTED,
+    "fontSize": "12px",
+    "display": "flex",
+    "flexDirection": "column",
+    "gap": "4px"
+}
+CHECKLIST_LABEL_STYLE = {
+    "display": "flex",
+    "alignItems": "center",
+    "color": TEXT_MUTED,
+    "fontSize": "12px",
+    "marginRight": "0px",
+    "padding": "2px 6px",
+    "borderRadius": "4px"
+}
+CHECKLIST_INPUT_STYLE = {"marginRight": "6px", "accentColor": NEON_CYAN}
+
 # =====================================================================
 # 3. Načtení a výpočet statistik jednotlivých tras z reálných CSV souborů
 # =====================================================================
@@ -262,35 +281,41 @@ layout = html.Div([
     # ── Lišta filtrů ───────────────────────────────────────────────────
     html.Div([
 
-        # Filtr zdroje
+        # Vícenásobné zaškrtávací pole pro výchozí letiště a destinace
+        # uspořádaná do dvou sloupců vedle sebe
         html.Div([
-            html.Label("Výchozí letiště", style=LABEL_STYLE),
-            dcc.Dropdown(
-                id="filter-source",
-                options=(
-                        [{"label": "Všechna výchozí letiště", "value": "ALL"}] +
-                        [{"label": c, "value": c} for c in sources_cities]
-                ),
-                value="ALL",
-                clearable=False,
-                style={**DROPDOWN_STYLE, "width": "160px"}
-            )
-        ], style=FILTER_CELL),
+            # Sloupec 1: Výchozí letiště
+            html.Div([
+                html.Label("Výchozí letiště", style=LABEL_STYLE),
+                dcc.Checklist(
+                    id="filter-source",
+                    options=[{"label": c, "value": c} for c in sources_cities],
+                    value=list(sources_cities),
+                    labelStyle=CHECKLIST_LABEL_STYLE,
+                    inputStyle=CHECKLIST_INPUT_STYLE,
+                    style=CHECKLIST_STYLE
+                )
+            ], style={**FILTER_CELL, "minWidth": "150px"}),
 
-        # Filtr cíle
-        html.Div([
-            html.Label("Destinace", style=LABEL_STYLE),
-            dcc.Dropdown(
-                id="filter-dest",
-                options=(
-                        [{"label": "Všechny destinace", "value": "ALL"}] +
-                        [{"label": c, "value": c} for c in targets_cities]
-                ),
-                value="ALL",
-                clearable=False,
-                style={**DROPDOWN_STYLE, "width": "180px"}
-            )
-        ], style=FILTER_CELL),
+            # Sloupec 2: Destinace
+            html.Div([
+                html.Label("Destinace", style=LABEL_STYLE),
+                dcc.Checklist(
+                    id="filter-dest",
+                    options=[{"label": c, "value": c} for c in targets_cities],
+                    value=list(targets_cities),
+                    labelStyle=CHECKLIST_LABEL_STYLE,
+                    inputStyle=CHECKLIST_INPUT_STYLE,
+                    style=CHECKLIST_STYLE
+                )
+            ], style={**FILTER_CELL, "minWidth": "150px"}),
+        ], style={
+            "display": "flex",
+            "flexDirection": "row",
+            "gap": "20px",
+            "marginRight": "20px",
+            "verticalAlign": "top"
+        }),
 
         # Oddělovač
         html.Span(style={
@@ -386,9 +411,13 @@ layout = html.Div([
 )
 def update_sankey(selected_source, selected_dest, stat_method, status):
 
-    # Určí, které zdroje/destinace jsou aktivní
-    active_sources = sources_cities if selected_source == "ALL" else [selected_source]
-    active_targets = targets_cities if selected_dest   == "ALL" else [selected_dest]
+    # dcc.Checklist vrací seznam vybraných hodnot (může být i prázdný nebo None)
+    selected_source = selected_source or []
+    selected_dest   = selected_dest   or []
+
+    # Určí, které zdroje/destinace jsou aktivní (zachová pořadí podle původních seznamů)
+    active_sources = [s for s in sources_cities if s in selected_source]
+    active_targets = [t for t in targets_cities if t in selected_dest]
 
     # Datový režim: "all" (vše) nebo "flown" (pouze odlétnuté lety)
     mode = status if status in ("all", "flown") else "all"
@@ -405,20 +434,17 @@ def update_sankey(selected_source, selected_dest, stat_method, status):
         stat_label = "Medián"
         stat_color = NEON_PINK
 
-    # Při výběru jedné destinace vynuluje všechny ostatní sloupce destinací,
-    # aby se v diagramu zobrazila pouze zvolená trasa
-    if selected_dest != "ALL":
-        filtered_table = []
-        for j, dest in enumerate(targets_cities):
-            row = []
-            for i, src in enumerate(sources_cities):
-                if dest == selected_dest:
-                    row.append(price_tbl[j][i])
-                else:
-                    row.append(0.0)
-            filtered_table.append(row)
-    else:
-        filtered_table = price_tbl
+    # Filtrace cenové tabulky: vynuluje sloupce destinací, které nejsou aktivní,
+    # aby se v diagramu zobrazily pouze zvolené trasy
+    filtered_table = []
+    for j, dest in enumerate(targets_cities):
+        row = []
+        for i, src in enumerate(sources_cities):
+            if dest in active_targets:
+                row.append(price_tbl[j][i])
+            else:
+                row.append(0.0)
+        filtered_table.append(row)
 
     src_list, tgt_list, val_list, lbl_list, col_list = build_links(
         active_sources, filtered_table, link_color
@@ -461,8 +487,20 @@ def update_sankey(selected_source, selected_dest, stat_method, status):
     ))
 
     # Sestaví titulek
-    src_part  = selected_source if selected_source != "ALL" else "Všechna výchozí letiště"
-    dest_part = selected_dest   if selected_dest   != "ALL" else "Všechny destinace"
+    if not active_sources:
+        src_part = "Žádné výchozí letiště"
+    elif len(active_sources) == len(sources_cities):
+        src_part = "Všechna výchozí letiště"
+    else:
+        src_part = ", ".join(active_sources)
+
+    if not active_targets:
+        dest_part = "Žádná destinace"
+    elif len(active_targets) == len(targets_cities):
+        dest_part = "Všechny destinace"
+    else:
+        dest_part = ", ".join(active_targets)
+
     title_txt = (
         f"Sankey diagram cen tras  |  {src_part} → {dest_part}  "
         f"|  <span style='color:{stat_color}'>{stat_label}</span>"
