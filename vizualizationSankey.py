@@ -221,7 +221,7 @@ layout = html.Div([
 
     html.Div([
         html.H2(
-            "✈️  Neural flight tracker — Sankey diagram cen tras",
+            "✈️  Neural flight tracker — Sankey diagram jednotlivých tras dle cen letenek",
             style={
                 "textAlign": "center",
                 "color": NEON_CYAN,
@@ -374,20 +374,9 @@ layout = html.Div([
         "display": "flex",
         "alignItems": "center",
         "flexWrap": "wrap"
-    }),
-
-    # ── Řádek souhrnných statistik ─────────────────────────────────────
-    html.Div(id="stats-bar", style={
-        "backgroundColor": PANEL_BG,
-        "padding": "10px 20px",
-        "borderRadius": "10px",
-        "marginBottom": "14px",
-        "fontSize": "12px",
-        "color": TEXT_MUTED,
-        "boxShadow": f"0 0 10px {NEON_BLUE}30",
-        "overflowX": "auto",
-        "whiteSpace": "nowrap"
     })
+
+
 
 ], style={
     "backgroundColor": BG_COLOR,
@@ -403,7 +392,6 @@ layout = html.Div([
 # =====================================================================
 @app.callback(
     Output("sankey-chart", "figure"),
-    Output("stats-bar",    "children"),
     Input("filter-source", "value"),
     Input("filter-dest",   "value"),
     Input("filter-stat",   "value"),
@@ -501,51 +489,7 @@ def update_sankey(selected_source, selected_dest, stat_method, status):
     else:
         dest_part = ", ".join(active_targets)
 
-    title_txt = (
-        f"Sankey diagram cen tras  |  {src_part} → {dest_part}  "
-        f"|  <span style='color:{stat_color}'>{stat_label}</span>"
-    )
 
-    fig.update_layout(
-        title=dict(text=title_txt, font=dict(color=NEON_CYAN, size=14)),
-        paper_bgcolor=PANEL_BG,
-        font=dict(color=TEXT_MUTED, family="Segoe UI", size=13),
-        margin=dict(l=30, r=30, t=55, b=30),
-        height=None   # výšku nechá řídit kontejner
-    )
-
-    # ── Obsah lišty souhrnných statistik ───────────────────────────────
-    stats_items = []
-    for src in active_sources:
-        for dest in active_targets:
-            m  = route_mean[mode].get((src, dest), np.nan)
-            md = route_median[mode].get((src, dest), np.nan)
-            n  = route_counts[mode].get((src, dest), 0)
-            if np.isnan(m):
-                continue
-            diff      = m - md
-            diff_sign = "+" if diff >= 0 else "-"
-            highlight = stat_color if stat_method == "mean" else TEXT_MUTED
-            h_med     = stat_color if stat_method == "median" else TEXT_MUTED
-
-            stats_items.append(
-                html.Span([
-                    html.Span(f"{src}→{dest}",
-                              style={"color": NEON_CYAN, "fontWeight": "bold",
-                                     "marginRight": "6px"}),
-                    html.Span(f"průměr ${m:.2f}",
-                              style={"color": highlight, "marginRight": "4px"}),
-                    html.Span(f"medián ${md:.2f}",
-                              style={"color": h_med, "marginRight": "4px"}),
-                    html.Span(f"Δ {diff_sign}${abs(diff):.2f}",
-                              style={"color": NEON_YELLOW, "marginRight": "4px"}),
-                    html.Span(f"n={n}",
-                              style={"color": "#555", "marginRight": "24px"}),
-                ])
-            )
-
-    stats_content = stats_items if stats_items else "Žádné statistiky nejsou k dispozici."
-    return fig, stats_content
 
 
 # =====================================================================
