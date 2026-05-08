@@ -139,9 +139,10 @@ _back_btn = html.Div([
     )
 ])
 
+
 layout = html.Div([_back_btn,
                    html.H2(
-                       "✈️ NEURAL FLIGHT TRACKER v2.0 - MULTI-ORIGIN",
+                       "✈️ NEURAL FLIGHT TRACKER v2.0 - VIZUALIZA CEN LETENEK Z LEDNA 2026",
                        style={
                            "textAlign": "center",
                            "textShadow": f"0 0 10px {NEON_CYAN}",
@@ -155,16 +156,16 @@ layout = html.Div([_back_btn,
 
                        # 🎛️ LEVÝ PANEL: Filtry
                        html.Div([
-                           html.H3("SYSTEM PARAMETERS", style={"color": NEON_BLUE, "borderBottom": f"1px solid {NEON_BLUE}", "paddingBottom": "10px"}),
+                           html.H3("SYSTÉMOVÉ PARAMETRY", style={"color": NEON_BLUE, "borderBottom": f"1px solid {NEON_BLUE}", "paddingBottom": "10px"}),
 
                            # Přepínač datového rozsahu (zrušené lety ANO/NE)
                            html.Div([
-                               html.Label("Data Scope", style={"color": TEXT_MUTED, "fontSize": "12px"}),
+                               html.Label("Filtr zrušených letů", style={"color": TEXT_MUTED, "fontSize": "12px"}),
                                dcc.RadioItems(
                                    id="filter-status",
                                    options=[
-                                       {"label": "  With canceled flights",    "value": "all"},
-                                       {"label": "  Without canceled flights", "value": "flown"}
+                                       {"label": "  Zahrnout zrušené lety",    "value": "all"},
+                                       {"label": "  Pouze uskutečněné lety",   "value": "flown"}
                                    ],
                                    value="all",
                                    labelStyle={"display": "block", "color": NEON_CYAN, "fontSize": "13px", "marginBottom": "4px"},
@@ -175,12 +176,12 @@ layout = html.Div([_back_btn,
 
                            # Přepínač metody agregace
                            html.Div([
-                               html.Label("Aggregation Method", style={"color": TEXT_MUTED, "fontSize": "12px"}),
+                               html.Label("Agregační metoda", style={"color": TEXT_MUTED, "fontSize": "12px"}),
                                dcc.RadioItems(
                                    id="agg-method",
                                    options=[
-                                       {"label": "  Mean",   "value": "mean"},
-                                       {"label": "  Median", "value": "median"}
+                                       {"label": "  Aritmetický průměr",   "value": "mean"},
+                                       {"label": "  Medián", "value": "median"}
                                    ],
                                    value="mean",
                                    labelStyle={"display": "inline-block", "color": NEON_CYAN, "marginRight": "16px", "fontSize": "13px"},
@@ -190,37 +191,37 @@ layout = html.Div([_back_btn,
 
                            # Filtry Graf 1
                            html.Div([
-                               html.H4("TRACKER ALPHA", style={"color": NEON_CYAN, "marginTop": "20px"}),
-                               html.Label("Dataset Origin"),
+                               html.H4("TRACKER ALFA", style={"color": NEON_CYAN, "marginTop": "20px"}),
+                               html.Label("Počáteční letiště"),
                                dcc.Dropdown(
                                    id="dataset-origin-1",
                                    options=['BER', 'BUD', 'PRG', 'VIE', 'WAW'],
                                    value="PRG",
                                    style=DROPDOWN_STYLE
                                ),
-                               html.Label("Destination"),
+                               html.Label("Destinace"),
                                dcc.Dropdown(id="destination-filter-1", value="AMS", style=DROPDOWN_STYLE),
-                               html.Label("Airline"),
+                               html.Label("Aerolinie"),
                                dcc.Dropdown(id="airline-filter-1", value="All", style=DROPDOWN_STYLE),
-                               html.Label("Search Date"),
+                               html.Label("Výběr měsíců pro zobrazení"),
                                dcc.Dropdown(id="search-date-filter-1", value="All", style=DROPDOWN_STYLE)
                            ], style={"border": f"1px solid {NEON_CYAN}", "padding": "15px", "borderRadius": "10px", "marginBottom": "20px", "boxShadow": f"0 0 10px {NEON_CYAN}40"}),
 
                            # Filtry Graf 2
                            html.Div([
                                html.H4("TRACKER BETA", style={"color": NEON_PINK}),
-                               html.Label("Dataset Origin"),
+                               html.Label("Počáteční letiště"),
                                dcc.Dropdown(
                                    id="dataset-origin-2",
                                    options=['BER', 'BUD', 'PRG', 'VIE', 'WAW'],
                                    value="PRG",
                                    style=DROPDOWN_STYLE
                                ),
-                               html.Label("Destination"),
+                               html.Label("Destinace"),
                                dcc.Dropdown(id="destination-filter-2", value="FCO", style=DROPDOWN_STYLE),
-                               html.Label("Airline"),
+                               html.Label("Aerolinie"),
                                dcc.Dropdown(id="airline-filter-2", value="All", style=DROPDOWN_STYLE),
-                               html.Label("Search Date"),
+                               html.Label("Výběr měsíců pro zobrazení"),
                                dcc.Dropdown(id="search-date-filter-2", value="All", style=DROPDOWN_STYLE)
                            ], style={"border": f"1px solid {NEON_PINK}", "padding": "15px", "borderRadius": "10px", "boxShadow": f"0 0 10px {NEON_PINK}40"})
 
@@ -257,7 +258,7 @@ layout = html.Div([_back_btn,
                        # Graf 3: 10 Nejlevnějších tras
                        html.Div([
                            html.Div([
-                               html.Label("Destination Filters:", style={"color": NEON_CYAN, "marginBottom": "10px"}),
+                               html.Label("Filtry destinací:", style={"color": NEON_CYAN, "marginBottom": "10px"}),
                                dcc.Checklist(
                                    id="destination-checklist-cheapest",
                                    options=[
@@ -277,7 +278,7 @@ layout = html.Div([_back_btn,
                        # Graf 4: 10 Nejdražších tras
                        html.Div([
                            html.Div([
-                               html.Label("Destination Filters:", style={"color": NEON_CYAN, "marginBottom": "10px"}),
+                               html.Label("Filtry destinací::", style={"color": NEON_CYAN, "marginBottom": "10px"}),
                                dcc.Checklist(
                                    id="destination-checklist-expensive",
                                    options=[
@@ -297,7 +298,7 @@ layout = html.Div([_back_btn,
                        # Graf 5: Srovnání letiště původu s filtry
                        html.Div([
                            html.Div([
-                               html.Label("Destination Filters:", style={"color": NEON_CYAN, "marginBottom": "10px"}),
+                               html.Label("Filtry destinací::", style={"color": NEON_CYAN, "marginBottom": "10px"}),
                                dcc.Checklist(
                                    id="destination-checklist",
                                    options=[
@@ -631,16 +632,16 @@ def update_merged_chart(orig1, dest1, air1, month1, orig2, dest2, air2, month2, 
 
         return agg_data
 
-    # Getuj data pro oba trackery
+    # Shání data pro oba trackery
     agg1 = process(orig1, dest1, air1, month1)
     agg2 = process(orig2, dest2, air2, month2)
 
     # Přidej TRACKER ALPHA
     if not agg1.empty:
-        label = f"ALPHA ({orig1} → {dest1})" if dest1 != "All" else f"ALPHA ({orig1})"
+        label = f"ALFA ({orig1} → {dest1})" if dest1 != "All" else f"ALPHA ({orig1})"
         fig.add_trace(go.Scatter(
-            x=agg1["Date"],
-            y=agg1["Price"],
+            x=agg1["Datum"],
+            y=agg1["Cena"],
             customdata=agg1[["Airline", "AvgCO2"]],
             hovertemplate=hover_template,
             mode="lines+markers",
@@ -653,8 +654,8 @@ def update_merged_chart(orig1, dest1, air1, month1, orig2, dest2, air2, month2, 
     if not agg2.empty:
         label = f"BETA ({orig2} → {dest2})" if dest2 != "All" else f"BETA ({orig2})"
         fig.add_trace(go.Scatter(
-            x=agg2["Date"],
-            y=agg2["Price"],
+            x=agg2["Datum"],
+            y=agg2["Cena"],
             customdata=agg2[["Airline", "AvgCO2"]],
             hovertemplate=hover_template,
             mode="lines+markers",
@@ -665,9 +666,9 @@ def update_merged_chart(orig1, dest1, air1, month1, orig2, dest2, air2, month2, 
 
     metric = "MEDIAN" if agg_method == "median" else "MEAN"
     if agg1.empty and agg2.empty:
-        title = f"NO SIGNAL: Adjust parameters to load {metric} Price Comparison"
+        title = f"Ztráta signalu: Upravte parametry pro načtení srovnání letů"
     else:
-        title = f"PRICE COMPARISON MATRIX: {metric} Price Trends (ALPHA vs BETA)"
+        title = f"SROVNÁVACÍ TABULKA CEN: Vývoj cen (ALFA vs. BETA)"
 
     fig.update_layout(
         title=title,
@@ -676,8 +677,8 @@ def update_merged_chart(orig1, dest1, air1, month1, orig2, dest2, air2, month2, 
         paper_bgcolor=PANEL_BG,
         font=dict(color=TEXT_MUTED, family="Segoe UI"),
         margin=dict(l=50, r=30, t=70, b=50),
-        xaxis=dict(showgrid=True, gridcolor="#333", zeroline=False, title="Departure Date"),
-        yaxis=dict(showgrid=True, gridcolor="#333", zeroline=False, tickprefix="$", title=f"{metric} Price ($)"),
+        xaxis=dict(showgrid=True, gridcolor="#333", zeroline=False, title="Datum odletu spoje"),
+        yaxis=dict(showgrid=True, gridcolor="#333", zeroline=False, tickprefix="$", title=f"{metric} Cena ($)"),
         hovermode="x unified"
     )
 
@@ -820,14 +821,14 @@ def update_cheapest_routes(selected_destinations, status, agg_method):
 
     metric = "MEDIAN" if agg_method == "median" else "MEAN"
     fig.update_layout(
-        title=f"10 CHEAPEST ROUTES ({metric})",
+        title=f"10 Nejlevnějších leteckých linek",
         template="plotly_dark",
         plot_bgcolor="rgba(0,0,0,0)",
         paper_bgcolor=PANEL_BG,
         font=dict(color=TEXT_MUTED, family="Segoe UI"),
         margin=dict(l=80, r=80, t=60, b=50),
-        xaxis=dict(showgrid=True, gridcolor="#333", title=f"{metric} Price ($)"),
-        yaxis=dict(showgrid=False, title="Route"),
+        xaxis=dict(showgrid=True, gridcolor="#333", title=f"{metric} Cena ($)"),
+        yaxis=dict(showgrid=False, title="Letecké linky"),
         height=400
     )
 
@@ -875,14 +876,14 @@ def update_expensive_routes(selected_destinations, status, agg_method):
 
     metric = "MEDIAN" if agg_method == "median" else "MEAN"
     fig.update_layout(
-        title=f"10 MOST EXPENSIVE ROUTES ({metric})",
+        title=f"10 Nejdražších leteckých linek",
         template="plotly_dark",
         plot_bgcolor="rgba(0,0,0,0)",
         paper_bgcolor=PANEL_BG,
         font=dict(color=TEXT_MUTED, family="Segoe UI"),
         margin=dict(l=80, r=80, t=60, b=50),
-        xaxis=dict(showgrid=True, gridcolor="#333", title=f"{metric} Price ($)"),
-        yaxis=dict(showgrid=False, title="Route"),
+        xaxis=dict(showgrid=True, gridcolor="#333", title=f"{metric} Cena ($)"),
+        yaxis=dict(showgrid=False, title="Letecké linky"),
         height=400
     )
 
@@ -936,14 +937,14 @@ def update_origin_comparison(selected_destinations, status, agg_method):
 
     metric = "MEDIAN" if agg_method == "median" else "MEAN"
     fig.update_layout(
-        title=f"ORIGIN AIRPORT {metric} PRICE COMPARISON",
+        title=f"Srovnání cenových úrovní výchozích letišť",
         template="plotly_dark",
         plot_bgcolor="rgba(0,0,0,0)",
         paper_bgcolor=PANEL_BG,
         font=dict(color=TEXT_MUTED, family="Segoe UI"),
         margin=dict(l=80, r=80, t=60, b=50),
-        xaxis=dict(showgrid=True, gridcolor="#333", title=f"{metric} Price ($)"),
-        yaxis=dict(showgrid=False, title="Origin Airport"),
+        xaxis=dict(showgrid=True, gridcolor="#333", title=f"Cena ($)"),
+        yaxis=dict(showgrid=False, title="Výchozí lety"),
         height=400
     )
 
