@@ -27,6 +27,54 @@ MONTH_NAMES = {
 }
 
 # =====================================================================
+# Klasifikace leteckých společností (Tradiční vs. Nízkonákladové)
+# =====================================================================
+TRADITIONAL_AIRLINES = [
+    "Austrian Airlines",
+    "KLM",
+    "British Airways",
+    "LOT Polish Airlines",
+]
+
+LOW_COST_AIRLINES = [
+    "easyJet",
+    "Wizz Air",
+    "Wizz Air Malta",
+    "Vueling Airlines",
+    "Wizz Air U",
+    "Smartwings",
+    "Ryanair",
+]
+
+# Společné styly pro vícenásobná zaškrtávací pole leteckých společností
+AIRLINE_CHECKLIST_STYLE = {
+    "color": TEXT_MUTED,
+    "fontSize": "11px",
+    "display": "flex",
+    "flexDirection": "column",
+    "gap": "3px",
+    "marginTop": "4px"
+}
+AIRLINE_CHECKLIST_LABEL_STYLE = {
+    "display": "flex",
+    "alignItems": "center",
+    "color": TEXT_MUTED,
+    "fontSize": "11px",
+    "padding": "1px 4px",
+    "borderRadius": "4px",
+    "lineHeight": "1.2"
+}
+AIRLINE_CHECKLIST_INPUT_STYLE = {"marginRight": "6px", "accentColor": NEON_CYAN}
+AIRLINE_GROUP_HEADER_STYLE = {
+    "color": NEON_BLUE,
+    "fontSize": "10px",
+    "letterSpacing": "1px",
+    "marginTop": "8px",
+    "marginBottom": "4px",
+    "display": "block"
+}
+
+# =====================================================================
 # 3. Načítání dat
 # =====================================================================
 def load_data(file_path):
@@ -102,28 +150,93 @@ def get_destinations(origin):
     return [{"label": "All", "value": "All"}] + [{"label": v, "value": v} for v in vals]
 
 
-def get_airlines(origin, dest, status="all"):
+def get_aircraft(origin, dest, airlines, status="all"):
+    """Vrátí seznam typů letadel pro zvolenou kombinaci.
+
+    Parametr airlines je seznam vybraných aerolinek (může být prázdný).
+    Pokud je seznam prázdný, ponechá se chování ekvivalentní původnímu "All",
+    tedy bez filtrace podle aerolinky.
+    """
     if origin not in datasets:
         return [{"label": "All", "value": "All"}]
     df = datasets[origin].copy()
     df = _apply_status(df, status)
     if dest != "All" and "destination" in df.columns:
         df = df[df["destination"].astype(str) == dest]
-    vals = sorted(v for v in df["_airline_col"].dropna().unique() if v and v != "nan")
-    return [{"label": "All", "value": "All"}] + [{"label": v, "value": v} for v in vals]
 
+    # Zpětná kompatibilita: pokud někdo zavolá s řetězcem, převede se
+    if isinstance(airlines, str):
+        airlines = [] if airlines == "All" else [airlines]
+    elif airlines is None:
+        airlines = []
 
-def get_aircraft(origin, dest, airline, status="all"):
-    if origin not in datasets:
-        return [{"label": "All", "value": "All"}]
-    df = datasets[origin].copy()
-    df = _apply_status(df, status)
-    if dest != "All" and "destination" in df.columns:
-        df = df[df["destination"].astype(str) == dest]
-    if airline != "All":
-        df = df[df["_airline_col"] == airline]
+    if airlines:
+        df = df[df["_airline_col"].isin(airlines)]
+
     vals = sorted(v for v in df["_aircraft_col"].dropna().unique() if v and v != "nan")
     return [{"label": "All", "value": "All"}] + [{"label": v, "value": v} for v in vals]
+
+
+# =====================================================================
+# Pomocné funkce pro klasifikaci aerolinek (Tradiční vs. Nízkonákladové)
+# =====================================================================
+def _airline_matches(value, target_name):
+    """Posoudí, zda hodnota ze sloupce aerolinka odpovídá cílovému názvu společnosti.
+
+    Porovnává se bez ohledu na velikost písmen a tolerují se varianty zápisu
+    (např. EasyJet vs. easyJet, plný název obsahující IATA kód apod.).
+    """
+    if value is None:
+        return False
+    val = str(value).strip().lower()
+    if not val:
+        return False
+    name = str(target_name).strip().lower()
+    return val == name or name in val or val in name
+
+
+def split_airlines_by_type(available_airlines):
+    """Rozdělí seznam dostupných aerolinek na tradiční a nízkonákladové.
+
+    Vrací dvojici seznamů (traditional, low_cost), v níž jsou položky
+    reprezentované původním zápisem ze zdrojových dat (zachovává se pořadí
+    podle definovaných seznamů). Každá hodnota se přiřadí maximálně jednou.
+    """
+    traditional, low_cost = [], []
+    used = set()
+
+    for canonical in TRADITIONAL_AIRLINES:
+        for raw in available_airlines:
+            if raw in used:
+                continue
+            if _airline_matches(raw, canonical):
+                traditional.append(raw)
+                used.add(raw)
+
+    for canonical in LOW_COST_AIRLINES:
+        for raw in available_airlines:
+            if raw in used:
+                continue
+            if _airline_matches(raw, canonical):
+                low_cost.append(raw)
+                used.add(raw)
+
+    return traditional, low_cost
+
+
+def get_available_airlines(origin, dest, status="all"):
+    """Vrátí seznam unikátních aerolinek dostupných pro danou trasu.
+
+    Vrací holý seznam názvů použitelný pro split_airlines_by_type
+    (na rozdíl od formátu options pro dropdown / checklist).
+    """
+    if origin not in datasets:
+        return []
+    df = datasets[origin].copy()
+    df = _apply_status(df, status)
+    if dest != "All" and "destination" in df.columns:
+        df = df[df["destination"].astype(str) == dest]
+    return sorted(v for v in df["_airline_col"].dropna().unique() if v and v != "nan")
 
 
 # =====================================================================
@@ -254,16 +367,6 @@ layout = html.Div([
             ], style=FILTER_CELL),
 
             html.Div([
-                html.Label("Letecká společnost", style=LABEL_STYLE),
-                dcc.Dropdown(
-                    id="filter-airline",
-                    value="All",
-                    clearable=False,
-                    style={**DROPDOWN_STYLE, "width": "100%"}
-                )
-            ], style=FILTER_CELL),
-
-            html.Div([
                 html.Label("Typ letadla", style=LABEL_STYLE),
                 dcc.Dropdown(
                     id="filter-aircraft",
@@ -271,6 +374,46 @@ layout = html.Div([
                     clearable=False,
                     style={**DROPDOWN_STYLE, "width": "100%"}
                 )
+            ], style=FILTER_CELL),
+
+            html.Div([
+                html.Label("Letecká společnost", style=LABEL_STYLE),
+                # Master přepínač "Všechny letecké společnosti"
+                dcc.Checklist(
+                    id="airline-select-all",
+                    options=[{"label": "  Všechny letecké společnosti", "value": "ALL"}],
+                    value=["ALL"],
+                    labelStyle={
+                        "color": NEON_CYAN,
+                        "fontSize": "11px",
+                        "marginTop": "4px",
+                        "marginBottom": "4px",
+                        "display": "block",
+                        "lineHeight": "1.2"
+                    },
+                    inputStyle=AIRLINE_CHECKLIST_INPUT_STYLE
+                ),
+                # Skupiny pod sebou: Tradiční nahoře, Nízkonákladové dole
+                html.Div([
+                    html.Label("Tradiční společnosti", style=AIRLINE_GROUP_HEADER_STYLE),
+                    dcc.Checklist(
+                        id="airline-traditional",
+                        options=[],
+                        value=[],
+                        labelStyle=AIRLINE_CHECKLIST_LABEL_STYLE,
+                        inputStyle=AIRLINE_CHECKLIST_INPUT_STYLE,
+                        style=AIRLINE_CHECKLIST_STYLE
+                    ),
+                    html.Label("Nízkonákladové společnosti", style=AIRLINE_GROUP_HEADER_STYLE),
+                    dcc.Checklist(
+                        id="airline-lowcost",
+                        options=[],
+                        value=[],
+                        labelStyle=AIRLINE_CHECKLIST_LABEL_STYLE,
+                        inputStyle=AIRLINE_CHECKLIST_INPUT_STYLE,
+                        style=AIRLINE_CHECKLIST_STYLE
+                    )
+                ])
             ], style=FILTER_CELL),
 
 
@@ -340,14 +483,31 @@ def update_destinations(origin):
 
 
 @app.callback(
-    Output("filter-airline", "options"),
-    Output("filter-airline", "value"),
+    Output("airline-traditional", "options"),
+    Output("airline-traditional", "value"),
+    Output("airline-lowcost", "options"),
+    Output("airline-lowcost", "value"),
     Input("filter-origin",  "value"),
     Input("filter-dest",    "value"),
-    Input("filter-status",  "value")
+    Input("filter-status",  "value"),
+    Input("airline-select-all", "value")
 )
-def update_airlines(origin, dest, status):
-    return get_airlines(origin, dest, status), "All"
+def update_airlines(origin, dest, status, select_all):
+    available = get_available_airlines(origin, dest, status)
+    traditional, low_cost = split_airlines_by_type(available)
+
+    trad_options = [{"label": f"  {name}", "value": name} for name in traditional]
+    low_options  = [{"label": f"  {name}", "value": name} for name in low_cost]
+
+    # Pokud je aktivní volba "Všechny letecké společnosti", předvyber vše dostupné.
+    if select_all and "ALL" in select_all:
+        trad_value = list(traditional)
+        low_value  = list(low_cost)
+    else:
+        trad_value = []
+        low_value  = []
+
+    return trad_options, trad_value, low_options, low_value
 
 
 @app.callback(
@@ -355,22 +515,25 @@ def update_airlines(origin, dest, status):
     Output("filter-aircraft", "value"),
     Input("filter-origin",  "value"),
     Input("filter-dest",    "value"),
-    Input("filter-airline", "value"),
+    Input("airline-traditional", "value"),
+    Input("airline-lowcost",     "value"),
     Input("filter-status",  "value")
 )
-def update_aircraft(origin, dest, airline, status):
-    return get_aircraft(origin, dest, airline, status), "All"
+def update_aircraft(origin, dest, air_trad, air_low, status):
+    selected_airlines = list(air_trad or []) + list(air_low or [])
+    return get_aircraft(origin, dest, selected_airlines, status), "All"
 
 
 @app.callback(
     Output("price-chart", "figure"),
-    Input("filter-origin",    "value"),
-    Input("filter-dest",      "value"),
-    Input("filter-airline",   "value"),
-    Input("filter-aircraft",  "value"),
-    Input("filter-status",    "value")
+    Input("filter-origin",       "value"),
+    Input("filter-dest",         "value"),
+    Input("airline-traditional", "value"),
+    Input("airline-lowcost",     "value"),
+    Input("filter-aircraft",     "value"),
+    Input("filter-status",       "value")
 )
-def update_chart(origin, dest, airline, aircraft, status):
+def update_chart(origin, dest, air_trad, air_low, aircraft, status):
     if origin not in datasets:
         return _empty_fig("ŽÁDNÝ SIGNÁL — dataset není načten")
 
@@ -382,8 +545,12 @@ def update_chart(origin, dest, airline, aircraft, status):
     if dest != "All" and "destination" in dff.columns:
         dff = dff[dff["destination"].astype(str) == dest]
 
-    if airline != "All":
-        dff = dff[dff["_airline_col"] == airline]
+    # Filtr letecké společnosti (vícenásobný výběr ze dvou skupin).
+    # Pokud nebyla zvolena žádná společnost, ponechá se kompletní dataset
+    # v duchu původní volby "All".
+    selected_airlines = list(air_trad or []) + list(air_low or [])
+    if selected_airlines:
+        dff = dff[dff["_airline_col"].isin(selected_airlines)]
 
     if aircraft != "All":
         dff = dff[dff["_aircraft_col"] == aircraft]
