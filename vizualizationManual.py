@@ -36,14 +36,14 @@ MANUAL_SECTIONS = [
         "popis":   "Sleduje vývoj cen letenek v čase — jak se cena mění v závislosti na tom, "
                    "kolik dní předem je letenka sledována.",
         "kroky": [
-            ("ORIGIN",        "Vyber zdrojové letiště (BER · BUD · PRG · VIE · WAW)."),
-            ("DESTINATION",   "Zvol cílovou destinaci nebo ponech 'All' pro všechny trasy."),
-            ("AIRLINE",       "Filtruj dle konkrétní aerolinky, nebo ponech 'All'."),
-            ("AIRCRAFT",      "Filtruj dle typu letadla (B738, A320 apod.)."),
-            ("VIEW MODE",     "Přepínej mezi Daily (každý den sběru dat zvlášť) "
-                              "a Monthly (agregace po měsících)."),
-            ("AGGREGATION",   "V měsíčním režimu zvol Mean nebo Median — "
-                              "oba se zobrazí současně, aktivní je tučný."),
+            ("Výchozí letiště",     "Vyber zdrojové letiště (BER · BUD · PRG · VIE · WAW)."),
+            ("Destinace",           "Zvol cílovou destinaci nebo ponech 'All' pro všechny trasy."),
+            ("Letecká společnost",  "Filtruj dle konkrétní aerolinky, nebo ponech 'All'."),
+            ("Typ letadla",         "Filtruj dle typu letadla (B738, A320 apod.)."),
+            ("Režim zobrazení",     "Přepínej mezi Daily (každý den sběru dat zvlášť) "
+                                    "a Monthly (agregace po měsících)."),
+            ("Agregace",            "V měsíčním režimu zvol Průměr nebo Medián — "
+                                    "oba se zobrazí současně, aktivní je tučný."),
         ],
         "tip": "V denním režimu každá čára = jeden datum odletu. "
                "Čím více čar konverguje doleva, tím stabilnější cena dané trasy je."
@@ -55,17 +55,17 @@ MANUAL_SECTIONS = [
         "accent": NEON_PINK,
         "href":   "/january",
         "popis":  "Multioriginové srovnání cen — porovnává trasy ze dvou různých letišť "
-                  "na jednom sloučeném grafu (ALPHA vs BETA).",
+                  "na jednom sloučeném grafu (Tracker Alfa vs Tracker Beta).",
         "kroky": [
-            ("AGGREGATION METHOD", "Přepínej Mean / Median — platí pro všechny grafy najednou."),
-            ("TRACKER ALPHA",      "Nastav Origin, Destination, Airline a Search Date "
-                                   "pro první trasu (zobrazena cyan barvou)."),
-            ("TRACKER BETA",       "Nastav stejné parametry pro druhou trasu "
+            ("Agregační metoda",   "Přepínej Průměr / Medián — platí pro všechny grafy najednou."),
+            ("Tracker Alfa",       "Nastav Výchozí letiště, Destinaci, Leteckou společnost a "
+                                   "Výběr měsíců pro první trasu (zobrazena cyan barvou)."),
+            ("Tracker Beta",       "Nastav stejné parametry pro druhou trasu "
                                    "(zobrazena pink barvou) — umožňuje přímé srovnání."),
-            ("DESTINATION FILTERS","Ve spodních grafech (nejlevnější / nejdražší trasy / "
+            ("Filtry destinací",   "Ve spodních grafech (nejlevnější / nejdražší trasy / "
                                    "srovnání letišť) zaškrtni, které destinace chceš zahrnout."),
         ],
-        "tip": "Nastav ALPHA na PRG→AMS a BETA na WAW→AMS pro přímé srovnání "
+        "tip": "Nastav Tracker Alfa na PRG→AMS a Tracker Beta na WAW→AMS pro přímé srovnání "
                "cen ze dvou sousedních letišť na stejné trase."
     },
     {
@@ -77,17 +77,17 @@ MANUAL_SECTIONS = [
         "popis":  "Analyzuje uhlíkovou stopu letů — srovnává emise CO₂ dle aerolinky, "
                   "typu letadla nebo trasy.",
         "kroky": [
-            ("ORIGIN",          "Vyber zdrojové letiště."),
-            ("DESTINATION",     "Vyber cílovou destinaci nebo 'All'."),
-            ("AIRLINE",         "Filtruj dle aerolinky."),
-            ("EMISSION MODE",   "Přepínej mezi třemi metrikami:\n"
-                                "• AVG CO₂ (kg/hr) — průměrná emise motoru za hodinu\n"
-                                "• Est. CO₂ (kg/flight) — celková emise za jeden let\n"
-                                "• Emission/Seat (kg/hr) — emise na jedno sedadlo"),
-            ("GROUP TRACES BY", "Seskup čáry dle Airline, Aircraft nebo Route "
-                                "pro různé úhly pohledu."),
+            ("Výchozí letiště",     "Vyber zdrojové letiště."),
+            ("Destinace",           "Vyber cílovou destinaci nebo 'All'."),
+            ("Letecká společnost",  "Filtruj dle aerolinky."),
+            ("Režim emisí",         "Přepínej mezi třemi metrikami:\n"
+                                    "• AVG CO₂ (kg/hod) — průměrná emise motoru za hodinu\n"
+                                    "• Est. CO₂ (kg/let) — celková emise za jeden let\n"
+                                    "• Emise/Sedadlo (kg/hod) — emise na jedno sedadlo"),
+            ("Seskupit podle",      "Seskup čáry dle Letecké společnosti, Typu letadla nebo Trasy "
+                                    "pro různé úhly pohledu."),
         ],
-        "tip": "Emission/Seat je nejfairová metrika pro srovnání letadel různé velikosti — "
+        "tip": "Emise/Sedadlo je nejférovější metrika pro srovnání letadel různé velikosti — "
                "velké letadlo může mít vyšší celkové emise, ale nižší na pasažéra."
     },
     {
@@ -99,14 +99,14 @@ MANUAL_SECTIONS = [
         "popis":  "Vizualizuje průměrné nebo mediánové ceny jako tok (flow) "
                   "mezi zdrojovými a cílovými letišti.",
         "kroky": [
-            ("ORIGIN",          "Vyber konkrétní zdrojové letiště nebo 'All Origins' "
-                                "pro zobrazení všech toků najednou."),
-            ("DESTINATION",     "Filtruj dle cílové destinace."),
-            ("PRICE STATISTIC", "Přepínej Mean (průměr) vs Median — "
-                                "Mean = cyan, Median = pink barva toků."),
+            ("Výchozí letiště",     "Vyber konkrétní zdrojové letiště nebo 'All Origins' "
+                                    "pro zobrazení všech toků najednou."),
+            ("Destinace",           "Filtruj dle cílové destinace."),
+            ("Cenová statistika",   "Přepínej Průměr vs Medián — "
+                                    "Průměr = cyan, Medián = pink barva toků."),
         ],
         "tip": "Šířka toku odpovídá výši ceny — čím širší tok, tím dražší trasa. "
-               "Ve statistické liště pod filtry vidíš Δ rozdíl mezi Mean a Median "
+               "Ve statistické liště pod filtry vidíš Δ rozdíl mezi Průměrem a Mediánem "
                "pro každou trasu."
     },
     {
@@ -118,11 +118,11 @@ MANUAL_SECTIONS = [
         "popis":  "Měří cenovou nerovnoměrnost pomocí True Gini koeficientu "
                   "(Santos & Dias, 2024) — čím vyšší hodnota, tím větší rozptyl cen.",
         "kroky": [
-            ("ORIGIN",      "Filtruj dle zdrojového letiště nebo zobraz všechna najednou."),
-            ("DESTINATION", "Filtruj dle destinace."),
-            ("CHART MODE",  "Přepínej mezi:\n"
-                            "• Bar — horizontální sloupcový graf, seřazený dle Gini\n"
-                            "• Heatmap — matice Origin × Destination, barva = míra nerovnoměrnosti"),
+            ("Výchozí letiště", "Filtruj dle zdrojového letiště nebo zobraz všechna najednou."),
+            ("Destinace",       "Filtruj dle destinace."),
+            ("Režim grafu",     "Přepínej mezi:\n"
+                                "• Bar — horizontální sloupcový graf, seřazený dle Gini\n"
+                                "• Heatmap — matice Výchozí letiště × Destinace, barva = míra nerovnoměrnosti"),
         ],
         "interpretace": [
             ("< 0.2",    "Velmi nízká nerovnoměrnost — ceny jsou stabilní"),
@@ -136,6 +136,123 @@ MANUAL_SECTIONS = [
                "různé velikosti."
     },
 ]
+
+# =====================================================================
+# Přehled kódů letišť — pro orientaci v ostatních modulech
+# =====================================================================
+ORIGIN_AIRPORTS = [
+    ("BER", "Berlín"),
+    ("WAW", "Varšava"),
+    ("PRG", "Praha"),
+    ("VIE", "Vídeň"),
+    ("BUD", "Budapešť"),
+]
+
+DESTINATION_AIRPORTS = [
+    ("FCO", "Řím"),
+    ("BCN", "Barcelona"),
+    ("LON", "Londýn (všechna letiště)"),
+    ("AMS", "Amsterdam"),
+]
+
+
+def _airport_row(code: str, city: str, accent: str):
+    """Jeden řádek tabulky letišť — kód + město."""
+    return html.Div([
+        html.Span(code, style={
+            "color":         accent,
+            "fontWeight":    "bold",
+            "fontSize":      "11px",
+            "letterSpacing": "1px",
+            "minWidth":      "48px",
+            "display":       "inline-block",
+            "fontFamily":    "Courier New, monospace",
+            "textShadow":    f"0 0 4px {accent}"
+        }),
+        html.Span("·", style={
+            "color":      TEXT_DIM,
+            "marginLeft": "6px",
+            "marginRight":"10px",
+            "fontSize":   "11px"
+        }),
+        html.Span(city, style={
+            "color":      TEXT_MUTED,
+            "fontSize":   "11px",
+            "fontFamily": "Courier New, monospace"
+        })
+    ], style={
+        "display":       "flex",
+        "alignItems":    "center",
+        "padding":       "5px 0",
+        "borderBottom":  f"1px solid {accent}10"
+    })
+
+
+def _airport_overview_table():
+    """Tabulka s přehledem kódů zdrojových letišť a destinací (dva sloupce vedle sebe)."""
+
+    # Levý sloupec — Výchozí letiště
+    origin_col = html.Div([
+        html.Div("Výchozí letiště", style={
+            "color":         NEON_CYAN,
+            "fontSize":      "10px",
+            "letterSpacing": "3px",
+            "fontWeight":    "bold",
+            "fontFamily":    "Courier New, monospace",
+            "marginBottom":  "8px",
+            "paddingBottom": "6px",
+            "borderBottom":  f"1px solid {NEON_CYAN}40",
+            "textShadow":    f"0 0 6px {NEON_CYAN}"
+        }),
+        html.Div(
+            [_airport_row(code, city, NEON_CYAN) for code, city in ORIGIN_AIRPORTS]
+        )
+    ], style={"flex": "1", "minWidth": "0"})
+
+    # Pravý sloupec — Destinace
+    dest_col = html.Div([
+        html.Div("Destinace", style={
+            "color":         NEON_PINK,
+            "fontSize":      "10px",
+            "letterSpacing": "3px",
+            "fontWeight":    "bold",
+            "fontFamily":    "Courier New, monospace",
+            "marginBottom":  "8px",
+            "paddingBottom": "6px",
+            "borderBottom":  f"1px solid {NEON_PINK}40",
+            "textShadow":    f"0 0 6px {NEON_PINK}"
+        }),
+        html.Div(
+            [_airport_row(code, city, NEON_PINK) for code, city in DESTINATION_AIRPORTS]
+        )
+    ], style={"flex": "1", "minWidth": "0"})
+
+    # Hlavička tabulky + dva sloupce vedle sebe
+    return html.Div([
+        html.Div("◈  PŘEHLED LETIŠŤ  //  KÓD A MĚSTO", style={
+            "color":         NEON_BLUE,
+            "fontSize":      "9px",
+            "letterSpacing": "3px",
+            "fontFamily":    "Courier New, monospace",
+            "marginBottom":  "12px",
+            "textAlign":     "center"
+        }),
+        html.Div(
+            [origin_col, dest_col],
+            style={
+                "display":  "flex",
+                "gap":      "32px",
+                "alignItems": "flex-start"
+            }
+        )
+    ], style={
+        "backgroundColor": PANEL_BG,
+        "border":          f"1px solid {NEON_BLUE}30",
+        "borderRadius":    "10px",
+        "padding":         "16px 22px",
+        "marginBottom":    "24px",
+        "boxShadow":       f"0 0 12px {NEON_BLUE}15"
+    })
 
 # =====================================================================
 # Pomocné komponenty
@@ -152,7 +269,7 @@ def _step_row(label: str, text: str, accent: str):
             "fontWeight":     "bold",
             "fontSize":       "10px",
             "letterSpacing":  "1px",
-            "minWidth":       "160px",
+            "minWidth":       "180px",
             "display":        "inline-block",
             "fontFamily":     "Courier New, monospace"
         }),
@@ -328,6 +445,9 @@ layout = html.Div([
             }
         )
     ]),
+
+    # ── Přehled letišť (tabulka kód → město) ──────────────────────────
+    _airport_overview_table(),
 
     # ── Úvod ──────────────────────────────────────────────────────────
     html.Div([
