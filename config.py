@@ -18,9 +18,11 @@ DATASET_PATHS = {
 }
 
 COM_PATHS = {
-    'PRG': f"{BASE}/COM/PRG_com.csv",
-    'WAW': f"{BASE}/COM/WAW_com.csv",
-    'VIE': f"{BASE}/COM/VIE_com.csv",
+    'BER': f"{BASE}/FORM/BER_form.csv",
+    'BUD': f"{BASE}/FORM/BUD_form.csv",
+    'PRG': f"{BASE}/FORM/PRG_form.csv",
+    'VIE': f"{BASE}/FORM/VIE_form.csv",
+    'WAW': f"{BASE}/FORM/WAW_form.csv",
 }
 
 OUTPUT_PATHS = {
