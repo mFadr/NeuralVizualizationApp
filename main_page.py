@@ -234,6 +234,7 @@ def make_analytics_panel():
         "marginBottom": "12px",
         "paddingBottom": "10px",
         "borderBottom": f"1px solid {NEON_BLUE}20",
+        "marginRight": "250px", 
         "paddingRight": "250px"  # ← Changed from 60px to ~250px (60 + 190)
     })
 
@@ -286,7 +287,6 @@ def make_analytics_panel():
         "borderRadius":    "10px",
         "border":          f"1px solid {NEON_PINK}30",
         "boxShadow":       f"0 0 12px {NEON_PINK}15",
-        "paddingRight": "250px", 
         "marginBottom":    "28px"
         
     })
