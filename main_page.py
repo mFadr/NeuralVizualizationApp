@@ -18,7 +18,6 @@ PANEL_BG    = "#1f2833"
 NEON_CYAN   = "#66fcf1"
 NEON_BLUE   = "#45a29e"
 NEON_PINK   = "#ff007f"
-NEON_YELLOW = "#ffa500"
 NEON_PURPLE = "#9d4edd"
 TEXT_MUTED  = "#c5c6c7"
 
@@ -58,7 +57,7 @@ PAGES = [
         "accent":   NEON_PURPLE,
         "icon":     "📊"
     },
-    {
+        {
         "title":    "ROUTES overview",
         "subtitle": "Overview of all tracked routes and their price distributions",
         "href":     "/overview",
@@ -242,7 +241,7 @@ def make_analytics_panel():
         "marginBottom": "12px",
         "paddingBottom": "10px",
         "borderBottom": f"1px solid {NEON_BLUE}20",
-        "paddingRight": "250px"  # ← Changed from 60px to ~250px (60 + 190)
+        "marginRight": "120px"
     })
 
     # Tabulka popularity modulů
@@ -286,26 +285,8 @@ def make_analytics_panel():
             "fontFamily":    "Courier New, monospace",
             "marginBottom":  "10px"
         }),
-        html.Div([
-            # Neviditelný spacer na levé straně
-            html.Div(module_rows, style={
-                "flex": "1"
-            }),
-            # Střed - header_row
-            html.Div(header_row, style={
-                "flex": "1",
-                "display": "flex",
-                "justifyContent": "center"
-            }),
-            # Neviditelný spacer na pravé straně
-            html.Div(style={
-                "flex": "1",
-                "visibility": "hidden"
-            })
-        ], style={
-            "display": "flex",
-            "gap": "12px"
-        })
+        header_row,
+        html.Div(module_rows)
     ], style={
         "padding":         "12px 16px",
         "backgroundColor": PANEL_BG,
@@ -616,7 +597,7 @@ def route(pathname, session_data):
     if pathname == "/gini":
         import vizualizationGini
         return vizualizationGini.layout, session_data
-
+    
     if pathname == "/overview":
         import vizualizationRoutes
         return vizualizationRoutes.layout, session_data
