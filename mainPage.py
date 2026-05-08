@@ -233,7 +233,8 @@ def make_analytics_panel():
         "display": "flex", "gap": "12px",
         "marginBottom": "12px",
         "paddingBottom": "10px",
-        "borderBottom": f"1px solid {NEON_BLUE}20"
+        "borderBottom": f"1px solid {NEON_BLUE}20",
+        "marginRight": "120px"
     })
 
     # Tabulka popularity modulů
