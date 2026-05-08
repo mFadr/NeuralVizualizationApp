@@ -744,9 +744,18 @@ def get_color_gradient(values, dark_color, light_color):
         colors.append(color)
     return colors
 
-def calculate_route_analytics(datasets, status="all"):
-    """Calculate average prices for all routes across all datasets,
-    optionally restricted to actually flown flights."""
+def calculate_route_analytics(datasets, status="all", agg_method="mean"):
+    """Calculate aggregated prices for all routes across all datasets.
+
+    Parameters
+    ----------
+    datasets : dict
+        Mapping of origin code -> DataFrame.
+    status : str
+        Data scope filter ("all" / "flown") - mirrors TRACKER ALPHA/BETA scope.
+    agg_method : str
+        Aggregation method ("mean" / "median") - mirrors TRACKER ALPHA/BETA.
+    """
     route_prices = {}
 
     for origin_code, df in datasets.items():
@@ -754,8 +763,16 @@ def calculate_route_analytics(datasets, status="all"):
         for destination in df['Destination'].unique():
             route_key = f"{origin_code}-{destination}"
             route_data = df[df['Destination'] == destination]
-            avg_price = route_data['Price'].mean()
-            route_prices[route_key] = avg_price
+
+            if route_data.empty or route_data['Price'].dropna().empty:
+                continue
+
+            if agg_method == "median":
+                price = route_data['Price'].median()
+            else:
+                price = route_data['Price'].mean()
+
+            route_prices[route_key] = price
 
     return route_prices
 
@@ -764,10 +781,11 @@ def calculate_route_analytics(datasets, status="all"):
 @app.callback(
     Output("cheapest-routes-chart", "figure"),
     Input("destination-checklist-cheapest", "value"),
-    Input("filter-status", "value")
+    Input("filter-status", "value"),
+    Input("agg-method", "value")
 )
-def update_cheapest_routes(selected_destinations, status):
-    route_prices = calculate_route_analytics(datasets, status)
+def update_cheapest_routes(selected_destinations, status, agg_method):
+    route_prices = calculate_route_analytics(datasets, status, agg_method)
 
     # Filtruj podle vybraných cílů
     if selected_destinations:
@@ -784,7 +802,7 @@ def update_cheapest_routes(selected_destinations, status):
 
 
     # Bílá pro nejlevnější (vrchol), tmavá fialová pro dražší
-    colors = get_color_gradient(prices, '#ffffff', '#3d1a4d')
+    colors = get_color_gradient(prices, '#ffffff', '#3d1a4d') if prices else []
 
     fig = px.bar(
         x=prices,
@@ -800,14 +818,15 @@ def update_cheapest_routes(selected_destinations, status):
         textfont=dict(color=TEXT_MUTED, size=11)
     )
 
+    metric = "MEDIAN" if agg_method == "median" else "MEAN"
     fig.update_layout(
-        title="10 CHEAPEST ROUTES",
+        title=f"10 CHEAPEST ROUTES ({metric})",
         template="plotly_dark",
         plot_bgcolor="rgba(0,0,0,0)",
         paper_bgcolor=PANEL_BG,
         font=dict(color=TEXT_MUTED, family="Segoe UI"),
         margin=dict(l=80, r=80, t=60, b=50),
-        xaxis=dict(showgrid=True, gridcolor="#333", title="Price ($)"),
+        xaxis=dict(showgrid=True, gridcolor="#333", title=f"{metric} Price ($)"),
         yaxis=dict(showgrid=False, title="Route"),
         height=400
     )
@@ -818,10 +837,11 @@ def update_cheapest_routes(selected_destinations, status):
 @app.callback(
     Output("expensive-routes-chart", "figure"),
     Input("destination-checklist-expensive", "value"),
-    Input("filter-status", "value")
+    Input("filter-status", "value"),
+    Input("agg-method", "value")
 )
-def update_expensive_routes(selected_destinations, status):
-    route_prices = calculate_route_analytics(datasets, status)
+def update_expensive_routes(selected_destinations, status, agg_method):
+    route_prices = calculate_route_analytics(datasets, status, agg_method)
 
     # Filtruj podle vybraných cílů
     if selected_destinations:
@@ -837,7 +857,7 @@ def update_expensive_routes(selected_destinations, status):
     prices = [r[1] for r in sorted_routes]
 
     # Tmavá purpurová pro nejdražší (vrchol), světlá purpurová pro levnější
-    colors = get_color_gradient(prices, '#6b0080', '#e6b3ff')
+    colors = get_color_gradient(prices, '#6b0080', '#e6b3ff') if prices else []
 
     fig = px.bar(
         x=prices,
@@ -853,14 +873,15 @@ def update_expensive_routes(selected_destinations, status):
         textfont=dict(color=TEXT_MUTED, size=11)
     )
 
+    metric = "MEDIAN" if agg_method == "median" else "MEAN"
     fig.update_layout(
-        title="10 MOST EXPENSIVE ROUTES",
+        title=f"10 MOST EXPENSIVE ROUTES ({metric})",
         template="plotly_dark",
         plot_bgcolor="rgba(0,0,0,0)",
         paper_bgcolor=PANEL_BG,
         font=dict(color=TEXT_MUTED, family="Segoe UI"),
         margin=dict(l=80, r=80, t=60, b=50),
-        xaxis=dict(showgrid=True, gridcolor="#333", title="Price ($)"),
+        xaxis=dict(showgrid=True, gridcolor="#333", title=f"{metric} Price ($)"),
         yaxis=dict(showgrid=False, title="Route"),
         height=400
     )
@@ -871,9 +892,10 @@ def update_expensive_routes(selected_destinations, status):
 @app.callback(
     Output("origin-comparison-chart", "figure"),
     Input("destination-checklist", "value"),
-    Input("filter-status", "value")
+    Input("filter-status", "value"),
+    Input("agg-method", "value")
 )
-def update_origin_comparison(selected_destinations, status):
+def update_origin_comparison(selected_destinations, status, agg_method):
     origin_avg_prices = {}
 
     for origin_code, df in datasets.items():
@@ -885,15 +907,18 @@ def update_origin_comparison(selected_destinations, status):
             # Pokud nejsou vybrány žádné cíle, použij všechny
             filtered_df = df
 
-        if not filtered_df.empty:
-            avg_price = filtered_df['Price'].mean()
-            origin_avg_prices[origin_code] = avg_price
+        if not filtered_df.empty and not filtered_df['Price'].dropna().empty:
+            if agg_method == "median":
+                price = filtered_df['Price'].median()
+            else:
+                price = filtered_df['Price'].mean()
+            origin_avg_prices[origin_code] = price
 
     origins = list(origin_avg_prices.keys())
     prices = list(origin_avg_prices.values())
 
     # Tmavě modrá pro nejdražší, světlá modrá pro levnější
-    colors = get_color_gradient(prices, '#003d4d', '#99e6f0')
+    colors = get_color_gradient(prices, '#003d4d', '#99e6f0') if prices else []
 
     fig = px.bar(
         x=prices,
@@ -909,14 +934,15 @@ def update_origin_comparison(selected_destinations, status):
         textfont=dict(color=TEXT_MUTED, size=11)
     )
 
+    metric = "MEDIAN" if agg_method == "median" else "MEAN"
     fig.update_layout(
-        title="ORIGIN AIRPORT AVG PRICE COMPARISON",
+        title=f"ORIGIN AIRPORT {metric} PRICE COMPARISON",
         template="plotly_dark",
         plot_bgcolor="rgba(0,0,0,0)",
         paper_bgcolor=PANEL_BG,
         font=dict(color=TEXT_MUTED, family="Segoe UI"),
         margin=dict(l=80, r=80, t=60, b=50),
-        xaxis=dict(showgrid=True, gridcolor="#333", title="Average Price ($)"),
+        xaxis=dict(showgrid=True, gridcolor="#333", title=f"{metric} Price ($)"),
         yaxis=dict(showgrid=False, title="Origin Airport"),
         height=400
     )
