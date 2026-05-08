@@ -147,7 +147,7 @@ layout = html.Div([
     # ── Tlačítko zpět + Nápověda (Refresh Tip) ──────────────────────────
     html.Div([
         html.A(
-            "← BACK TO MAIN",
+            "← ZPĚT",
             href="/",
             style={
                 "display":        "inline-block",
@@ -164,7 +164,7 @@ layout = html.Div([
         ),
         # Subtle help message below the button
         html.P(
-            "💡 Data not showing? The app may be warming up. Please press F5 to refresh.",
+            "💡 Data se nezobrazují? Prosím stiskněte F5 pro obnovení stránky.",
             style={
                 "color": TEXT_MUTED,
                 "fontSize": "10px",
@@ -178,7 +178,7 @@ layout = html.Div([
 
     # ── Titulek ────────────────────────────────────────────────────────
     html.H2(
-        "✈️  NEURAL FLIGHT TRACKER — BOOKING CURVE ANALYZER",
+        "✈️  NEURAL FLIGHT TRACKER — Křivky jednotlivých rezervací",
         style={
             "textAlign": "center",
             "color": NEON_CYAN,
@@ -194,7 +194,7 @@ layout = html.Div([
         # ── Sidebar filtrů (banner vlevo, 25% width) ──────────────────────────
         html.Div([
             # Hlavička sidebaru
-            html.Div("◈  FILTERS", style={
+            html.Div("◈  Filtry", style={
                 "color": NEON_CYAN,
                 "fontSize": "11px",
                 "letterSpacing": "3px",
@@ -208,12 +208,12 @@ layout = html.Div([
 
             # ── Přepínač datového rozsahu (zrušené lety ANO/NE) ───────────
             html.Div([
-                html.Label("DATA SCOPE", style=LABEL_STYLE),
+                html.Label("Filtr zrušených letů", style=LABEL_STYLE),
                 dcc.RadioItems(
                     id="filter-status",
                     options=[
-                        {"label": " With canceled flights",    "value": "all"},
-                        {"label": " Without canceled flights", "value": "flown"},
+                        {"label": " Zahrnout i zrušené lety",    "value": "all"},
+                        {"label": " Pouze uskutečněné lety",   "value": "flown"},
                     ],
                     value="all",
                     labelStyle={
@@ -233,7 +233,7 @@ layout = html.Div([
             ], style=FILTER_CELL),
 
             html.Div([
-                html.Label("ORIGIN", style=LABEL_STYLE),
+                html.Label("Výchozí letiště", style=LABEL_STYLE),
                 dcc.Dropdown(
                     id="filter-origin",
                     options=[{"label": o, "value": o} for o in origins],
@@ -244,7 +244,7 @@ layout = html.Div([
             ], style=FILTER_CELL),
 
             html.Div([
-                html.Label("DESTINATION", style=LABEL_STYLE),
+                html.Label("Destinace", style=LABEL_STYLE),
                 dcc.Dropdown(
                     id="filter-dest",
                     value="All",
@@ -254,7 +254,7 @@ layout = html.Div([
             ], style=FILTER_CELL),
 
             html.Div([
-                html.Label("AIRLINE", style=LABEL_STYLE),
+                html.Label("Letecká společnost", style=LABEL_STYLE),
                 dcc.Dropdown(
                     id="filter-airline",
                     value="All",
@@ -264,7 +264,7 @@ layout = html.Div([
             ], style=FILTER_CELL),
 
             html.Div([
-                html.Label("AIRCRAFT", style=LABEL_STYLE),
+                html.Label("Typ letadla", style=LABEL_STYLE),
                 dcc.Dropdown(
                     id="filter-aircraft",
                     value="All",
@@ -372,7 +372,7 @@ def update_aircraft(origin, dest, airline, status):
 )
 def update_chart(origin, dest, airline, aircraft, status):
     if origin not in datasets:
-        return _empty_fig("NO SIGNAL — dataset not loaded")
+        return _empty_fig("ŽÁDNÝ SIGNÁL — dataset není načten")
 
     dff = datasets[origin].copy()
 
@@ -389,7 +389,7 @@ def update_chart(origin, dest, airline, aircraft, status):
         dff = dff[dff["_aircraft_col"] == aircraft]
 
     if dff.empty:
-        return _empty_fig("NO SIGNAL — no flights match selected filters")
+        return _empty_fig("ŽÁDNÝ SIGNÁL — žádné lety neodpovídají vybraným filtrům")
 
 
     return _build_daily_chart(dff, origin, dest)
@@ -453,7 +453,7 @@ def _build_daily_chart(dff, origin, dest):
             line=dict(width=2)
         ))
 
-    return _apply_theme(fig, f"BOOKING CURVE — {origin} → {dest}  |  DAILY")
+    return _apply_theme(fig, f"KŘIVKA REZERVACÍ — {origin} → {dest}  |  DENNÍ")
 
 
 def _build_monthly_chart(dff, origin, dest, agg_method):
@@ -472,7 +472,7 @@ def _build_monthly_chart(dff, origin, dest, agg_method):
     available_months = sorted(dff["flight_month"].dropna().unique().astype(int))
 
     if not available_months:
-        return _empty_fig("NO SIGNAL — no flight_date data in filtered selection")
+        return _empty_fig("ŽÁDNÝ SIGNÁL — žádná data flight_date v gefiltrovém výběru")
 
     # Agregace po měsících přes celý filtrovaný výřez
     agg = (
@@ -555,8 +555,8 @@ def _build_monthly_chart(dff, origin, dest, agg_method):
 
     fig = _apply_theme(
         fig,
-        f"MONTHLY AGGREGATION — {origin} → {dest}  |  "
-        f"MEAN vs MEDIAN  (active: {agg_method.upper()})"
+        f"AGREGACE MĚSÍCE — {origin} → {dest}  |  "
+        f"PRŮMĚR vs MEDIÁN  (aktivní: {agg_method.upper()})"
     )
 
     # Uzamkne osu X na chronologické pořadí měsíců přítomných v datech

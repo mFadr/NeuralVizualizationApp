@@ -110,7 +110,7 @@ MAIN_PANEL_HEIGHT = "760px"
 # ── Tlačítko zpět ──────────────────────────────────────────────────────
 _back_btn = html.Div([
     html.A(
-        "← BACK TO MAIN",
+        "← ZPĚT",
         href="/",
         style={
             "display":        "inline-block",
@@ -127,7 +127,7 @@ _back_btn = html.Div([
         }
     ),
     html.P(
-        "💡 Data not showing? The app may be warming up. Please press F5 to refresh.",
+        "💡 Data se nezobrazují? Prosím stiskněte F5 pro obnovení stránky.",
         style={
             "color": TEXT_MUTED,
             "fontSize": "10px",
@@ -139,10 +139,9 @@ _back_btn = html.Div([
     )
 ])
 
-
 layout = html.Div([_back_btn,
                    html.H2(
-                       "✈️ NEURAL FLIGHT TRACKER v2.0 - VIZUALIZA CEN LETENEK Z LEDNA 2026",
+                       "✈️ NEURAL FLIGHT TRACKER v2.0 - Vizualizace cen letenek z Ledna 2026",
                        style={
                            "textAlign": "center",
                            "textShadow": f"0 0 10px {NEON_CYAN}",
@@ -164,7 +163,7 @@ layout = html.Div([_back_btn,
                                dcc.RadioItems(
                                    id="filter-status",
                                    options=[
-                                       {"label": "  Zahrnout zrušené lety",    "value": "all"},
+                                       {"label": "  Zahrnout i zrušené lety",    "value": "all"},
                                        {"label": "  Pouze uskutečněné lety",   "value": "flown"}
                                    ],
                                    value="all",
@@ -278,7 +277,7 @@ layout = html.Div([_back_btn,
                        # Graf 4: 10 Nejdražších tras
                        html.Div([
                            html.Div([
-                               html.Label("Filtry destinací::", style={"color": NEON_CYAN, "marginBottom": "10px"}),
+                               html.Label("Filtry destinací:", style={"color": NEON_CYAN, "marginBottom": "10px"}),
                                dcc.Checklist(
                                    id="destination-checklist-expensive",
                                    options=[
@@ -292,13 +291,13 @@ layout = html.Div([_back_btn,
                                    labelStyle={"color": "white", "display": "inline-flex", "alignItems": "center", "marginRight": "15px"}
                                ),
                            ], style={"backgroundColor": "#333333", "padding": "10px", "borderRadius": "10px", "marginBottom": "10px"}),
-                           dcc.Graph(id="expensive-routes-chart")
+                               dcc.Graph(id="expensive-routes-chart")
                        ], style={"flex": "1", "borderRadius": "15px", "overflow": "hidden", "boxShadow": f"0 0 15px {ELECTRIC_PURPLE}80"}),
 
                        # Graf 5: Srovnání letiště původu s filtry
                        html.Div([
                            html.Div([
-                               html.Label("Filtry destinací::", style={"color": NEON_CYAN, "marginBottom": "10px"}),
+                               html.Label("Filtry destinací:", style={"color": NEON_CYAN, "marginBottom": "10px"}),
                                dcc.Checklist(
                                    id="destination-checklist",
                                    options=[
@@ -641,7 +640,7 @@ def update_merged_chart(orig1, dest1, air1, month1, orig2, dest2, air2, month2, 
         label = f"ALFA ({orig1} → {dest1})" if dest1 != "All" else f"ALPHA ({orig1})"
         fig.add_trace(go.Scatter(
             x=agg1["Datum"],
-            y=agg1["Cena"],
+            y=agg1["Price"],
             customdata=agg1[["Airline", "AvgCO2"]],
             hovertemplate=hover_template,
             mode="lines+markers",
@@ -655,7 +654,7 @@ def update_merged_chart(orig1, dest1, air1, month1, orig2, dest2, air2, month2, 
         label = f"BETA ({orig2} → {dest2})" if dest2 != "All" else f"BETA ({orig2})"
         fig.add_trace(go.Scatter(
             x=agg2["Datum"],
-            y=agg2["Cena"],
+            y=agg2["Price"],
             customdata=agg2[["Airline", "AvgCO2"]],
             hovertemplate=hover_template,
             mode="lines+markers",
@@ -666,9 +665,9 @@ def update_merged_chart(orig1, dest1, air1, month1, orig2, dest2, air2, month2, 
 
     metric = "MEDIAN" if agg_method == "median" else "MEAN"
     if agg1.empty and agg2.empty:
-        title = f"Ztráta signalu: Upravte parametry pro načtení srovnání letů"
+        title = f"NO SIGNAL: Adjust parameters to load {metric} Price Comparison"
     else:
-        title = f"SROVNÁVACÍ TABULKA CEN: Vývoj cen (ALFA vs. BETA)"
+        title = f"PRICE COMPARISON MATRIX: {metric} Price Trends (ALPHA vs BETA)"
 
     fig.update_layout(
         title=title,
@@ -677,8 +676,8 @@ def update_merged_chart(orig1, dest1, air1, month1, orig2, dest2, air2, month2, 
         paper_bgcolor=PANEL_BG,
         font=dict(color=TEXT_MUTED, family="Segoe UI"),
         margin=dict(l=50, r=30, t=70, b=50),
-        xaxis=dict(showgrid=True, gridcolor="#333", zeroline=False, title="Datum odletu spoje"),
-        yaxis=dict(showgrid=True, gridcolor="#333", zeroline=False, tickprefix="$", title=f"{metric} Cena ($)"),
+        xaxis=dict(showgrid=True, gridcolor="#333", zeroline=False, title="Departure Date"),
+        yaxis=dict(showgrid=True, gridcolor="#333", zeroline=False, tickprefix="$", title=f"{metric} Price ($)"),
         hovermode="x unified"
     )
 
@@ -745,18 +744,9 @@ def get_color_gradient(values, dark_color, light_color):
         colors.append(color)
     return colors
 
-def calculate_route_analytics(datasets, status="all", agg_method="mean"):
-    """Calculate aggregated prices for all routes across all datasets.
-
-    Parameters
-    ----------
-    datasets : dict
-        Mapping of origin code -> DataFrame.
-    status : str
-        Data scope filter ("all" / "flown") - mirrors TRACKER ALPHA/BETA scope.
-    agg_method : str
-        Aggregation method ("mean" / "median") - mirrors TRACKER ALPHA/BETA.
-    """
+def calculate_route_analytics(datasets, status="all"):
+    """Calculate average prices for all routes across all datasets,
+    optionally restricted to actually flown flights."""
     route_prices = {}
 
     for origin_code, df in datasets.items():
@@ -764,16 +754,8 @@ def calculate_route_analytics(datasets, status="all", agg_method="mean"):
         for destination in df['Destination'].unique():
             route_key = f"{origin_code}-{destination}"
             route_data = df[df['Destination'] == destination]
-
-            if route_data.empty or route_data['Price'].dropna().empty:
-                continue
-
-            if agg_method == "median":
-                price = route_data['Price'].median()
-            else:
-                price = route_data['Price'].mean()
-
-            route_prices[route_key] = price
+            avg_price = route_data['Price'].mean()
+            route_prices[route_key] = avg_price
 
     return route_prices
 
@@ -782,11 +764,10 @@ def calculate_route_analytics(datasets, status="all", agg_method="mean"):
 @app.callback(
     Output("cheapest-routes-chart", "figure"),
     Input("destination-checklist-cheapest", "value"),
-    Input("filter-status", "value"),
-    Input("agg-method", "value")
+    Input("filter-status", "value")
 )
-def update_cheapest_routes(selected_destinations, status, agg_method):
-    route_prices = calculate_route_analytics(datasets, status, agg_method)
+def update_cheapest_routes(selected_destinations, status):
+    route_prices = calculate_route_analytics(datasets, status)
 
     # Filtruj podle vybraných cílů
     if selected_destinations:
@@ -803,7 +784,7 @@ def update_cheapest_routes(selected_destinations, status, agg_method):
 
 
     # Bílá pro nejlevnější (vrchol), tmavá fialová pro dražší
-    colors = get_color_gradient(prices, '#ffffff', '#3d1a4d') if prices else []
+    colors = get_color_gradient(prices, '#ffffff', '#3d1a4d')
 
     fig = px.bar(
         x=prices,
@@ -819,16 +800,15 @@ def update_cheapest_routes(selected_destinations, status, agg_method):
         textfont=dict(color=TEXT_MUTED, size=11)
     )
 
-    metric = "MEDIAN" if agg_method == "median" else "MEAN"
     fig.update_layout(
-        title=f"10 Nejlevnějších leteckých linek",
+        title="10 CHEAPEST ROUTES",
         template="plotly_dark",
         plot_bgcolor="rgba(0,0,0,0)",
         paper_bgcolor=PANEL_BG,
         font=dict(color=TEXT_MUTED, family="Segoe UI"),
         margin=dict(l=80, r=80, t=60, b=50),
-        xaxis=dict(showgrid=True, gridcolor="#333", title=f"{metric} Cena ($)"),
-        yaxis=dict(showgrid=False, title="Letecké linky"),
+        xaxis=dict(showgrid=True, gridcolor="#333", title="Price ($)"),
+        yaxis=dict(showgrid=False, title="Route"),
         height=400
     )
 
@@ -838,11 +818,10 @@ def update_cheapest_routes(selected_destinations, status, agg_method):
 @app.callback(
     Output("expensive-routes-chart", "figure"),
     Input("destination-checklist-expensive", "value"),
-    Input("filter-status", "value"),
-    Input("agg-method", "value")
+    Input("filter-status", "value")
 )
-def update_expensive_routes(selected_destinations, status, agg_method):
-    route_prices = calculate_route_analytics(datasets, status, agg_method)
+def update_expensive_routes(selected_destinations, status):
+    route_prices = calculate_route_analytics(datasets, status)
 
     # Filtruj podle vybraných cílů
     if selected_destinations:
@@ -858,7 +837,7 @@ def update_expensive_routes(selected_destinations, status, agg_method):
     prices = [r[1] for r in sorted_routes]
 
     # Tmavá purpurová pro nejdražší (vrchol), světlá purpurová pro levnější
-    colors = get_color_gradient(prices, '#6b0080', '#e6b3ff') if prices else []
+    colors = get_color_gradient(prices, '#6b0080', '#e6b3ff')
 
     fig = px.bar(
         x=prices,
@@ -874,16 +853,15 @@ def update_expensive_routes(selected_destinations, status, agg_method):
         textfont=dict(color=TEXT_MUTED, size=11)
     )
 
-    metric = "MEDIAN" if agg_method == "median" else "MEAN"
     fig.update_layout(
-        title=f"10 Nejdražších leteckých linek",
+        title="10 MOST EXPENSIVE ROUTES",
         template="plotly_dark",
         plot_bgcolor="rgba(0,0,0,0)",
         paper_bgcolor=PANEL_BG,
         font=dict(color=TEXT_MUTED, family="Segoe UI"),
         margin=dict(l=80, r=80, t=60, b=50),
-        xaxis=dict(showgrid=True, gridcolor="#333", title=f"{metric} Cena ($)"),
-        yaxis=dict(showgrid=False, title="Letecké linky"),
+        xaxis=dict(showgrid=True, gridcolor="#333", title="Price ($)"),
+        yaxis=dict(showgrid=False, title="Route"),
         height=400
     )
 
@@ -893,10 +871,9 @@ def update_expensive_routes(selected_destinations, status, agg_method):
 @app.callback(
     Output("origin-comparison-chart", "figure"),
     Input("destination-checklist", "value"),
-    Input("filter-status", "value"),
-    Input("agg-method", "value")
+    Input("filter-status", "value")
 )
-def update_origin_comparison(selected_destinations, status, agg_method):
+def update_origin_comparison(selected_destinations, status):
     origin_avg_prices = {}
 
     for origin_code, df in datasets.items():
@@ -908,18 +885,15 @@ def update_origin_comparison(selected_destinations, status, agg_method):
             # Pokud nejsou vybrány žádné cíle, použij všechny
             filtered_df = df
 
-        if not filtered_df.empty and not filtered_df['Price'].dropna().empty:
-            if agg_method == "median":
-                price = filtered_df['Price'].median()
-            else:
-                price = filtered_df['Price'].mean()
-            origin_avg_prices[origin_code] = price
+        if not filtered_df.empty:
+            avg_price = filtered_df['Price'].mean()
+            origin_avg_prices[origin_code] = avg_price
 
     origins = list(origin_avg_prices.keys())
     prices = list(origin_avg_prices.values())
 
     # Tmavě modrá pro nejdražší, světlá modrá pro levnější
-    colors = get_color_gradient(prices, '#003d4d', '#99e6f0') if prices else []
+    colors = get_color_gradient(prices, '#003d4d', '#99e6f0')
 
     fig = px.bar(
         x=prices,
@@ -935,16 +909,15 @@ def update_origin_comparison(selected_destinations, status, agg_method):
         textfont=dict(color=TEXT_MUTED, size=11)
     )
 
-    metric = "MEDIAN" if agg_method == "median" else "MEAN"
     fig.update_layout(
-        title=f"Srovnání cenových úrovní výchozích letišť",
+        title="ORIGIN AIRPORT AVG PRICE COMPARISON",
         template="plotly_dark",
         plot_bgcolor="rgba(0,0,0,0)",
         paper_bgcolor=PANEL_BG,
         font=dict(color=TEXT_MUTED, family="Segoe UI"),
         margin=dict(l=80, r=80, t=60, b=50),
-        xaxis=dict(showgrid=True, gridcolor="#333", title=f"Cena ($)"),
-        yaxis=dict(showgrid=False, title="Výchozí lety"),
+        xaxis=dict(showgrid=True, gridcolor="#333", title="Average Price ($)"),
+        yaxis=dict(showgrid=False, title="Origin Airport"),
         height=400
     )
 
