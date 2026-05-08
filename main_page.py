@@ -18,6 +18,7 @@ PANEL_BG    = "#1f2833"
 NEON_CYAN   = "#66fcf1"
 NEON_BLUE   = "#45a29e"
 NEON_PINK   = "#ff007f"
+NEON_YELLOW = "#ffa500"
 NEON_PURPLE = "#9d4edd"
 TEXT_MUTED  = "#c5c6c7"
 
@@ -56,6 +57,13 @@ PAGES = [
         "href":     "/gini",
         "accent":   NEON_PURPLE,
         "icon":     "📊"
+    },
+    {
+        "title":    "ROUTES overview",
+        "subtitle": "Overview of all tracked routes and their price distributions",
+        "href":     "/overview",
+        "accent":   NEON_YELLOW,
+        "icon":     "🗂️"
     },
     {
         "title":    "Manual",
@@ -608,6 +616,10 @@ def route(pathname, session_data):
     if pathname == "/gini":
         import vizualizationGini
         return vizualizationGini.layout, session_data
+
+    if pathname == "/overview":
+        import vizualizationRoutes
+        return vizualizationRoutes.layout, session_data
 
     if pathname == "/info":
         import vizualizationManual
