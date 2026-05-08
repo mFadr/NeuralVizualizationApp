@@ -289,12 +289,133 @@ def make_analytics_panel():
     })
 
 
+def make_footer():
+    """Sestavení zápatí (footeru) hlavní stránky aplikace."""
+    return html.Div([
+        # Tenká červená dělící linka nad textem footeru
+        html.Div(style={
+            "height":          "2px",
+            "width":           "100%",
+            "background":      "linear-gradient(90deg, transparent 0%, #ff3366 20%, #ff007f 50%, #ff3366 80%, transparent 100%)",
+            "boxShadow":       "0 0 10px #ff007f",
+            "marginBottom":    "16px"
+        }),
+
+        # Hlavní řádek s textem footeru
+        html.Div([
+            html.Span("© 2026 ", style={"color": TEXT_MUTED}),
+            html.Span("Flight Analytics Platform ", style={
+                "color":      NEON_CYAN,
+                "fontWeight": "bold",
+                "textShadow": f"0 0 6px {NEON_CYAN}"
+            }),
+            html.Span("by ", style={"color": TEXT_MUTED}),
+            html.Span("[Jméno autora] ", style={
+                "color":      NEON_CYAN,
+                "fontWeight": "bold"
+            }),
+            html.Span(" |  ", style={"color": NEON_BLUE}),
+            html.Span("All Rights Reserved", style={"color": TEXT_MUTED}),
+            html.Span("  |  ", style={"color": NEON_BLUE}),
+            html.Span("Powered by ", style={"color": TEXT_MUTED}),
+            html.A("Plotly Dash", href="https://plotly.com/dash/",
+                   target="_blank",
+                   style={
+                       "color":          NEON_PINK,
+                       "textDecoration": "none",
+                       "fontWeight":     "bold",
+                       "textShadow":     f"0 0 6px {NEON_PINK}"
+                   }),
+            html.Span(" & ", style={"color": TEXT_MUTED}),
+            html.A("Pandas", href="https://pandas.pydata.org/",
+                   target="_blank",
+                   style={
+                       "color":          NEON_PINK,
+                       "textDecoration": "none",
+                       "fontWeight":     "bold"
+                   })
+        ], style={
+            "fontSize":      "11px",
+            "letterSpacing": "1px",
+            "fontFamily":    "Courier New, monospace",
+            "textAlign":     "center",
+            "marginBottom":  "10px"
+        }),
+
+        # Druhý řádek s informací o akademickém kontextu práce
+        html.Div([
+            html.Span("Bakalářská práce  //  ", style={"color": NEON_BLUE}),
+            html.Span("Analýza a vizualizace vývoje cen letenek na vybraných trasách leteckých společností",
+                      style={"color": TEXT_MUTED, "fontStyle": "italic"})
+        ], style={
+            "fontSize":      "10px",
+            "letterSpacing": "1px",
+            "fontFamily":    "Courier New, monospace",
+            "textAlign":     "center",
+            "marginBottom":  "8px"
+        }),
+
+        # Třetí řádek s informačním upozorněním
+        html.Div([
+            html.Span("Data sesbírána v lednu 2026  //  Vizualizace slouží výhradně k akademickým a vzdělávacím účelům",
+                      style={"color": TEXT_MUTED, "opacity": "0.7"})
+        ], style={
+            "fontSize":      "9px",
+            "letterSpacing": "1px",
+            "fontFamily":    "Courier New, monospace",
+            "textAlign":     "center",
+            "marginBottom":  "8px"
+        }),
+
+        # Čtvrtý řádek s odkazem na repozitář
+        html.Div([
+            html.A("GitHub repozitář",
+                   href="https://github.com/[uživatelské-jméno]/[název-repozitáře]",
+                   target="_blank",
+                   style={
+                       "color":          NEON_BLUE,
+                       "textDecoration": "none",
+                       "fontSize":       "9px",
+                       "letterSpacing":  "2px"
+                   })
+        ], style={
+            "textAlign":  "center",
+            "fontFamily": "Courier New, monospace"
+        })
+
+    ], style={
+        "width":         "100%",
+        "padding":       "24px 20px 18px 20px",
+        "marginTop":     "60px",
+        "borderTop":     "1px solid #1f2833",
+        "backgroundColor": "#08090d",
+        "boxSizing":     "border-box"
+    })
+
+
 def build_main_layout():
     """Sestavení hlavního layoutu, aby se analytiky obnovovaly při každé návštěvě."""
     return html.Div([
         html.Div([
+            html.H1("✈  FLIGHT ANALYTICS PLATFORM", style={
+                "color":        NEON_CYAN,
+                "textShadow":   f"0 0 20px {NEON_CYAN}",
+                "letterSpacing":"5px",
+                "fontSize":     "22px",
+                "fontFamily":   "Courier New, monospace",
+                "margin":       "0 0 150px 0",
+                "width":        "100%",
+                "textAlign":    "center"
+            }),
+            html.Div("CENTRAL OPERATIONS  //  SELECT MODULE", style={
+                "color":         NEON_BLUE,
+                "fontSize":      "10px",
+                "letterSpacing": "4px",
+                "fontFamily":    "Courier New, monospace",
+                "marginBottom":  "28px"
+            }),
 
-            # Hlavní flex layout s levým panelem analytiky a pravým obsahem
+            # Hlavní flex layout s levým panelem analytiky a pravým obsahem s KPI
             html.Div([
                 # Levý panel - Analytics panel jako vertikální banner
                 html.Div([
@@ -304,28 +425,8 @@ def build_main_layout():
                     "marginRight": "24px"
                 }),
 
-                # Pravý panel - Title + KPI + Karty modulů
+                # Pravý panel - Obsah a karty modulů
                 html.Div([
-
-                    # === Titulek a podtitulek (přesunuto do pravého sloupce) ===
-                    html.H1("✈  FLIGHT ANALYTICS PLATFORM", style={
-                        "color":         NEON_CYAN,
-                        "textShadow":    f"0 0 20px {NEON_CYAN}",
-                        "letterSpacing": "5px",
-                        "fontSize":      "22px",
-                        "fontFamily":    "Courier New, monospace",
-                        "margin":        "0 0 8px 0",
-                        "textAlign":     "center"
-                    }),
-                    html.Div("CENTRAL OPERATIONS  //  SELECT MODULE", style={
-                        "color":         NEON_BLUE,
-                        "fontSize":      "10px",
-                        "letterSpacing": "4px",
-                        "fontFamily":    "Courier New, monospace",
-                        "marginBottom":  "20px",
-                        "textAlign":     "center"
-                    }),
-
                     # KPI karty - horizontální orientace
                     html.Div([
                         make_kpi_card("ORIGIN AIRPORTS",   KPI["origins"],
@@ -419,14 +520,19 @@ def build_main_layout():
             "maxWidth":  "960px",
             "margin":    "0 auto",
             "width":     "100%"
-        })
+        }),
+
+        # Footer připojený pod hlavní obsah
+        make_footer()
+
     ], style={
         "backgroundColor": BG_COLOR,
         "minHeight":       "100vh",
         "display":         "flex",
+        "flexDirection":   "column",
         "alignItems":      "center",
-        "justifyContent":  "center",
-        "padding":         "32px 24px",
+        "justifyContent":  "flex-start",
+        "padding":         "32px 24px 0 24px",
         "fontFamily":      "Courier New, monospace"
     })
 
