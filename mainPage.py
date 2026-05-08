@@ -234,7 +234,7 @@ def make_analytics_panel():
         "marginBottom": "12px",
         "paddingBottom": "10px",
         "borderBottom": f"1px solid {NEON_BLUE}20",
-        "marginRight": "120px"
+        "marginRight": "250px"  # ← Changed from 60px to ~250px (60 + 190)
     })
 
     # Tabulka popularity modulů
