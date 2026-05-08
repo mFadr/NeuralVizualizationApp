@@ -26,43 +26,43 @@ TEXT_MUTED  = "#c5c6c7"
 
 PAGES = [
     {
-        "title":    "BOOKING CURVE ANALYZER",
-        "subtitle": "Price trends over the scraping period",
+        "title":    "Křivka rezervací",
+        "subtitle": "Vývoj cen během období sběru",
         "href":     "/offers",
         "accent":   NEON_CYAN,
         "icon":     "📈"
     },
     {
-        "title":    "JANUARY FLIGHT TRACKER",
-        "subtitle": "Multi-origin price comparison — Jan 2026",
+        "title":    "Sledování letů v lednu",
+        "subtitle": "Srovnání cen z více výchozích letišť — leden 2026",
         "href":     "/january",
         "accent":   NEON_PINK,
         "icon":     "✈️"
     },
     {
-        "title":    "EMISSION INTELLIGENCE",
-        "subtitle": "CO₂ and per-seat emission analysis",
+        "title":    "Analýza emisí",
+        "subtitle": "Analýza emisí CO₂ na cestujícího",
         "href":     "/emission",
         "accent":   NEON_GREEN,
         "icon":     "🌍"
     },
     {
-        "title":    "ROUTE SANKEY",
-        "subtitle": "Flow diagram of prices between cities",
+        "title":    "Sankey diagram tras",
+        "subtitle": "Diagram toku cen mezi městy",
         "href":     "/sankey",
         "accent":   NEON_YELLOW,
         "icon":     "🗺️"
     },
     {
-        "title":    "GINI ANALYZER",
-        "subtitle": "Inequality analysis of price distributions",
+        "title":    "Analyzátor Gini",
+        "subtitle": "Analýza nerovnosti rozdělení cen",
         "href":     "/gini",
         "accent":   NEON_PURPLE,
         "icon":     "📊"
     },
     {
-        "title":    "ROUTES overview",
-        "subtitle": "Overview of all tracked routes and their price distributions",
+        "title":    "Přehled tras",
+        "subtitle": "Přehled všech sledovaných tras a jejich rozdělení cen",
         "href":     "/overview",
         "accent":   NEON_YELLOW,
         "icon":     "🗂️"
@@ -71,8 +71,8 @@ PAGES = [
 
 # Karta Manual zobrazená v pravém bočním panelu (symetricky s Traffic Analytics)
 MANUAL_PAGE = {
-    "title":    "Manual",
-    "subtitle": "How to use the platform and interpret the data",
+    "title":    "Manuál",
+    "subtitle": "Jak používat platformu a interpretovat data",
     "href":     "/info",
     "accent":   NEON_PURPLE,
     "icon":     "📊"
@@ -300,7 +300,7 @@ def make_manual_panel():
     """
     return html.Div([
         # Hlavička panelu (analogická s "TRAFFIC ANALYTICS" vlevo)
-        html.Div("◈  MANUAL FOR APPS FUNCTIONS", style={
+        html.Div("◈  MANUÁL FUNKCÍ APLIKACE", style={
             "color":         NEON_BLUE,
             "fontSize":      "9px",
             "letterSpacing": "3px",
@@ -310,7 +310,7 @@ def make_manual_panel():
 
         # Krátký popis pod nadpisem
         html.Div(
-            "How to use the platform and interpret the data",
+            "Jak používat platformu a interpretovat data",
             style={
                 "color":         TEXT_MUTED,
                 "fontSize":      "10px",
@@ -323,7 +323,7 @@ def make_manual_panel():
 
         # Obdélníkové tlačítko (užší forma) — odkaz na manuál
         html.A(
-            "▶  OPEN MANUAL",
+            "▶  OTEVŘÍT MANUÁL",
             href=MANUAL_PAGE["href"],
             style={
                 "display":         "block",
@@ -582,7 +582,7 @@ def build_main_layout():
     # ── Sestavení celé stránky ───────────────────────────────────────
     return html.Div([
         html.Div([
-            html.H1("✈  FLIGHT ANALYTICS PLATFORM", style={
+            html.H1("✈  PLATFORMA PRO ANALÝZU LETŮ", style={
                 "color":        NEON_CYAN,
                 "textShadow":   f"0 0 20px {NEON_CYAN}",
                 "letterSpacing":"5px",
@@ -592,7 +592,7 @@ def build_main_layout():
                 "width":        "100%",
                 "textAlign":    "center"
             }),
-            html.Div("CENTRAL OPERATIONS  //  SELECT MODULE", style={
+            html.Div("CENTRÁLNÍ OPERACE  //  VYBERTE MODUL", style={
                 "color":         NEON_BLUE,
                 "fontSize":      "10px",
                 "letterSpacing": "4px",
@@ -691,3 +691,4 @@ def route(pathname, session_data):
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port, debug=False)
+    
