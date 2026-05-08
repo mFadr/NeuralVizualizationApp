@@ -198,7 +198,7 @@ layout = html.Div([
             "verticalAlign": "middle",
             "filter": f"drop-shadow(0 0 8px {NEON_CYAN})"
         }),
-        html.H2("Koplexní vizualizade emisí leteckých linek", style={
+        html.H2("EMISSION INTELLIGENCE SYSTEM - vizualizade emisí leteckých linek", style={
             "display": "inline-block",
             "color": NEON_CYAN,
             "textShadow": f"0 0 20px {NEON_CYAN}, 0 0 40px {NEON_CYAN}40",
