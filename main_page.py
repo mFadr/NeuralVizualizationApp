@@ -240,24 +240,6 @@ def make_analytics_panel():
 
 
 
-    return html.Div([
-        html.Div("◈  NÁVŠTĚVNOST APLIKACE", style={
-            "color":         NEON_BLUE,
-            "fontSize":      "9px",
-            "letterSpacing": "3px",
-            "fontFamily":    "Courier New, monospace",
-            "marginBottom":  "10px"
-        }),
-        header_row,
-        html.Div(module_rows)
-    ], style={
-        "padding":         "12px 16px",
-        "backgroundColor": PANEL_BG,
-        "borderRadius":    "10px",
-        "border":          f"1px solid {NEON_PINK}30",
-        "boxShadow":       f"0 0 12px {NEON_PINK}15",
-        "marginBottom":    "28px"
-    })
 
 
 def make_manual_panel():
