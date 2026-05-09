@@ -34,7 +34,7 @@ PAGES = [
     },
     {
         "title":    "Porovnání cen letů z Ledna 2026",
-        "subtitle": "Srovnání cen z více výchozích letišť — leden 2026",
+        "subtitle": "Srovnání cen napříč výchozími letišťi",
         "href":     "/january",
         "accent":   NEON_PINK,
         "icon":     "✈️"
@@ -231,45 +231,14 @@ def make_analytics_panel():
     header_row = html.Div([
         _stat_row("CELKOVÝ POČET NÁVŠTĚV", stats['total'],     NEON_CYAN),
         _stat_row("POSLEDNÍCH 24H",     stats['last_24h'],  NEON_GREEN),
-        _stat_row("NOVÝCH PŘICHOZÍCH ZA 7 DNÍ",    stats['unique_7d'], NEON_PINK),
+        _stat_row("NOVĚ PŘÍCHOZÍCH ZA 7 DNÍ",    stats['unique_7d'], NEON_PINK),
     ], style={
         "marginBottom":  "12px",
         "paddingBottom": "10px",
         "borderBottom":  f"1px solid {NEON_BLUE}20"
     })
 
-    # Tabulka popularity modulů
-    if not stats["modules"]:
-        module_rows = [html.Div("Zatím žádné záznamy o návštěvách", style={
-            "color": TEXT_MUTED, "fontSize": "10px",
-            "textAlign": "center", "padding": "8px"
-        })]
-    else:
-        max_visits = max(m["visits"] for m in stats["modules"]) or 1
-        module_rows = []
-        for m in stats["modules"]:
-            label    = PATH_LABELS.get(m["path"], m["path"])
-            width_pc = (m["visits"] / max_visits) * 100
-            module_rows.append(html.Div([
-                html.Div([
-                    html.Span(label, style={
-                        "color": NEON_CYAN, "fontSize": "10px",
-                        "fontFamily": "Courier New, monospace"
-                    }),
-                    html.Span(f"{m['visits']:,} prokliků", style={
-                        "color": TEXT_MUTED, "fontSize": "10px",
-                        "fontFamily": "Courier New, monospace",
-                        "float": "right"
-                    })
-                ], style={"marginBottom": "3px"}),
-                html.Div(style={
-                    "width": f"{width_pc}%",
-                    "height": "4px",
-                    "backgroundColor": NEON_CYAN,
-                    "boxShadow": f"0 0 4px {NEON_CYAN}",
-                    "borderRadius": "2px"
-                })
-            ], style={"marginBottom": "6px"}))
+
 
     return html.Div([
         html.Div("◈  NÁVŠTĚVNOST APLIKACE", style={
@@ -373,7 +342,7 @@ def make_footer():
                 "textShadow": f"0 0 6px {NEON_CYAN}"
             }),
             html.Span("by ", style={"color": TEXT_MUTED}),
-            html.Span("[Matěj Fadrhons] ", style={
+            html.Span("Matěj Fadrhons ", style={
                 "color":      NEON_CYAN,
                 "fontWeight": "bold"
             }),
@@ -420,7 +389,7 @@ def make_footer():
 
         # Třetí řádek s informačním upozorněním
         html.Div([
-            html.Span("Data sesbírána v lednu 2026  //  Vizualizace slouží výhradně k akademickým a vzdělávacím účelům",
+            html.Span("Data sesbírána na leden 2026  //  Vizualizace slouží výhradně k akademickým a vzdělávacím účelům",
                       style={"color": TEXT_MUTED, "opacity": "0.7"})
         ], style={
             "fontSize":      "9px",
@@ -582,7 +551,7 @@ def build_main_layout():
     # ── Sestavení celé stránky ───────────────────────────────────────
     return html.Div([
         html.Div([
-            html.H1("✈  APLIKACE VIZUALIZACE DAT Z LETECKÝCH TRAS", style={
+            html.H1("✈  APLIKACE: VIZUALIZACE DAT Z LETECKÝCH TRAS", style={
                 "color":        NEON_CYAN,
                 "textShadow":   f"0 0 20px {NEON_CYAN}",
                 "letterSpacing":"5px",
