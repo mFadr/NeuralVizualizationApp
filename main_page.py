@@ -172,7 +172,7 @@ def make_card(page):
             html.Div(page["icon"], style={
                 "fontSize": "30px", "marginBottom": "10px"
             }),
-            html.Div(page["nadpis"], style={
+            html.Div(page["title"], style={
                 "color":        page["accent"],
                 "fontSize":     "12px",
                 "letterSpacing":"2px",
@@ -181,7 +181,7 @@ def make_card(page):
                 "fontFamily":   "Courier New, monospace",
                 "textShadow":   f"0 0 8px {page['accent']}"
             }),
-            html.Div(page["podnadpis"], style={
+            html.Div(page["subtitle"], style={
                 "color":      TEXT_MUTED,
                 "fontSize":   "10px",
                 "fontFamily": "Courier New, monospace"
