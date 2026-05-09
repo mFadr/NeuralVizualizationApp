@@ -467,7 +467,7 @@ ALLOWED_AIRLINES = {
 }
 
 def filter_allowed_airlines(available_airlines):
-    """Filter airlines to only include those in the ALLOWED_AIRLINES list"""
+    """Filtruje aerolinky tak, aby zahrnovaly pouze ty ze seznamu ALLOWED_AIRLINES"""
     filtered = []
     for airline in available_airlines:
         if pd.isna(airline):
@@ -487,7 +487,7 @@ def filter_allowed_airlines(available_airlines):
     return filtered
 
 def clean_sorted_unique(series):
-    """Return a stable, case-insensitive sorted list of non-empty string values."""
+    """Vrácí stabilní seznam řazený bez ohledu na velikost písmen, obsahující neprázdné řetězcové hodnoty."""
     cleaned = (
         series.dropna()
         .astype("string")
@@ -747,7 +747,7 @@ def update_search_dates_2(selected_dataset_origin, select_all):
     return options, []
 
 def style_cyberpunk_figure(fig, line_color=None, title=""):
-    """Applies the dark modern aesthetic to Plotly figures."""
+    """Aplikuje tmavou moderní estetiku na Plotly grafy."""
     fig.update_layout(
         title=title,
         template="plotly_dark",
@@ -811,8 +811,8 @@ def filter_by_month_name(df, month_names):
 # =====================================================================
 def aggregate_price_data(filtered_df, agg_method='mean'):
     """
-    Aggregate price data by date, preserving airline and CO2 information.
-    For each date, calculate the mean/median price and average the CO2 values.
+    Agreguje data cen podle data, zachovávaje informace o aerolinku a CO2.
+    Pro každé datum vypočítá průměr/medián ceny a průměruje hodnoty CO2.
     """
     if filtered_df.empty:
         return pd.DataFrame()
@@ -846,9 +846,7 @@ def aggregate_price_data(filtered_df, agg_method='mean'):
 def update_merged_chart(orig1, dest1, air1_trad, air1_low, month1,
                         orig2, dest2, air2_trad, air2_low, month2,
                         agg_method, status):
-    """
-    Display both TRACKER ALPHA and TRACKER BETA on the same chart for direct comparison
-    """
+    """Zobrazí oba TRACKER ALFA a TRACKER BETA na stejném grafu pro přímé porovnání"""
     # Spojení vybraných tradičních a nízkonákladových společností
     air1 = list(air1_trad or []) + list(air1_low or [])
     air2 = list(air2_trad or []) + list(air2_low or [])
@@ -856,10 +854,10 @@ def update_merged_chart(orig1, dest1, air1_trad, air1_low, month1,
     fig = go.Figure()
 
     hover_template = (
-            "<b>Date:</b> %{x|%b %d, %Y}<br>" +
-            "<b>Airline:</b> %{customdata[0]}<br>" +
-            "<b>Price:</b> $%{y:.2f}<br>" +
-            "<b>AVG CO2:</b> %{customdata[1]:.2f} kg/hr<br>" +
+            "<b>Datum:</b> %{x|%b %d, %Y}<br>" +
+            "<b>Letecká společnost:</b> %{customdata[0]}<br>" +
+            "<b>Cena:</b> $%{y:.2f}<br>" +
+            "<b>PRŮMĚRNÉ CO2:</b> %{customdata[1]:.2f} kg/h<br>" +
             "<extra></extra>"
     )
 
@@ -899,9 +897,9 @@ def update_merged_chart(orig1, dest1, air1_trad, air1_low, month1,
     agg1 = process(orig1, dest1, air1, month1)
     agg2 = process(orig2, dest2, air2, month2)
 
-    # Přidej TRACKER ALPHA
+    # Přidej TRACKER ALFA
     if not agg1.empty:
-        label = f"ALFA ({orig1} → {dest1})" if dest1 != "All" else f"ALPHA ({orig1})"
+        label = f"ALFA ({orig1} → {dest1})" if dest1 != "All" else f"ALFA ({orig1})"
         fig.add_trace(go.Scatter(
             x=agg1["Date"],
             y=agg1["Price"],
@@ -927,11 +925,11 @@ def update_merged_chart(orig1, dest1, air1_trad, air1_low, month1,
             marker=dict(size=8, color=NEON_PINK, line=dict(width=2, color=BG_COLOR))
         ))
 
-    metric = "MEDIAN" if agg_method == "median" else "MEAN"
+    metric = "MEDIÁN" if agg_method == "median" else "PRŮMĚR"
     if agg1.empty and agg2.empty:
-        title = f"NO SIGNAL: Adjust parameters to load {metric} Price Comparison"
+        title = f"ŽÁDNÝ SIGNÁL: Upravte parametry pro načtení porovnání cen {metric}"
     else:
-        title = f"PRICE COMPARISON MATRIX: {metric} Price Trends (ALPHA vs BETA)"
+        title = f"MATICE POROVNÁNÍ CEN: Trendy cen {metric} (ALFA vs BETA)"
 
     fig.update_layout(
         title=title,
@@ -940,8 +938,8 @@ def update_merged_chart(orig1, dest1, air1_trad, air1_low, month1,
         paper_bgcolor=PANEL_BG,
         font=dict(color=TEXT_MUTED, family="Segoe UI"),
         margin=dict(l=50, r=30, t=70, b=50),
-        xaxis=dict(showgrid=True, gridcolor="#333", zeroline=False, title="Departure Date"),
-        yaxis=dict(showgrid=True, gridcolor="#333", zeroline=False, tickprefix="$", title=f"{metric} Price ($)"),
+        xaxis=dict(showgrid=True, gridcolor="#333", zeroline=False, title="Datum odletu"),
+        yaxis=dict(showgrid=True, gridcolor="#333", zeroline=False, tickprefix="$", title=f"Cena {metric} ($)"),
         hovermode="x unified"
     )
 
@@ -950,20 +948,20 @@ def update_merged_chart(orig1, dest1, air1_trad, air1_low, month1,
 # =====================================================================
 # 5️⃣ NAČÍTÁNÍ DATASETŮ — na úrovni modulu (běží při importu A při přímém spuštění)
 # =====================================================================
-print("Loading datasets (edit5)...")
+print("Načítání datových sad (edit5)...")
 datasets = {}
 for origin_code, file_path in DATASET_PATHS.items():
     try:
         df = load_data_from_file(file_path)
         datasets[origin_code] = df
-        print(f"✓ Loaded {origin_code}: {len(df)} records")
+        print(f"✓ Načteno {origin_code}: {len(df)} záznamů")
     except Exception as e:
-        print(f"✗ Error loading {origin_code} from {file_path}: {e}")
+        print(f"✗ Chyba při načítání {origin_code} z {file_path}: {e}")
 
 if not datasets:
-    print("WARNING: No datasets loaded — app will show empty state.")
+    print("UPOZORNĚNÍ: Žádné datové sady nebyly načteny — aplikace bude zobrazovat prázdný stav.")
 
-print(f"\n✓ Successfully loaded {len(datasets)} datasets\n")
+print(f"\n✓ Úspěšně načteny {len(datasets)} datové sady\n")
 
 # =====================================================================
 # 6️⃣ VSTUPNÍ BOD (pouze pro místní vývoj)

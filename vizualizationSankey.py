@@ -221,7 +221,7 @@ layout = html.Div([
 
     html.Div([
         html.H2(
-            "✈️  Neural flight tracker — Sankey diagram jednotlivých tras dle cen letenek",
+            "✈️  Neural letový sledovač — Sankey ceny tras",
             style={
                 "textAlign": "center",
                 "color": NEON_CYAN,
@@ -234,7 +234,7 @@ layout = html.Div([
             }
         ),
         html.A(
-            "← Zpět",
+            "← ZPĚT",
             href="/",
             style={
                 "position": "absolute",
