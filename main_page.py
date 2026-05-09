@@ -26,42 +26,42 @@ TEXT_MUTED  = "#c5c6c7"
 
 PAGES = [
     {
-        "title":    "Křivka rezervací",
-        "subtitle": "Vývoj cen během období sběru",
+        "title":    "Historie vývoje cen rezervací",
+        "subtitle": "Křivka vývoje cen letenek 09/2025–01/2026",
         "href":     "/offers",
         "accent":   NEON_CYAN,
         "icon":     "📈"
     },
     {
-        "title":    "Sledování letů v lednu",
+        "title":    "Porovnání cen letů z Ledna 2026",
         "subtitle": "Srovnání cen z více výchozích letišť — leden 2026",
         "href":     "/january",
         "accent":   NEON_PINK,
         "icon":     "✈️"
     },
     {
-        "title":    "Analýza emisí",
-        "subtitle": "Analýza emisí CO₂ na cestujícího",
+        "title":    "Analýza emisí jednotlivých leů",
+        "subtitle": "Analýza emisí CO₂ pro jednotlivé typy letadel",
         "href":     "/emission",
         "accent":   NEON_GREEN,
         "icon":     "🌍"
     },
     {
         "title":    "Sankey diagram tras",
-        "subtitle": "Diagram toku cen mezi městy",
+        "subtitle": "Diagram toku cen na jednotlivých trasách",
         "href":     "/sankey",
         "accent":   NEON_YELLOW,
         "icon":     "🗺️"
     },
     {
         "title":    "Analyzátor Gini",
-        "subtitle": "Analýza nerovnosti rozdělení cen",
+        "subtitle": "Analýza nerovnosti rozdělení cen na jednotlivých trasách",
         "href":     "/gini",
         "accent":   NEON_PURPLE,
         "icon":     "📊"
     },
     {
-        "title":    "Přehled tras",
+        "title":    "Přehled všech sledovaných tras",
         "subtitle": "Přehled všech sledovaných tras a jejich rozdělení cen",
         "href":     "/overview",
         "accent":   NEON_YELLOW,
@@ -172,7 +172,7 @@ def make_card(page):
             html.Div(page["icon"], style={
                 "fontSize": "30px", "marginBottom": "10px"
             }),
-            html.Div(page["title"], style={
+            html.Div(page["nadpis"], style={
                 "color":        page["accent"],
                 "fontSize":     "12px",
                 "letterSpacing":"2px",
@@ -181,7 +181,7 @@ def make_card(page):
                 "fontFamily":   "Courier New, monospace",
                 "textShadow":   f"0 0 8px {page['accent']}"
             }),
-            html.Div(page["subtitle"], style={
+            html.Div(page["podnadpis"], style={
                 "color":      TEXT_MUTED,
                 "fontSize":   "10px",
                 "fontFamily": "Courier New, monospace"
@@ -229,9 +229,9 @@ def make_analytics_panel():
         })
 
     header_row = html.Div([
-        _stat_row("TOTAL VISITS", stats['total'],     NEON_CYAN),
-        _stat_row("LAST 24H",     stats['last_24h'],  NEON_GREEN),
-        _stat_row("UNIQUE 7D",    stats['unique_7d'], NEON_PINK),
+        _stat_row("CELKOVÝ POČET NÁVŠTĚV", stats['total'],     NEON_CYAN),
+        _stat_row("POSLEDNÍCH 24H",     stats['last_24h'],  NEON_GREEN),
+        _stat_row("NOVÝCH PŘICHOZÍCH ZA 7 DNÍ",    stats['unique_7d'], NEON_PINK),
     ], style={
         "marginBottom":  "12px",
         "paddingBottom": "10px",
@@ -240,7 +240,7 @@ def make_analytics_panel():
 
     # Tabulka popularity modulů
     if not stats["modules"]:
-        module_rows = [html.Div("No traffic data yet", style={
+        module_rows = [html.Div("Zatím žádné záznamy o návštěvách", style={
             "color": TEXT_MUTED, "fontSize": "10px",
             "textAlign": "center", "padding": "8px"
         })]
@@ -256,7 +256,7 @@ def make_analytics_panel():
                         "color": NEON_CYAN, "fontSize": "10px",
                         "fontFamily": "Courier New, monospace"
                     }),
-                    html.Span(f"{m['visits']:,} hits", style={
+                    html.Span(f"{m['visits']:,} prokliků", style={
                         "color": TEXT_MUTED, "fontSize": "10px",
                         "fontFamily": "Courier New, monospace",
                         "float": "right"
@@ -272,7 +272,7 @@ def make_analytics_panel():
             ], style={"marginBottom": "6px"}))
 
     return html.Div([
-        html.Div("◈  TRAFFIC ANALYTICS  //  MODULE POPULARITY", style={
+        html.Div("◈  NÁVŠTĚVNOST APLIKACE", style={
             "color":         NEON_BLUE,
             "fontSize":      "9px",
             "letterSpacing": "3px",
@@ -367,20 +367,20 @@ def make_footer():
         # Hlavní řádek s textem footeru
         html.Div([
             html.Span("© 2026 ", style={"color": TEXT_MUTED}),
-            html.Span("Flight Analytics Platform ", style={
+            html.Span("Aplikace na vizualizaci leteckých dat ", style={
                 "color":      NEON_CYAN,
                 "fontWeight": "bold",
                 "textShadow": f"0 0 6px {NEON_CYAN}"
             }),
             html.Span("by ", style={"color": TEXT_MUTED}),
-            html.Span("[Jméno autora] ", style={
+            html.Span("[Matěj Fadrhons] ", style={
                 "color":      NEON_CYAN,
                 "fontWeight": "bold"
             }),
             html.Span(" |  ", style={"color": NEON_BLUE}),
-            html.Span("All Rights Reserved", style={"color": TEXT_MUTED}),
+            html.Span("Všechna práva vyhrazena", style={"color": TEXT_MUTED}),
             html.Span("  |  ", style={"color": NEON_BLUE}),
-            html.Span("Powered by ", style={"color": TEXT_MUTED}),
+            html.Span("S využítím ", style={"color": TEXT_MUTED}),
             html.A("Plotly Dash", href="https://plotly.com/dash/",
                    target="_blank",
                    style={
@@ -480,15 +480,15 @@ def build_main_layout():
         html.Div([
             # KPI karty — horizontální řada (5 dlaždic)
             html.Div([
-                make_kpi_card("ORIGIN AIRPORTS",   KPI["origins"],
-                              "origins",  NEON_CYAN),
-                make_kpi_card("TOTAL RECORDS",     f"{KPI['total_records']:,}",
-                              "rows",     NEON_BLUE),
-                make_kpi_card("ROUTES TRACKED",    KPI["total_routes"],
-                              "routes",   NEON_PURPLE),
-                make_kpi_card("AVG TICKET PRICE",  f"${KPI['avg_price']}",
+                make_kpi_card("VÝCHOZÍ LETIŠTĚ",   KPI["origins"],
+                              "letišť",  NEON_CYAN),
+                make_kpi_card("CELKOVÝ POČET ZÁZNAMŮ",     f"{KPI['total_records']:,}",
+                              "řádků",     NEON_BLUE),
+                make_kpi_card("POČET SLEDOVANÝCH TRAS",    KPI["total_routes"],
+                              "linek",   NEON_PURPLE),
+                make_kpi_card("PRŮMĚRNÁ CENA LETENKY",  f"${KPI['avg_price']}",
                               "USD",      NEON_YELLOW),
-                make_kpi_card("PRICE RANGE",
+                make_kpi_card("CENOVÝ ROZPTYL",
                               f"${KPI['min_price']}–${KPI['max_price']}",
                               "USD",      NEON_GREEN),
             ], style={
@@ -501,7 +501,7 @@ def build_main_layout():
 
             # Stavová lišta s informacemi o načtených datech
             html.Div([
-                html.Div("◈  SYSTEM STATUS  //  DATA TRACKING", style={
+                html.Div("◈  NAHRANÁ DATA V SYSTÉMU: ", style={
                     "color":         NEON_BLUE,
                     "fontSize":      "9px",
                     "letterSpacing": "3px",
@@ -510,14 +510,14 @@ def build_main_layout():
                     "textAlign":     "center"
                 }),
                 html.Div([
-                    html.Span("▶  DATASETS LOADED  ", style={"color": NEON_CYAN}),
-                    html.Span(f"{KPI['origins']}/5 origins  ·  ",
+                    html.Span("▶  DATASETY NAHRÁNY  ", style={"color": NEON_CYAN}),
+                    html.Span(f"{KPI['origins']}/5 výchozích letišť  ·  ",
                               style={"color": NEON_GREEN}),
-                    html.Span(f"{KPI['total_records']:,} total records  ·  ",
+                    html.Span(f"{KPI['total_records']:,} celkový počet záznamů  ·  ",
                               style={"color": TEXT_MUTED}),
-                    html.Span(f"{KPI['total_routes']} routes tracked  ·  ",
+                    html.Span(f"{KPI['total_routes']} sledovaných tras  ·  ",
                               style={"color": TEXT_MUTED}),
-                    html.Span(f"avg price ${KPI['avg_price']}  ·  ",
+                    html.Span(f"průmerná cena ${KPI['avg_price']}  ·  ",
                               style={"color": NEON_YELLOW}),
                 ], style={
                     "fontSize":         "11px",
@@ -582,7 +582,7 @@ def build_main_layout():
     # ── Sestavení celé stránky ───────────────────────────────────────
     return html.Div([
         html.Div([
-            html.H1("✈  PLATFORMA PRO ANALÝZU LETŮ", style={
+            html.H1("✈  APLIKACE VIZUALIZACE DAT Z LETECKÝCH TRAS", style={
                 "color":        NEON_CYAN,
                 "textShadow":   f"0 0 20px {NEON_CYAN}",
                 "letterSpacing":"5px",
@@ -691,4 +691,3 @@ def route(pathname, session_data):
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port, debug=False)
-    
