@@ -304,11 +304,11 @@ NeuralVizualizationApp/
 |   |   |-- fixCanceledFlight.py       označení zrušených letů
 |   |   |-- fixAirlines.py             sjednocení názvů aerolinek
 |   |   `-- splitAircraftColumn.py     rozdělení Aircraft na typ a registraci
-|   |-- PRG_1_0.py                     statistická analýza + emise pro PRG
-|   |-- WAW_1_0.py                     statistická analýza + emise pro WAW
-|   |-- VIE_1_0.py                     statistická analýza + emise pro VIE
-|   |-- BER_1_0.py                     statistická analýza + emise pro BER
-|   `-- BUD_1_0.py                     statistická analýza + emise pro BUD
+|   |-- PRG_Formatter.py                     statistická analýza + emise pro PRG
+|   |-- WAW_Formatter.py                     statistická analýza + emise pro WAW
+|   |-- VIE_Formatter.py                     statistická analýza + emise pro VIE
+|   |-- BER_Formatter.py                     statistická analýza + emise pro BER
+|   `-- BUD_Formatter.py                     statistická analýza + emise pro BUD
 |
 |-- Konfigurace
 |   |-- config.py                      správa cest (local/cloud)
