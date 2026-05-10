@@ -20,6 +20,7 @@ popis funkcí, ovládacích prvků a způsobu interpretace výstupů.
 
 import os
 import base64
+import json
 from dash import dcc, html, Input, Output, callback_context, ALL
 
 from app_instance import app
