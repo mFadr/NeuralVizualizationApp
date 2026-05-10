@@ -2,15 +2,15 @@
 vizualizationManual.py
 Komplexní uživatelský manuál pro platformu Neural Flight Analytics.
 
-Manuál obsahuje šest podstránek odpovídajících šesti hlavním vizualizačním
-modulům:
+Manuál obsahuje sedm podstránek:
 
-  1. booking curve analyzer  (vizualizationFlightOffers)
-  2. january flight tracker  (vizualizationJanuary)
-  3. emission intelligence   (vizualizationEmision)
-  4. route sankey diagram    (vizualizationSankey)
-  5. gini analyzer           (vizualizationGini)
-  6. routes overview         (vizualizationRoutes)
+  1. přehled sledovaných tras  (úvodní rozcestník)
+  2. booking curve analyzer    (vizualizationFlightOffers)
+  3. january flight tracker    (vizualizationJanuary)
+  4. emission intelligence     (vizualizationEmision)
+  5. route sankey diagram      (vizualizationSankey)
+  6. gini analyzer             (vizualizationGini)
+  7. routes overview           (vizualizationRoutes)
 
 Každá podstránka obsahuje náhledový snímek obrazovky a podrobný textový
 popis funkcí, ovládacích prvků a způsobu interpretace výstupů.
@@ -38,7 +38,25 @@ NEON_ORANGE = "#ff6600"
 TEXT_MUTED  = "#c5c6c7"
 
 # =====================================================================
-# 2. načítání obrázků
+# 2. seznamy letišť
+# =====================================================================
+ORIGIN_AIRPORTS = [
+    ("BER", "Berlín"),
+    ("WAW", "Varšava"),
+    ("PRG", "Praha"),
+    ("VIE", "Vídeň"),
+    ("BUD", "Budapešť"),
+]
+
+DESTINATION_AIRPORTS = [
+    ("FCO", "Řím"),
+    ("BCN", "Barcelona"),
+    ("LON", "Londýn (všechna letiště)"),
+    ("AMS", "Amsterdam"),
+]
+
+# =====================================================================
+# 3. načítání obrázků
 # =====================================================================
 def _encode_image(filename):
     """převede obrázek do base64 řetězce použitelného v atributu src."""
@@ -71,11 +89,24 @@ SCREENSHOT_FILES = {
 }
 
 # =====================================================================
-# 3. obsah jednotlivých podstránek manuálu
+# 4. obsah jednotlivých podstránek manuálu
 # =====================================================================
 PAGES_CONTENT = [
     # =================================================================
-    # 1. booking curve analyzer
+    # 1. přehled sledovaných tras (úvodní rozcestník)
+    # =================================================================
+    {
+        "id":       "overview",
+        "title":    "přehled sledovaných tras",
+        "subtitle": "úvodní rozcestník platformy a seznam sledovaných letišť",
+        "accent":   NEON_BLUE,
+        "image":    None,
+        "blocks": [],
+        "is_overview": True
+    },
+
+    # =================================================================
+    # 2. booking curve analyzer
     # =================================================================
     {
         "id":       "offers",
@@ -138,7 +169,7 @@ PAGES_CONTENT = [
     },
 
     # =================================================================
-    # 2. january flight tracker
+    # 3. january flight tracker
     # =================================================================
     {
         "id":       "january",
@@ -198,7 +229,7 @@ PAGES_CONTENT = [
     },
 
     # =================================================================
-    # 3. emission intelligence
+    # 4. emission intelligence
     # =================================================================
     {
         "id":       "emission",
@@ -270,7 +301,7 @@ PAGES_CONTENT = [
     },
 
     # =================================================================
-    # 4. route sankey diagram
+    # 5. route sankey diagram
     # =================================================================
     {
         "id":       "sankey",
@@ -330,7 +361,7 @@ PAGES_CONTENT = [
     },
 
     # =================================================================
-    # 5. gini analyzer
+    # 6. gini analyzer
     # =================================================================
     {
         "id":       "gini",
@@ -395,12 +426,30 @@ PAGES_CONTENT = [
                     "poskytuje konzervativnější odhad nerovnosti, neboť "
                     "vylučuje záznamy, které nebyly fakticky realizovány."
                 )
+            },
+            {
+                "heading": "interpretace hodnot true gini",
+                "body": (
+                    "Hodnoty pod 0,2 lze interpretovat jako velmi nízkou "
+                    "nerovnoměrnost, kdy jsou ceny relativně stabilní. "
+                    "Pásmo 0,2 až 0,3 odpovídá nízké nerovnoměrnosti, "
+                    "pásmo 0,3 až 0,4 střední nerovnoměrnosti, jež je "
+                    "typická pro trasy s mírnými cenovými výkyvy. "
+                    "Hodnoty v rozmezí 0,4 až 0,5 značí vysokou "
+                    "nerovnoměrnost se silně kolísajícími cenami a "
+                    "hodnoty nad 0,5 odpovídají velmi vysoké cenové "
+                    "variabilitě. Koeficient true gini splňuje kritéria "
+                    "symetrie, škálové invariance a Pigou-Daltonova "
+                    "principu, avšak nesplňuje princip populace, a proto "
+                    "není vhodný pro porovnání skupin s výrazně odlišnou "
+                    "velikostí."
+                )
             }
         ]
     },
 
     # =================================================================
-    # 6. routes overview
+    # 7. routes overview
     # =================================================================
     {
         "id":       "routes",
@@ -466,7 +515,7 @@ PAGES_CONTENT = [
 
 
 # =====================================================================
-# 4. styly opakovaně používaných prvků
+# 5. styly opakovaně používaných prvků
 # =====================================================================
 NAV_BUTTON_STYLE_BASE = {
     "display":         "inline-block",
@@ -506,12 +555,267 @@ BLOCK_BODY_STYLE = {
 
 
 # =====================================================================
-# 5. sestavení obsahu jedné podstránky
+# 6. sestavení tabulky letišť (pro úvodní podstránku)
+# =====================================================================
+def _build_airport_card(code, name, accent):
+    """sestaví jednu kartu s kódem letiště a jeho názvem."""
+    return html.Div([
+        html.Div(code, style={
+            "color":         accent,
+            "fontSize":      "20px",
+            "fontWeight":    "bold",
+            "fontFamily":    "Courier New, monospace",
+            "letterSpacing": "3px",
+            "textShadow":    f"0 0 8px {accent}80",
+            "marginBottom":  "4px"
+        }),
+        html.Div(name, style={
+            "color":      TEXT_MUTED,
+            "fontSize":   "12px",
+            "fontFamily": "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+        })
+    ], style={
+        "padding":         "14px 18px",
+        "backgroundColor": PANEL_BG,
+        "border":          f"1px solid {accent}40",
+        "borderRadius":    "8px",
+        "minWidth":        "150px",
+        "textAlign":       "center",
+        "boxShadow":       f"0 0 10px {accent}20"
+    })
+
+
+def _build_airport_grid(airports, accent):
+    """sestaví mřížku karet letišť."""
+    return html.Div(
+        [_build_airport_card(code, name, accent) for code, name in airports],
+        style={
+            "display":        "flex",
+            "flexWrap":       "wrap",
+            "gap":            "12px",
+            "justifyContent": "center",
+            "marginTop":      "14px",
+            "marginBottom":   "20px"
+        }
+    )
+
+
+def _build_module_quicklink(page):
+    """sestaví dlaždici s odkazem na konkrétní modul manuálu."""
+    accent = page["accent"]
+    return html.Div([
+        html.Div(page["title"].upper(), style={
+            "color":         accent,
+            "fontSize":      "12px",
+            "letterSpacing": "2px",
+            "fontFamily":    "Courier New, monospace",
+            "fontWeight":    "bold",
+            "textShadow":    f"0 0 6px {accent}80",
+            "marginBottom":  "6px"
+        }),
+        html.Div(page["subtitle"], style={
+            "color":      TEXT_MUTED,
+            "fontSize":   "11px",
+            "lineHeight": "1.5",
+            "fontFamily": "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+        })
+    ], style={
+        "padding":         "14px 16px",
+        "backgroundColor": KPI_BG,
+        "border":          f"1px solid {accent}40",
+        "borderLeft":      f"3px solid {accent}",
+        "borderRadius":    "0 8px 8px 0",
+        "flex":            "1 1 280px",
+        "minWidth":        "280px"
+    })
+
+
+def _build_overview_body():
+    """sestaví obsah úvodní podstránky se seznamem letišť a moduly."""
+    accent = NEON_BLUE
+
+    # záhlaví podstránky
+    header = html.Div([
+        html.Div(
+            "PŘEHLED SLEDOVANÝCH TRAS",
+            style={
+                "color":         accent,
+                "fontSize":      "20px",
+                "letterSpacing": "5px",
+                "fontFamily":    "Courier New, monospace",
+                "fontWeight":    "bold",
+                "textShadow":    f"0 0 12px {accent}",
+                "marginBottom":  "6px",
+                "textAlign":     "center"
+            }
+        ),
+        html.Div(
+            "úvodní rozcestník platformy a seznam sledovaných letišť",
+            style={
+                "color":         NEON_BLUE,
+                "fontSize":      "11px",
+                "letterSpacing": "2px",
+                "fontFamily":    "Courier New, monospace",
+                "textAlign":     "center",
+                "marginBottom":  "24px"
+            }
+        )
+    ])
+
+    # úvodní popis platformy
+    intro_block = html.Div([
+        html.Div("o platformě", style={
+            **BLOCK_HEADING_STYLE,
+            "color":      accent,
+            "textShadow": f"0 0 6px {accent}80"
+        }),
+        html.Div(
+            "Platforma neural flight analytics je analytickou aplikací "
+            "zaměřenou na sledování a vyhodnocení cen letenek z pěti "
+            "středoevropských výchozích letišť do čtyř klíčových destinací. "
+            "Sběr dat probíhá od září 2025 do ledna 2026 a obsahuje rovněž "
+            "metainformace o emisích oxidu uhličitého a typech provozovaných "
+            "letadel. Veškeré moduly platformy sdílejí jednotný datový "
+            "podklad a čerpají z formulářových exportů uložených v souborech "
+            "s příponou form.csv pro každé výchozí letiště.",
+            style=BLOCK_BODY_STYLE
+        )
+    ], style={
+        "padding":         "14px 20px",
+        "marginBottom":    "16px",
+        "backgroundColor": PANEL_BG,
+        "borderLeft":      f"3px solid {accent}",
+        "borderRadius":    "0 8px 8px 0"
+    })
+
+    # blok s výchozími letišti
+    origins_block = html.Div([
+        html.Div("výchozí letiště (origin)", style={
+            **BLOCK_HEADING_STYLE,
+            "color":      NEON_CYAN,
+            "textShadow": f"0 0 6px {NEON_CYAN}80"
+        }),
+        html.Div(
+            "Pět středoevropských výchozích letišť, ze kterých byl prováděn "
+            "sběr cen letenek. Třípísmenné kódy odpovídají standardu "
+            "Mezinárodní asociace leteckých dopravců (IATA) a jsou "
+            "používány konzistentně napříč všemi vizualizačními moduly.",
+            style=BLOCK_BODY_STYLE
+        ),
+        _build_airport_grid(ORIGIN_AIRPORTS, NEON_CYAN)
+    ], style={
+        "padding":         "14px 20px",
+        "marginBottom":    "16px",
+        "backgroundColor": PANEL_BG,
+        "borderLeft":      f"3px solid {NEON_CYAN}",
+        "borderRadius":    "0 8px 8px 0"
+    })
+
+    # blok s cílovými letišti
+    destinations_block = html.Div([
+        html.Div("cílové destinace (destination)", style={
+            **BLOCK_HEADING_STYLE,
+            "color":      NEON_PINK,
+            "textShadow": f"0 0 6px {NEON_PINK}80"
+        }),
+        html.Div(
+            "Čtyři klíčové cílové destinace pokrývající hlavní evropské "
+            "ekonomické a turistické uzly. Kód LON zahrnuje všechna "
+            "londýnská letiště společně, neboť jsou v rámci leteckého "
+            "provozu obvykle vykazována jako jedna destinace.",
+            style=BLOCK_BODY_STYLE
+        ),
+        _build_airport_grid(DESTINATION_AIRPORTS, NEON_PINK)
+    ], style={
+        "padding":         "14px 20px",
+        "marginBottom":    "16px",
+        "backgroundColor": PANEL_BG,
+        "borderLeft":      f"3px solid {NEON_PINK}",
+        "borderRadius":    "0 8px 8px 0"
+    })
+
+    # přehled struktury sledovaných tras
+    structure_block = html.Div([
+        html.Div("struktura sledovaných tras", style={
+            **BLOCK_HEADING_STYLE,
+            "color":      NEON_YELLOW,
+            "textShadow": f"0 0 6px {NEON_YELLOW}80"
+        }),
+        html.Div(
+            "Kombinací pěti výchozích letišť a čtyř cílových destinací "
+            "vzniká celkem dvacet sledovaných tras. Každá trasa je "
+            "monitorována nezávisle a obsahuje záznamy nejen o ceně "
+            "letenky, ale rovněž o letecké společnosti, typu letadla, "
+            "plánovaném datu a čase odletu, době letu a stavu letu. "
+            "Stav letu rozlišuje, zda byl daný let skutečně odlétnut, "
+            "nebo zda došlo k jeho zrušení, což je následně využíváno "
+            "filtrem zrušených letů ve většině modulů.",
+            style=BLOCK_BODY_STYLE
+        )
+    ], style={
+        "padding":         "14px 20px",
+        "marginBottom":    "16px",
+        "backgroundColor": PANEL_BG,
+        "borderLeft":      f"3px solid {NEON_YELLOW}",
+        "borderRadius":    "0 8px 8px 0"
+    })
+
+    # rozcestník na jednotlivé moduly
+    module_pages = [p for p in PAGES_CONTENT if not p.get("is_overview")]
+    modules_block = html.Div([
+        html.Div("dostupné vizualizační moduly", style={
+            **BLOCK_HEADING_STYLE,
+            "color":      NEON_GREEN,
+            "textShadow": f"0 0 6px {NEON_GREEN}80"
+        }),
+        html.Div(
+            "Platforma obsahuje šest vzájemně propojených vizualizačních "
+            "modulů, z nichž každý zpřístupňuje odlišný analytický pohled "
+            "na zpracovaná data. Detailní popis funkcionality každého "
+            "modulu je k dispozici na příslušné podstránce manuálu, kterou "
+            "lze otevřít prostřednictvím horní navigační lišty.",
+            style=BLOCK_BODY_STYLE
+        ),
+        html.Div(
+            [_build_module_quicklink(p) for p in module_pages],
+            style={
+                "display":        "flex",
+                "flexWrap":       "wrap",
+                "gap":            "10px",
+                "marginTop":      "14px"
+            }
+        )
+    ], style={
+        "padding":         "14px 20px",
+        "marginBottom":    "12px",
+        "backgroundColor": PANEL_BG,
+        "borderLeft":      f"3px solid {NEON_GREEN}",
+        "borderRadius":    "0 8px 8px 0"
+    })
+
+    return html.Div([
+        header,
+        html.Div([
+            intro_block,
+            origins_block,
+            destinations_block,
+            structure_block,
+            modules_block
+        ], style={"maxWidth": "1100px", "margin": "0 auto"})
+    ])
+
+
+# =====================================================================
+# 7. sestavení obsahu jedné podstránky (modulové)
 # =====================================================================
 def _build_page_body(page):
     """sestaví tělo podstránky manuálu pro vybraný modul."""
+    # speciální případ — úvodní rozcestník
+    if page.get("is_overview"):
+        return _build_overview_body()
+
     accent = page["accent"]
-    img_src = _encode_image(page["image"])
+    img_src = _encode_image(page["image"]) if page.get("image") else None
 
     # nadpis a podtitulek podstránky
     header = html.Div([
@@ -605,7 +909,7 @@ def _build_page_body(page):
 
 
 # =====================================================================
-# 6. sestavení navigačního panelu mezi podstránkami
+# 8. sestavení navigačního panelu mezi podstránkami
 # =====================================================================
 def _build_nav_buttons(active_id):
     """sestaví seznam tlačítek navigační lišty."""
@@ -636,12 +940,12 @@ def _build_nav_buttons(active_id):
 
 
 # =====================================================================
-# 7. hlavní layout stránky manuálu
-#    POZN.: navigační tlačítka i obsah první podstránky jsou vykresleny
+# 9. hlavní layout stránky manuálu
+#    POZN.: navigační tlačítka i obsah úvodní podstránky jsou vykresleny
 #    přímo v layoutu (nikoliv až callbackem), aby cílové komponenty
 #    callbacku existovaly v DOMu hned po načtení stránky.
 # =====================================================================
-INITIAL_PAGE_ID = "offers"
+INITIAL_PAGE_ID = "overview"
 INITIAL_PAGE = PAGES_CONTENT[0]
 
 layout = html.Div([
@@ -741,10 +1045,10 @@ layout = html.Div([
 
 
 # =====================================================================
-# 8. callback pro přepínání podstránek
-#    Používá pattern-matching ALL — callback se spustí při kliknutí
-#    na kterékoliv tlačítko skupiny manual-nav. Tlačítka jsou v DOMu
-#    vykreslena již v layoutu, takže callback má vždy dostupné vstupy.
+# 10. callback pro přepínání podstránek
+#     Používá pattern-matching ALL — callback se spustí při kliknutí
+#     na kterékoliv tlačítko skupiny manual-nav. Tlačítka jsou v DOMu
+#     vykreslena již v layoutu, takže callback má vždy dostupné vstupy.
 # =====================================================================
 @app.callback(
     Output("manual-nav-container", "children"),
@@ -778,7 +1082,7 @@ def switch_page(_n_clicks_list):
 
 
 # =====================================================================
-# 9. vstupní bod pro lokální vývoj
+# 11. vstupní bod pro lokální vývoj
 # =====================================================================
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8090))
