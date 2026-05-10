@@ -18,13 +18,13 @@ popis funkcí, ovládacích prvků a způsobu interpretace výstupů.
 
 import os
 import base64
-from dash import dcc, html, Input, Output, State
+from dash import dcc, html, Input, Output, callback_context, ALL
 
 from app_instance import app
 
-# ====================================================================
+# =====================================================================
 # 1. cyberpunk téma
-# ====================================================================
+# =====================================================================
 BG_COLOR    = "#0b0c10"
 PANEL_BG    = "#1f2833"
 KPI_BG      = "#0d1117"
@@ -40,16 +40,15 @@ TEXT_MUTED  = "#c5c6c7"
 # =====================================================================
 # 2. načítání obrázků
 # =====================================================================
-# obrázky jsou očekávány v lokálním adresáři projektu (stejný adresář
-# jako ostatní vizualizační skripty). pokud obrázek chybí, zobrazí se
-# pouze textový popis bez náhledu.
 def _encode_image(filename):
     """převede obrázek do base64 řetězce použitelného v atributu src."""
+    here = os.path.dirname(os.path.abspath(__file__))
     candidate_paths = [
         filename,
-        os.path.join(os.path.dirname(__file__), filename),
+        os.path.join(here, filename),
         os.path.join("assets", filename),
-        os.path.join(os.path.dirname(__file__), "assets", filename),
+        os.path.join(here, "assets", filename),
+        os.path.join(here, "..", filename),
     ]
     for path in candidate_paths:
         if os.path.exists(path):
@@ -62,7 +61,6 @@ def _encode_image(filename):
     return None
 
 
-# mapování názvů souborů s obrázky pro jednotlivé podstránky
 SCREENSHOT_FILES = {
     "offers":   "vizualizationFlightOffers.png",
     "january":  "vizualizationJanuary.png",
@@ -75,14 +73,6 @@ SCREENSHOT_FILES = {
 # =====================================================================
 # 3. obsah jednotlivých podstránek manuálu
 # =====================================================================
-# každá podstránka obsahuje:
-#   - identifikátor (klíč)
-#   - název v záhlaví
-#   - podtitulek
-#   - akcentovou barvu (slaďuje se s barvou modulu na hlavní stránce)
-#   - název obrázku k zobrazení
-#   - seznam textových bloků (každý blok má nadpis a tělo)
-
 PAGES_CONTENT = [
     # =================================================================
     # 1. booking curve analyzer
@@ -495,21 +485,12 @@ NAV_BUTTON_STYLE_BASE = {
     "minWidth":        "180px"
 }
 
-NAV_BUTTON_STYLE_ACTIVE = {
-    **NAV_BUTTON_STYLE_BASE,
-    "color":           NEON_CYAN,
-    "border":          f"1px solid {NEON_CYAN}",
-    "boxShadow":       f"0 0 12px {NEON_CYAN}50",
-    "fontWeight":      "bold"
-}
-
 BLOCK_HEADING_STYLE = {
-    "color":         NEON_CYAN,
     "fontSize":      "13px",
     "letterSpacing": "2px",
     "fontFamily":    "Courier New, monospace",
     "fontWeight":    "bold",
-    "marginTop":     "18px",
+    "marginTop":     "0px",
     "marginBottom":  "8px",
     "textTransform": "uppercase"
 }
@@ -627,7 +608,7 @@ def _build_page_body(page):
 # 6. sestavení navigačního panelu mezi podstránkami
 # =====================================================================
 def _build_nav_buttons(active_id):
-    """sestaví horizontální navigační lištu se šesti tlačítky."""
+    """sestaví seznam tlačítek navigační lišty."""
     buttons = []
     for page in PAGES_CONTENT:
         is_active = (page["id"] == active_id)
@@ -636,9 +617,9 @@ def _build_nav_buttons(active_id):
         if is_active:
             style = {
                 **NAV_BUTTON_STYLE_BASE,
-                "color":     accent,
-                "border":    f"1px solid {accent}",
-                "boxShadow": f"0 0 12px {accent}60",
+                "color":      accent,
+                "border":     f"1px solid {accent}",
+                "boxShadow":  f"0 0 12px {accent}60",
                 "fontWeight": "bold"
             }
         else:
@@ -651,26 +632,19 @@ def _build_nav_buttons(active_id):
             style=style
         ))
 
-    return html.Div(
-        buttons,
-        style={
-            "textAlign":       "center",
-            "padding":         "16px 12px",
-            "marginBottom":    "20px",
-            "backgroundColor": PANEL_BG,
-            "borderRadius":    "10px",
-            "border":          f"1px solid {NEON_BLUE}30"
-        }
-    )
+    return buttons
 
 
 # =====================================================================
 # 7. hlavní layout stránky manuálu
+#    POZN.: navigační tlačítka i obsah první podstránky jsou vykresleny
+#    přímo v layoutu (nikoliv až callbackem), aby cílové komponenty
+#    callbacku existovaly v DOMu hned po načtení stránky.
 # =====================================================================
-layout = html.Div([
-    # skryté úložiště aktuálně zobrazené podstránky
-    dcc.Store(id="manual-active-page", data="offers"),
+INITIAL_PAGE_ID = "offers"
+INITIAL_PAGE = PAGES_CONTENT[0]
 
+layout = html.Div([
     # tlačítko zpět na hlavní stránku
     html.Div([
         dcc.Link(
@@ -717,11 +691,26 @@ layout = html.Div([
         )
     ]),
 
-    # navigační lišta mezi podstránkami
-    html.Div(id="manual-nav-container"),
+    # navigační lišta — vykreslena STATICKY v layoutu (nikoliv callbackem)
+    html.Div(
+        _build_nav_buttons(INITIAL_PAGE_ID),
+        id="manual-nav-container",
+        style={
+            "textAlign":       "center",
+            "padding":         "16px 12px",
+            "marginBottom":    "20px",
+            "backgroundColor": PANEL_BG,
+            "borderRadius":    "10px",
+            "border":          f"1px solid {NEON_BLUE}30"
+        }
+    ),
 
-    # tělo aktuální podstránky
-    html.Div(id="manual-page-body", style={"padding": "0 20px"}),
+    # tělo aktuální podstránky — naplněno hned počátečním obsahem
+    html.Div(
+        _build_page_body(INITIAL_PAGE),
+        id="manual-page-body",
+        style={"padding": "0 20px"}
+    ),
 
     # zápatí
     html.Div([
@@ -752,48 +741,32 @@ layout = html.Div([
 
 
 # =====================================================================
-# 8. callbacky pro přepínání podstránek
+# 8. callback pro přepínání podstránek
+#    Používá pattern-matching ALL — callback se spustí při kliknutí
+#    na kterékoliv tlačítko skupiny manual-nav. Tlačítka jsou v DOMu
+#    vykreslena již v layoutu, takže callback má vždy dostupné vstupy.
 # =====================================================================
-@app.callback(
-    Output("manual-active-page",   "data"),
-    Input({"type": "manual-nav", "page": "offers"},   "n_clicks"),
-    Input({"type": "manual-nav", "page": "january"},  "n_clicks"),
-    Input({"type": "manual-nav", "page": "emission"}, "n_clicks"),
-    Input({"type": "manual-nav", "page": "sankey"},   "n_clicks"),
-    Input({"type": "manual-nav", "page": "gini"},     "n_clicks"),
-    Input({"type": "manual-nav", "page": "routes"},   "n_clicks"),
-    State("manual-active-page", "data"),
-    prevent_initial_call=False
-)
-def select_page(n_offers, n_january, n_emission, n_sankey, n_gini, n_routes, current):
-    """určí aktuálně zobrazenou podstránku na základě posledního stisknutí."""
-    from dash import callback_context
-
-    if not callback_context.triggered:
-        return current or "offers"
-
-    triggered_id = callback_context.triggered[0]["prop_id"]
-
-    # rozbalení slovníkového identifikátoru
-    if "offers" in triggered_id:    return "offers"
-    if "january" in triggered_id:   return "january"
-    if "emission" in triggered_id:  return "emission"
-    if "sankey" in triggered_id:    return "sankey"
-    if "gini" in triggered_id:      return "gini"
-    if "routes" in triggered_id:    return "routes"
-
-    return current or "offers"
-
-
 @app.callback(
     Output("manual-nav-container", "children"),
     Output("manual-page-body",     "children"),
-    Input("manual-active-page",    "data")
+    Input({"type": "manual-nav", "page": ALL}, "n_clicks"),
+    prevent_initial_call=True
 )
-def render_active_page(active_id):
-    """vykreslí navigační lištu a tělo podstránky pro vybraný modul."""
-    if not active_id:
-        active_id = "offers"
+def switch_page(_n_clicks_list):
+    """vykreslí navigaci a tělo podstránky podle stisknutého tlačítka."""
+    triggered = callback_context.triggered
+
+    # výchozí stav — pokud nebyl rozpoznán žádný stisk, ponechá se výchozí stránka
+    if not triggered or triggered[0]["value"] in (None, 0):
+        active_id = INITIAL_PAGE_ID
+    else:
+        # identifikátor má tvar JSON: {"page":"emission","type":"manual-nav"}.n_clicks
+        prop_id = triggered[0]["prop_id"]
+        active_id = INITIAL_PAGE_ID
+        for page in PAGES_CONTENT:
+            if f'"page":"{page["id"]}"' in prop_id:
+                active_id = page["id"]
+                break
 
     # nalezení odpovídající stránky
     page = next(
