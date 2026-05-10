@@ -217,7 +217,7 @@ _system_panel = html.Div([
 layout = html.Div([
     _back_btn,
     html.H2(
-        "✈️ NEURAL ROUTE EXPLORER - Analýza tras a výchozích letišť",
+        "Analýza tras dle přímeho porovnání cenových úrovní výchozích letišť",
         style={
             "textAlign": "center",
             "textShadow": f"0 0 10px {NEON_CYAN}",

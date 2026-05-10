@@ -310,7 +310,7 @@ layout = html.Div([
             "verticalAlign": "middle",
             "filter": f"drop-shadow(0 0 8px {NEON_CYAN})"
         }),
-        html.H2("Systém emisní inteligence", style={
+        html.H2("Porovnání emisí leteckých společností", style={
             "display": "inline-block",
             "color": NEON_CYAN,
             "textShadow": f"0 0 20px {NEON_CYAN}, 0 0 40px {NEON_CYAN}40",
@@ -326,7 +326,7 @@ layout = html.Div([
             "verticalAlign": "middle",
             "filter": f"drop-shadow(0 0 8px {NEON_CYAN})"
         }),
-        html.Div("Sledování uhlíkové stopy  //  Leden 2026", style={
+        html.Div("Sledování uhlíkové stopy u jednotlivých typů letadel  //  Leden 2026", style={
             "color": NEON_BLUE,
             "fontSize": "10px",
             "letterSpacing": "4px",

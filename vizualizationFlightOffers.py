@@ -291,7 +291,7 @@ layout = html.Div([
 
     # ── Titulek ────────────────────────────────────────────────────────
     html.H2(
-        "✈️  NEURAL FLIGHT TRACKER — Křivky jednotlivých rezervací",
+        "Křivky jednotlivých rezervací",
         style={
             "textAlign": "center",
             "color": NEON_CYAN,

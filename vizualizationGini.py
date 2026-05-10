@@ -79,11 +79,11 @@ def true_gini(values: np.ndarray) -> float:
 
 def interpret_gini(g: float) -> str:
     if np.isnan(g):       return "N/A"
-    if g < 0.2:           return "Very low"
-    if g < 0.3:           return "Low"
-    if g < 0.4:           return "Moderate"
-    if g < 0.5:           return "High"
-    return                       "Very high"
+    if g < 0.2:           return "Velmi nízká"
+    if g < 0.3:           return "Nízká"
+    if g < 0.4:           return "Střední"
+    if g < 0.5:           return "Vysoká"
+    return                       "Velmi vysoká"
 
 
 def gini_color(g: float, accent: str) -> str:
@@ -272,7 +272,7 @@ layout = html.Div([
     # ── Titulek ────────────────────────────────────────────────────────
     html.Div([
         html.H2(
-            "◈  Analyzátor Gini nerovnosti  ·  Cena",
+            "Analyzátor Gini nerovnosti, dle cen na jednotlivých trasách",
             style={
                 "color":         NEON_CYAN,
                 "textShadow":    f"0 0 16px {NEON_CYAN}",
@@ -284,7 +284,7 @@ layout = html.Div([
             }
         ),
         html.Div(
-            "Koeficient True Gini  ·  Santos & Dias (2024)  ·  Lorenzova křivka a Distribuce",
+            "Lorenzova křivka dle koeficient True Gini, Sloupcové porovnání linek dle True GIni a matice distribuce prezentována formou Heatmap",
             style={
                 "color":         NEON_BLUE,
                 "fontSize":      "10px",

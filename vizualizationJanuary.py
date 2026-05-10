@@ -200,7 +200,7 @@ _back_btn = html.Div([
 
 layout = html.Div([_back_btn,
                    html.H2(
-                       "✈️ NEURAL FLIGHT TRACKER v2.0 - Vizualizace cen letenek z Ledna 2026",
+                       "Vizualizace cen letenek z Ledna 2026",
                        style={
                            "textAlign": "center",
                            "textShadow": f"0 0 10px {NEON_CYAN}",
@@ -929,7 +929,7 @@ def update_merged_chart(orig1, dest1, air1_trad, air1_low, month1,
     if agg1.empty and agg2.empty:
         title = f"ŽÁDNÝ SIGNÁL: Upravte parametry pro načtení porovnání cen {metric}"
     else:
-        title = f"MATICE POROVNÁNÍ CEN: Trendy cen {metric} (ALFA vs BETA)"
+        title = f"Trendy cen v porovnání trackerů: ALFA vs BETA"
 
     fig.update_layout(
         title=title,
