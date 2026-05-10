@@ -290,24 +290,36 @@ layout = html.Div([
     ]),
 
     # ── Titulek ────────────────────────────────────────────────────────
-    html.H2(
-        "Křivky jednotlivých rezervací, Data: Září 2025 - Leden 2026",
+    html.Div(
         style={
-            "textAlign": "center",
-            "color": NEON_CYAN,
-            "textShadow": f"0 0 12px {NEON_CYAN}",
-            "letterSpacing": "3px",
-            "margin": "0 0 8px 0",
-            "fontSize": "17px"
-        }
+            "textAlign": "center",  # Vycentruje vše uvnitř tohoto obalovacího Divu
+            "marginBottom": "20px"  # Spodní odsazení od zbytku stránky (lze upravit)
+        },
+        children=[
+            # Hlavní nadpis (Nadpis 1)
+            html.H2(
+                "Křivky jednotlivých rezervací, Data: Září 2025 - Leden 2026",
+                style={
+                    "color": NEON_CYAN,
+                    "textShadow": f"0 0 12px {NEON_CYAN}",
+                    "letterSpacing": "3px",
+                    "margin": "0 0 4px 0",  # Spodní margin zmenšen na 4px pro těsnější návaznost
+                    "fontSize": "17px"
+                }
+            ),
 
-        html.Div("Sledování vývoje cen letenek na jednotlivých linkách", style={
-            "color": NEON_BLUE,
-            "fontSize": "10px",
-            "letterSpacing": "4px",
-            "marginTop": "4px",
-            "fontFamily": "'Courier New', monospace"
-        }),
+            # Podnadpis (Nadpis 2) přímo pod ním
+            html.Div(
+                "Sledování vývoje cen letenek na jednotlivých linkách",
+                style={
+                    "color": NEON_BLUE,
+                    "fontSize": "10px",
+                    "letterSpacing": "4px",
+                    "margin": "0",  # Odstraněn výchozí margin pro dokonalé zarovnání pod H2
+                    "fontFamily": "'Courier New', monospace"
+                }
+            )
+        ]
     ),
 
     # ── Hlavní flex layout: Sidebar filtrů (vlevo) + Graf (vpravo) ──────────
