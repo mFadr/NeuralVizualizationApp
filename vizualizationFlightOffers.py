@@ -291,7 +291,7 @@ layout = html.Div([
 
     # ── Titulek ────────────────────────────────────────────────────────
     html.H2(
-        "Křivky jednotlivých rezervací",
+        "Křivky jednotlivých rezervací, Data: Září 2025 - Leden 2026",
         style={
             "textAlign": "center",
             "color": NEON_CYAN,
@@ -301,6 +301,13 @@ layout = html.Div([
             "fontSize": "17px"
         }
     ),
+    html.Div("Sledování vývoje cen letenek na jednotlivých linkách", style={
+        "color": NEON_BLUE,
+        "fontSize": "10px",
+        "letterSpacing": "4px",
+        "marginTop": "4px",
+        "fontFamily": "'Courier New', monospace"
+    }),
 
     # ── Hlavní flex layout: Sidebar filtrů (vlevo) + Graf (vpravo) ──────────
     html.Div([

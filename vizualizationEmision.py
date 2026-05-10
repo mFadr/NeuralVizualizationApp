@@ -320,12 +320,7 @@ layout = html.Div([
             "fontFamily": "'Courier New', monospace",
             "verticalAlign": "middle"
         }),
-        html.Div("◈", style={
-            "color": NEON_CYAN, "fontSize": "28px",
-            "display": "inline-block", "marginLeft": "14px",
-            "verticalAlign": "middle",
-            "filter": f"drop-shadow(0 0 8px {NEON_CYAN})"
-        }),
+
         html.Div("Sledování uhlíkové stopy u jednotlivých typů letadel  //  Leden 2026", style={
             "color": NEON_BLUE,
             "fontSize": "10px",
