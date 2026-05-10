@@ -446,9 +446,10 @@ def update_sankey(selected_source, selected_dest, stat_method, status):
             plot_bgcolor="rgba(0,0,0,0)",
             font=dict(color=TEXT_MUTED),
             title=dict(text="Žádná data pro vybrané filtry",
-                       font=dict(color=NEON_PINK))
+                       font=dict(color=NEON_PINK)),
+            height=600
         )
-        return fig, "Pro vybranou kombinaci nejsou k dispozici žádná data."
+        return fig
 
     fig = go.Figure(go.Sankey(
         arrangement="snap",
@@ -489,7 +490,21 @@ def update_sankey(selected_source, selected_dest, stat_method, status):
     else:
         dest_part = ", ".join(active_targets)
 
+    title_txt = (
+        f"Sankey diagram cen tras  |  {src_part} → {dest_part}  "
+        f"|  <span style='color:{stat_color}'>{stat_label}</span>"
+    )
 
+    fig.update_layout(
+        title=dict(text=title_txt, font=dict(color=NEON_CYAN, size=14)),
+        paper_bgcolor=PANEL_BG,
+        plot_bgcolor="rgba(0,0,0,0)",
+        font=dict(color=TEXT_MUTED, family="Segoe UI", size=13),
+        margin=dict(l=30, r=30, t=55, b=30),
+        height=600
+    )
+
+    return fig
 
 
 # =====================================================================
