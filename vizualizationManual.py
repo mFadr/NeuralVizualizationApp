@@ -1,3 +1,5 @@
+from config import SCREENSHOT_FILES
+
 """
 vizualizationManual.py
 Komplexní uživatelský manuál pro platformu Neural Flight Analytics.
@@ -79,38 +81,26 @@ def _encode_image(filename):
     return None
 
 
-SCREENSHOT_FILES = {
-    "offers":   "vizualizationFlightOffers.png",
-    "january":  "vizualizationJanuary.png",
-    "emission": "vizualizationEmision.png",
-    "sankey":   "vizualizationSankey.png",
-    "gini":     "vizualizationGini.png",
-    "routes":   "přehled_tras_5.png",
-}
+
 
 # =====================================================================
 # 4. obsah jednotlivých podstránek manuálu
 # =====================================================================
 PAGES_CONTENT = [
-    # =================================================================
-    # 1. přehled sledovaných tras (úvodní rozcestník)
-    # =================================================================
     {
-        "id":       "overview",
-        "title":    "přehled sledovaných tras",
-        "subtitle": "úvodní rozcestník platformy a seznam sledovaných letišť",
-        "accent":   NEON_BLUE,
-        "image":    None,
-        "blocks": [],
+        "id":          "overview",
+        "title":       "Přehled tras",
+        "subtitle":    "úvodní rozcestník a seznam letišť",
+        "accent":      NEON_BLUE,
         "is_overview": True
     },
-
+    
     # =================================================================
-    # 2. booking curve analyzer
+    # 1. booking curve analyzer
     # =================================================================
     {
         "id":       "offers",
-        "title":    "booking curve analyzer",
+        "title":    "Historie vývoje cen letenek",
         "subtitle": "křivka vývoje cen rezervací (září 2025 až leden 2026)",
         "accent":   NEON_CYAN,
         "image":    SCREENSHOT_FILES["offers"],
@@ -169,11 +159,11 @@ PAGES_CONTENT = [
     },
 
     # =================================================================
-    # 3. january flight tracker
+    # 2. january flight tracker
     # =================================================================
     {
         "id":       "january",
-        "title":    "january flight tracker",
+        "title":    "Vizualizace cen letenek z Ledna",
         "subtitle": "porovnání cen letů v lednu 2026 napříč výchozími letišti",
         "accent":   NEON_PINK,
         "image":    SCREENSHOT_FILES["january"],
@@ -229,11 +219,11 @@ PAGES_CONTENT = [
     },
 
     # =================================================================
-    # 4. emission intelligence
+    # 3. emission intelligence
     # =================================================================
     {
         "id":       "emission",
-        "title":    "emission intelligence system",
+        "title":    "Porovnání emisí leteckých společností",
         "subtitle": "analýza uhlíkové stopy jednotlivých letů",
         "accent":   NEON_GREEN,
         "image":    SCREENSHOT_FILES["emission"],
@@ -301,11 +291,11 @@ PAGES_CONTENT = [
     },
 
     # =================================================================
-    # 5. route sankey diagram
+    # 4. route sankey diagram
     # =================================================================
     {
         "id":       "sankey",
-        "title":    "route sankey diagram",
+        "title":    "Porovnání ceny tras pomocí Sankey diagramu",
         "subtitle": "diagram cenových toků mezi letišti",
         "accent":   NEON_YELLOW,
         "image":    SCREENSHOT_FILES["sankey"],
@@ -361,11 +351,11 @@ PAGES_CONTENT = [
     },
 
     # =================================================================
-    # 6. gini analyzer
+    # 5. gini analyzer
     # =================================================================
     {
         "id":       "gini",
-        "title":    "gini analyzer",
+        "title":    "Analyzátor Gini nerovnosti",
         "subtitle": "analyzátor cenové nerovnosti napříč trasami",
         "accent":   NEON_PURPLE,
         "image":    SCREENSHOT_FILES["gini"],
@@ -426,34 +416,16 @@ PAGES_CONTENT = [
                     "poskytuje konzervativnější odhad nerovnosti, neboť "
                     "vylučuje záznamy, které nebyly fakticky realizovány."
                 )
-            },
-            {
-                "heading": "interpretace hodnot true gini",
-                "body": (
-                    "Hodnoty pod 0,2 lze interpretovat jako velmi nízkou "
-                    "nerovnoměrnost, kdy jsou ceny relativně stabilní. "
-                    "Pásmo 0,2 až 0,3 odpovídá nízké nerovnoměrnosti, "
-                    "pásmo 0,3 až 0,4 střední nerovnoměrnosti, jež je "
-                    "typická pro trasy s mírnými cenovými výkyvy. "
-                    "Hodnoty v rozmezí 0,4 až 0,5 značí vysokou "
-                    "nerovnoměrnost se silně kolísajícími cenami a "
-                    "hodnoty nad 0,5 odpovídají velmi vysoké cenové "
-                    "variabilitě. Koeficient true gini splňuje kritéria "
-                    "symetrie, škálové invariance a Pigou-Daltonova "
-                    "principu, avšak nesplňuje princip populace, a proto "
-                    "není vhodný pro porovnání skupin s výrazně odlišnou "
-                    "velikostí."
-                )
             }
         ]
     },
 
     # =================================================================
-    # 7. routes overview
+    # 6. routes overview
     # =================================================================
     {
         "id":       "routes",
-        "title":    "routes overview",
+        "title":    "Příme porovnání leteckých linek",
         "subtitle": "přehled všech sledovaných tras a jejich cenových úrovní",
         "accent":   NEON_ORANGE,
         "image":    SCREENSHOT_FILES["routes"],
@@ -971,7 +943,7 @@ layout = html.Div([
     # hlavní záhlaví manuálu
     html.Div([
         html.H1(
-            "uživatelský manuál platformy",
+            "Uživatelský manuál platformy",
             style={
                 "color":         NEON_CYAN,
                 "fontSize":      "26px",
@@ -1064,13 +1036,15 @@ def switch_page(_n_clicks_list):
     if not triggered or triggered[0]["value"] in (None, 0):
         active_id = INITIAL_PAGE_ID
     else:
-        # identifikátor má tvar JSON: {"page":"emission","type":"manual-nav"}.n_clicks
+        # prop_id má tvar např. '{"page":"offers","type":"manual-nav"}.n_clicks'
         prop_id = triggered[0]["prop_id"]
-        active_id = INITIAL_PAGE_ID
-        for page in PAGES_CONTENT:
-            if f'"page":"{page["id"]}"' in prop_id:
-                active_id = page["id"]
-                break
+        try:
+            # Oddělíme část před ".n_clicks" a načteme jako JSON
+            id_dict_str = prop_id.split('.')[0]
+            id_dict = json.loads(id_dict_str)
+            active_id = id_dict.get("page", INITIAL_PAGE_ID)
+        except Exception:
+            active_id = INITIAL_PAGE_ID
 
     # nalezení odpovídající stránky
     page = next(
@@ -1079,8 +1053,6 @@ def switch_page(_n_clicks_list):
     )
 
     return _build_nav_buttons(active_id), _build_page_body(page)
-
-
 # =====================================================================
 # 11. vstupní bod pro lokální vývoj
 # =====================================================================
