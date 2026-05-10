@@ -62,7 +62,7 @@ PAGES = [
     },
     {
         "title":    "Přehled všech sledovaných tras",
-        "subtitle": "Přehled všech sledovaných tras a jejich rozdělení cen",
+        "subtitle": "Přímé porovnání cen z letišť ve Sřední Evropě: PRG / VIE / BUD / BER / WAW ",
         "href":     "/overview",
         "accent":   NEON_YELLOW,
         "icon":     "🗂️"
@@ -384,7 +384,7 @@ def make_footer():
         # Čtvrtý řádek s odkazem na repozitář
         html.Div([
             html.A("GitHub repozitář",
-                   href="https://github.com/[uživatelské-jméno]/[název-repozitáře]",
+                   href="https://github.com/mFadr/NeuralVizualizationApp",
                    target="_blank",
                    style={
                        "color":          NEON_BLUE,
@@ -533,7 +533,7 @@ def build_main_layout():
     # ── Sestavení celé stránky ───────────────────────────────────────
     return html.Div([
         html.Div([
-            html.H1("✈  APLIKACE: VIZUALIZACE DAT Z LETECKÝCH TRAS", style={
+            html.H1("APLIKACE: VIZUALIZACE DAT Z VYBRANÝCH LETECKÝCH TRAS", style={
                 "color":        NEON_CYAN,
                 "textShadow":   f"0 0 20px {NEON_CYAN}",
                 "letterSpacing":"5px",
@@ -543,7 +543,7 @@ def build_main_layout():
                 "width":        "100%",
                 "textAlign":    "center"
             }),
-            html.Div("CENTRÁLNÍ OPERACE  //  VYBERTE MODUL", style={
+            html.Div("ANALÝZA 20 VYBRANÝCH LETECKÝCH LINEK Z LETIŠŤ VE STŘEDNÍ EVROPĚ", style={
                 "color":         NEON_BLUE,
                 "fontSize":      "10px",
                 "letterSpacing": "4px",
