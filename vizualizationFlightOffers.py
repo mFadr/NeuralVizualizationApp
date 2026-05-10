@@ -298,7 +298,7 @@ layout = html.Div([
         children=[
             # Hlavní nadpis (Nadpis 1)
             html.H2(
-                "Křivky jednotlivých rezervací, Data: Září 2025 - Leden 2026",
+                "Křivky vývoje cen letenek, Data: září 2025 - leden 2026",
                 style={
                     "color": NEON_CYAN,
                     "textShadow": f"0 0 12px {NEON_CYAN}",
@@ -457,7 +457,7 @@ layout = html.Div([
             dcc.Graph(
                 id="price-chart",
                 style={"height": "100%", "width": "100%"},
-                config={"displayModeBar": True, "responsive": True}
+                config={"displayModeBar": True, "responsive": True, "locale": "cs"}
             )
         ], style={
             "borderRadius": "15px",
@@ -634,7 +634,7 @@ def _build_daily_chart(dff, origin, dest):
             line=dict(width=2)
         ))
 
-    return _apply_theme(fig, f"KŘIVKA REZERVACÍ — {origin} → {dest}  |  DENNÍ")
+    return _apply_theme(fig, f"VÝVOJ CEN LETENEK — {origin} → {dest} ")
 
 
 def _build_monthly_chart(dff, origin, dest, agg_method):

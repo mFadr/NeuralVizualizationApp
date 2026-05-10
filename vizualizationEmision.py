@@ -359,7 +359,7 @@ layout = html.Div([
         dcc.Graph(
             id="em-chart",
             style={"height": "72vh", "width": "100%"},
-            config={"displayModeBar": True, "responsive": True}
+            config={"displayModeBar": True, "responsive": True, "locale": "cs"}
         )
     ], style={
         "borderRadius": "14px",
@@ -469,8 +469,7 @@ layout = html.Div([
                 id="em-groupby",
                 options=[
                     {"label": "  Letecká společnost",  "value": "airline"},
-                    {"label": "  Typ letadla", "value": "aircraft"},
-                    {"label": "  Trasa",    "value": "route"}
+                    {"label": "  Typ letadla", "value": "aircraft"}
                 ],
                 value="airline",
                 labelStyle={
@@ -615,8 +614,7 @@ def update_chart(origin, dest, air_trad, air_low, mode, groupby):
         dff["_group"] = dff["_airline"]
     elif groupby == "aircraft":
         dff["_group"] = dff["aircraft"]
-    else:  # route
-        dff["_group"] = dff["destination"].apply(lambda d: f"{origin}→{d}")
+
 
     fig = go.Figure()
     groups = sorted(dff["_group"].dropna().unique())
@@ -673,7 +671,7 @@ def update_chart(origin, dest, air_trad, air_low, mode, groupby):
     dest_part = dest if dest != "All" else "Všechny destinace"
     mode_label = {"avg": "Průměrné CO₂/hod", "est": "Odhadované CO₂/let", "per_seat": "Emise/Sedadlo"}.get(mode, mode)
 
-    groupby_labels = {"airline": "Letecká společnost", "aircraft": "Typ letadla", "route": "Trasa"}
+    groupby_labels = {"airline": "Letecká společnost", "aircraft": "Typ letadla"}
     groupby_cz = groupby_labels.get(groupby, groupby)
 
     title = (
@@ -684,38 +682,7 @@ def update_chart(origin, dest, air_trad, air_low, mode, groupby):
 
     fig = _apply_theme(fig, title, y_label, accent)
 
-    # ── Lišta statistik ────────────────────────────────────────────────
-    stats_parts = []
-    overall_mean   = dff[y_col].mean()
-    overall_median = dff[y_col].median()
-    overall_min    = dff[y_col].min()
-    overall_max    = dff[y_col].max()
 
-    stats_parts.append(
-        html.Span([
-            html.Span("Statistiky flotily  //  ", style={"color": NEON_BLUE}),
-            html.Span(f"Aritmetický průměr: {overall_mean:,.0f}  ", style={"color": NEON_CYAN}),
-            html.Span(f"Medián: {overall_median:,.0f}  ", style={"color": NEON_PINK}),
-            html.Span(f"Min: {overall_min:,.0f}  ", style={"color": NEON_GREEN}),
-            html.Span(f"Max: {overall_max:,.0f}  ", style={"color": NEON_YELLOW}),
-            html.Span(f"n={len(dff)}", style={"color": "#555"}),
-            html.Span("    //    Za skupinu:  ", style={"color": NEON_BLUE}),
-        ])
-    )
-
-    for grp in groups:
-        gdf  = dff[dff["_group"] == grp]
-        gm   = gdf[y_col].mean()
-        gmed = gdf[y_col].median()
-        stats_parts.append(
-            html.Span([
-                html.Span(f"{grp} ", style={"color": NEON_CYAN, "fontWeight": "bold"}),
-                html.Span(f"μ={gm:,.0f} ", style={"color": TEXT_MUTED}),
-                html.Span(f"med={gmed:,.0f}  ", style={"color": "#888"}),
-            ])
-        )
-
-    return fig, stats_parts
 
 
 # =====================================================================

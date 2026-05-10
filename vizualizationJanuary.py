@@ -429,7 +429,7 @@ layout = html.Div([_back_btn,
                                dcc.Graph(
                                    id="merged-price-chart",
                                    style={"height": "100%"},
-                                   config={"responsive": True}
+                                   config={"responsive": True, "locale": "cs"}
                                )
                            ], style={"height": MAIN_PANEL_HEIGHT, "borderRadius": "15px", "overflow": "hidden", "boxShadow": f"0 0 15px {NEON_CYAN}80", "marginBottom": "30px"}),
 

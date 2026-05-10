@@ -221,7 +221,7 @@ layout = html.Div([
 
     html.Div([
         html.H2(
-            "Porovnání ceny tras pomocí Sankey diagramu",
+            "Porovnání ceny letů pomocí Sankey diagramu",
             style={
                 "textAlign": "center",
                 "color": NEON_CYAN,
