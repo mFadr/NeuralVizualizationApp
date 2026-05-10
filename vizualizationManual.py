@@ -935,7 +935,7 @@ layout = html.Div([
     # hlavní záhlaví manuálu
     html.Div([
         html.H1(
-            "uživatelský manuál platformy",
+            "Uživatelský manuál platformy",
             style={
                 "color":         NEON_CYAN,
                 "fontSize":      "26px",
