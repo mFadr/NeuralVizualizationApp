@@ -304,12 +304,6 @@ layout = html.Div([
 
     # ── Titulek ────────────────────────────────────────────────────────
     html.Div([
-        html.Div("◈", style={
-            "color": NEON_CYAN, "fontSize": "28px",
-            "display": "inline-block", "marginRight": "14px",
-            "verticalAlign": "middle",
-            "filter": f"drop-shadow(0 0 8px {NEON_CYAN})"
-        }),
         html.H2("Porovnání emisí leteckých společností", style={
             "display": "inline-block",
             "color": NEON_CYAN,

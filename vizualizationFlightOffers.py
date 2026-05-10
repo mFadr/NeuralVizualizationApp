@@ -300,14 +300,15 @@ layout = html.Div([
             "margin": "0 0 8px 0",
             "fontSize": "17px"
         }
+
+        html.Div("Sledování vývoje cen letenek na jednotlivých linkách", style={
+            "color": NEON_BLUE,
+            "fontSize": "10px",
+            "letterSpacing": "4px",
+            "marginTop": "4px",
+            "fontFamily": "'Courier New', monospace"
+        }),
     ),
-    html.Div("Sledování vývoje cen letenek na jednotlivých linkách", style={
-        "color": NEON_BLUE,
-        "fontSize": "10px",
-        "letterSpacing": "4px",
-        "marginTop": "4px",
-        "fontFamily": "'Courier New', monospace"
-    }),
 
     # ── Hlavní flex layout: Sidebar filtrů (vlevo) + Graf (vpravo) ──────────
     html.Div([
