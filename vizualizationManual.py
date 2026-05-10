@@ -20,8 +20,7 @@ popis funkcí, ovládacích prvků a způsobu interpretace výstupů.
 
 import os
 import base64
-import json
-from dash import dcc, html, Input, Output, callback_context, ALL
+from dash import dcc, html, Input, Output, callback_context, ALL, ctx, no_update
 
 from app_instance import app
 
@@ -95,7 +94,7 @@ PAGES_CONTENT = [
         "accent":      NEON_BLUE,
         "is_overview": True
     },
-    
+
     # =================================================================
     # 1. booking curve analyzer
     # =================================================================
@@ -905,8 +904,7 @@ def _build_nav_buttons(active_id):
         buttons.append(html.Button(
             page["title"],
             id={"type": "manual-nav", "page": page["id"]},
-            n_clicks=0,
-            style=style
+            style=style  # <-- ZDE JSME SMAZALI n_clicks=0
         ))
 
     return buttons
@@ -1031,21 +1029,18 @@ layout = html.Div([
 )
 def switch_page(_n_clicks_list):
     """vykreslí navigaci a tělo podstránky podle stisknutého tlačítka."""
-    triggered = callback_context.triggered
 
-    # výchozí stav — pokud nebyl rozpoznán žádný stisk, ponechá se výchozí stránka
-    if not triggered or triggered[0]["value"] in (None, 0):
-        active_id = INITIAL_PAGE_ID
+    # Pokud nebyl proveden žádný reálný klik (všechny n_clicks jsou None)
+    if not any(_n_clicks_list):
+        return no_update, no_update
+
+    # ctx.triggered_id nám vrátí rovnou dictionary, např. {"type": "manual-nav", "page": "offers"}
+    triggered_id = ctx.triggered_id
+
+    if isinstance(triggered_id, dict) and "page" in triggered_id:
+        active_id = triggered_id["page"]
     else:
-        # prop_id má tvar např. '{"page":"offers","type":"manual-nav"}.n_clicks'
-        prop_id = triggered[0]["prop_id"]
-        try:
-            # Oddělíme část před ".n_clicks" a načteme jako JSON
-            id_dict_str = prop_id.split('.')[0]
-            id_dict = json.loads(id_dict_str)
-            active_id = id_dict.get("page", INITIAL_PAGE_ID)
-        except Exception:
-            active_id = INITIAL_PAGE_ID
+        active_id = INITIAL_PAGE_ID
 
     # nalezení odpovídající stránky
     page = next(
@@ -1054,6 +1049,7 @@ def switch_page(_n_clicks_list):
     )
 
     return _build_nav_buttons(active_id), _build_page_body(page)
+
 # =====================================================================
 # 11. vstupní bod pro lokální vývoj
 # =====================================================================
