@@ -3,7 +3,7 @@ import plotly.graph_objects as go
 from dash import dcc, html, Input, Output
 from app_instance import app
 
-# ============================================================a=========
+# =====================================================================
 # 1. Konfigurace
 # =====================================================================
 from config import DATASET_PATHS
@@ -617,17 +617,23 @@ def _build_daily_chart(dff, origin, dest):
     fig = go.Figure()
     for fdate, grp in dff.groupby("flight_date_str"):
         grp = grp.sort_values("search_date")
+        
+        # Bezpečné sestavení polí pro hover (zobrazuje pouze cenu)
+        price_col = grp["price"].apply(
+            lambda x: f"${x:.2f}" if pd.notna(x) else "N/A"
+        )
+        
+        customdata = list(zip(price_col))
+        
         fig.add_trace(go.Scatter(
             x=grp["search_date"],
             y=grp["price"],
             mode="lines+markers",
             name=fdate,
-            customdata=grp[["_airline_col", "_aircraft_col"]].values,
+            customdata=customdata,
             hovertemplate=(
-                "<b>Obs. date:</b> %{x|%b %d, %Y}<br>"
-                "<b>Price:</b> $%{y:.2f}<br>"
-                "<b>Airline:</b> %{customdata[0]}<br>"
-                "<b>Aircraft:</b> %{customdata[1]}"
+                "<b>%{x|%d %b %Y}</b><br>"
+                "<b>Cena letenky:</b> %{customdata[0]}"
                 "<extra></extra>"
             ),
             marker=dict(size=5),
@@ -670,6 +676,12 @@ def _build_monthly_chart(dff, origin, dest, agg_method):
 
     # ── Průměr ─────────────────────────────────────────────────────────
     mean_on = agg_method == "mean"
+    
+    price_col_mean = agg["mean_price"].apply(
+        lambda x: f"${x:.2f}" if pd.notna(x) else "N/A"
+    )
+    customdata_mean = list(zip(price_col_mean))
+    
     fig.add_trace(go.Scatter(
         x=agg["month_name"],
         y=agg["mean_price"],
@@ -685,17 +697,22 @@ def _build_monthly_chart(dff, origin, dest, agg_method):
             color=NEON_CYAN if mean_on else "#1a4a48",
             line=dict(width=2, color=BG_COLOR)
         ),
-        customdata=agg[["count"]].values,
+        customdata=customdata_mean,
         hovertemplate=(
             "<b>%{x}</b><br>"
-            "<b>Mean:</b> $%{y:.2f}<br>"
-            "<b>Observations:</b> %{customdata[0]}<br>"
+            "<b>Cena letenky:</b> %{customdata[0]}"
             "<extra></extra>"
         )
     ))
 
     # ── Medián ─────────────────────────────────────────────────────────
     med_on = agg_method == "median"
+    
+    price_col_med = agg["median_price"].apply(
+        lambda x: f"${x:.2f}" if pd.notna(x) else "N/A"
+    )
+    customdata_med = list(zip(price_col_med))
+    
     fig.add_trace(go.Scatter(
         x=agg["month_name"],
         y=agg["median_price"],
@@ -711,11 +728,10 @@ def _build_monthly_chart(dff, origin, dest, agg_method):
             color=NEON_PINK if med_on else "#5a0030",
             line=dict(width=2, color=BG_COLOR)
         ),
-        customdata=agg[["count"]].values,
+        customdata=customdata_med,
         hovertemplate=(
             "<b>%{x}</b><br>"
-            "<b>Median:</b> $%{y:.2f}<br>"
-            "<b>Observations:</b> %{customdata[0]}<br>"
+            "<b>Cena letenky:</b> %{customdata[0]}"
             "<extra></extra>"
         )
     ))
