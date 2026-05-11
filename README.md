@@ -153,7 +153,7 @@ scraping_date,departure_date,origin,destination,departure_time,flight_duration,p
 2025-09-01,2026-01-06,PRG,AMS,11:35 AM,1h 35min,US$97.31,KLM
 ```
 
-**Provozní data** (FlightRadar24) doplňují skutečné operační informace o letech, zejména typ letadla, registraci, plánované a skutečné časy odletu a status letu.
+**Provozní data** (FlightRadar24) v datasetu (flight_details_FR24.csv) doplňují skutečné operační informace o letech, zejména typ letadla, registraci, plánované a skutečné časy odletu a status letu.
 
 ```
 Date,Origin,Destination,Flight Number,Aircraft,Duration,Sched Dep,Actual Dep,Sched Arr,Status
