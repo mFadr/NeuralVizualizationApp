@@ -213,32 +213,7 @@ duration ; price ; airline_details ; flown_status ; Est. Fuel (kg) ;
 Est. CO2 (kg) ; AVG CO2 (kg/hr) ; aircraft ; emissions_per_seat (AVG)
 ```
 
-## Spuštění projektu
 
-### Lokálně
-
-```bash
-# 1. Klonování repozitáře
-git clone https://github.com/mFadrhons/NeuralVizualizationApp.git
-cd NeuralVizualizationApp
-
-# 2. Vytvoření virtual environment
-python -m venv .venv
-.venv\Scripts\activate          # Windows
-# source .venv/bin/activate     # Mac/Linux
-
-# 3. Instalace závislostí
-pip install -r requirements.txt
-
-# 4. Nastavení prostředí
-copy .env.example .env          # Windows
-# cp .env.example .env          # Mac/Linux
-# Uprav LOCAL_DATA_PATH v .env
-
-# 5. Spuštění
-python mainPage.py
-# http://localhost:8080
-```
 
 ### Docker
 
