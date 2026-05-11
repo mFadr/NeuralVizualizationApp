@@ -1,3 +1,11 @@
+# Neural Flight Analytics Platform — Technická distribuce
+
+> Tento dokument obsahuje spojený obsah souborů `README.md` a `docker-compose.yml` připravený pro technickou distribuci přes GitHub.
+
+---
+
+## Část 1 — README.md
+
 # Neural Flight Analytics Platform
 
 Ekonomicko-statistická analýza cen letů a emisí CO2 ze středoevropských letišť.
@@ -329,3 +337,87 @@ NeuralVizualizationApp/
 Matěj Fadrhons
 Prague, Czech Republic
 GitHub: [@mFadr](https://github.com/mFadr)
+
+---
+
+## Část 2 — docker-compose.yml
+
+```yaml
+version: "3.9"
+
+x-common: &common
+  build: .
+  env_file: .env
+  environment:
+    APP_ENV: cloud
+    PYTHONUNBUFFERED: "1"
+  restart: "no"
+  # ← REMOVE the volumes section entirely for cloud deployment
+  # volumes:
+  #   - ${LOCAL_DATA_PATH:-./data}:/data
+
+services:
+  main-page:
+    <<: *common
+    container_name: main_page
+    command: gunicorn --bind 0.0.0.0:8080 --workers 2 "mainPage:server"
+    ports:
+      - "8050:8050"
+    profiles: ["dashboards"]
+
+  viz-january:
+    <<: *common
+    container_name: viz_january
+    command: gunicorn --bind 0.0.0.0:8051 --workers 2 "vizualizationJanuary:server"
+    ports:
+      - "8051:8051"
+    profiles: ["dashboards"]
+
+  viz-offers:
+    <<: *common
+    container_name: viz_offers
+    command: gunicorn --bind 0.0.0.0:8052 --workers 2 "vizualizationFlightOffers:server"
+    ports:
+      - "8052:8052"
+    profiles: ["dashboards"]
+
+  viz-emission:
+    <<: *common
+    container_name: viz_emission
+    command: gunicorn --bind 0.0.0.0:8053 --workers 2 "vizualizationEmision:server"
+    ports:
+      - "8053:8053"
+    profiles: ["dashboards"]
+
+  viz-sankey:
+    <<: *common
+    container_name: viz_sankey
+    command: gunicorn --bind 0.0.0.0:8054 --workers 2 "vizualizationSankey:server"
+    ports:
+      - "8054:8054"
+    profiles: ["dashboards"]
+
+  viz-gini:
+    <<: *common
+    container_name: viz_gini
+    command: gunicorn --bind 0.0.0.0:8055 --workers 2 "vizualizationGini:server"
+    ports:
+      - "8055:8055"
+    profiles: ["dashboards"]
+
+  viz-routes:
+    <<: *common
+    container_name: viz_routes
+    command: gunicorn --bind 0.0.0.0:8056 --workers 2 "vizualizationRoutes:server"
+    ports:
+      - "8056:8056"
+    profiles: ["dashboards"]
+
+  viz-manual:
+    <<: *common
+    container_name: viz_manual
+    command: gunicorn --bind 0.0.0.0:8057 --workers 2 "vizualizationManual:server"
+    ports:
+      - "8057:8057"
+    profiles: ["dashboards"]
+```
