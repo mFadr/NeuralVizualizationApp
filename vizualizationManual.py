@@ -130,7 +130,7 @@ MANUAL_SECTIONS = [
         "icon":    "🛫",
         "title":   "Příme porovnání leteckých linek",
         "accent":  NEON_ORANGE,
-        "href":    "/routes",
+        "href":    "/overview",
         "popis":   "Porovnává cenové hladiny jednotlivých leteckých linek a výchozích letišť "
                    "pomocí sady přehledných horizontálních sloupcových grafů.",
         "kroky": [
