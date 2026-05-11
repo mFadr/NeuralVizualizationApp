@@ -36,17 +36,15 @@ MANUAL_SECTIONS = [
         "popis":   "Sleduje vývoj cen letenek v čase — jak se cena mění v závislosti na tom, "
                    "kolik dní předem je letenka sledována.",
         "kroky": [
-            ("výchozí letiště",    "Vyber zdrojové letiště (BER · BUD · PRG · VIE · WAW)."),
-            ("destinace",          "Zvol cílovou destinaci nebo ponech 'All' pro všechny trasy."),
-            ("letecká společnost", "Filtruj dle konkrétní aerolinky nebo ponech 'All'."),
-            ("typ letadla",        "Filtruj dle typu letadla (B738, A320 apod.)."),
-            ("režim zobrazení",    "Přepínej mezi daily (každý den sběru dat zvlášť) "
-                                   "a monthly (agregace po měsících)."),
-            ("agregace",           "V měsíčním režimu zvol průměr nebo medián — "
-                                   "oba se zobrazí současně, aktivní je tučný."),
+            ("výchozí letiště",    "Zvolte si jedno z nabízených výchozích letišť (např. Praha, Vídeň, Berlín), ze kterého chcete analyzovat vývoj cen letenek."),
+            ("destinace",          "Vyberte konkrétní cílovou destinaci, nebo ponechte možnost 'All', čímž do analýzy zahrnete všechny dostupné trasy."),
+            ("letecká společnost", "Pokud vás zajímá konkrétní dopravce, můžete zobrazená data omezit pouze na něj. V opačném případě ponechte zobrazené všechny aerolinky."),
+            ("typ letadla",        "Pomocí tohoto filtru si můžete zobrazit pouze lety operované určitým typem letadla (například Boeing 738 nebo Airbus A320)."),
+            ("režim zobrazení",    "Rozhodněte se, zda chcete vidět detailní data po jednotlivých dnech (každé datum letu má svou vlastní křivku), nebo raději agregovaný pohled shrnutý po měsících."),
+            ("agregace",           "V případě měsíčního zobrazení si můžete vybrat mezi výpočtem průměru a mediánu. Na grafu se vždy zobrazí obě křivky, ale vámi zvolená metrika bude vizuálně zvýrazněna."),
         ],
-        "tip": "V denním režimu každá čára = jedno datum odletu. "
-               "Čím více čar konverguje doleva, tím stabilnější je cena dané trasy."
+        "tip": "V denním režimu odpovídá každá zobrazená čára jednomu konkrétnímu datu odletu. "
+               "Čím více čar se k sobě sbíhá na levé straně grafu, tím stabilnější je cena dané trasy."
     },
     {
         "id":      "january",
@@ -57,16 +55,13 @@ MANUAL_SECTIONS = [
         "popis":   "Multioriginové srovnání cen — porovnává trasy ze dvou různých letišť "
                    "na jednom sloučeném grafu (tracker alfa vs. tracker beta).",
         "kroky": [
-            ("agregační metoda",   "Přepínej průměr / medián — platí pro všechny grafy najednou."),
-            ("tracker alfa",       "Nastav výchozí letiště, destinaci, leteckou společnost a "
-                                   "výběr měsíců pro první trasu (zobrazena azurovou barvou)."),
-            ("tracker beta",       "Nastav stejné parametry pro druhou trasu "
-                                   "(zobrazena růžovou barvou) — umožňuje přímé srovnání."),
-            ("filtry destinací",   "Ve spodních grafech (nejlevnější / nejdražší trasy / "
-                                   "srovnání letišť) zaškrtni, které destinace chceš zahrnout."),
+            ("agregační metoda",   "Určete, zda se má pro výpočty používat aritmetický průměr, nebo stabilnější medián. Toto nastavení se automaticky aplikuje na všechny grafy na stránce."),
+            ("tracker alfa",       "Pro první sledovanou trasu (v grafu je označena azurovou barvou) si nastavte požadované výchozí letiště, destinaci, aerolinku a časové období."),
+            ("tracker beta",       "Stejným způsobem definujte parametry pro druhou trasu (v grafu je zobrazena růžově). Tím získáte přímé a přehledné srovnání obou tras v jednom hlavním grafu."),
+            ("filtry destinací",   "Ve spodní části naleznete doplňující grafy (ukazují nejlevnější a nejdražší trasy či srovnání letišť). Pomocí zaškrtávacích políček zde určíte, které destinace se mají v těchto grafech zobrazovat."),
         ],
-        "tip": "Nastav tracker alfa na PRG→AMS a tracker beta na WAW→AMS pro přímé srovnání "
-               "cen ze dvou sousedních letišť na stejné trase."
+        "tip": "Vyzkoušejte nastavit Tracker Alfa například na trasu PRG→AMS a Tracker Beta na WAW→AMS. "
+               "Získáte tak dokonalé srovnání cen ze dvou sousedních letišť při letu do stejné destinace."
     },
     {
         "id":      "emission",
@@ -77,18 +72,17 @@ MANUAL_SECTIONS = [
         "popis":   "Analyzuje uhlíkovou stopu letů — srovnává emise CO₂ dle aerolinky, "
                    "typu letadla nebo trasy.",
         "kroky": [
-            ("výchozí letiště",    "Vyber zdrojové letiště."),
-            ("destinace",          "Vyber cílovou destinaci nebo 'All'."),
-            ("letecká společnost", "Filtruj dle aerolinky."),
-            ("režim emisí",        "Přepínej mezi třemi metrikami:\n"
-                                   "• AVG CO₂ (kg/hod) — průměrná emise motoru za hodinu\n"
-                                   "• Est. CO₂ (kg/let) — celková emise za jeden let\n"
-                                   "• Emise/sedadlo (kg/hod) — emise na jedno sedadlo"),
-            ("seskupit podle",     "Seskup čáry dle letecké společnosti, typu letadla nebo trasy "
-                                   "pro různé úhly pohledu."),
+            ("výchozí letiště",    "Vyberte si letiště, ze kterého sledované lety odlétají, abyste mohli začít s analýzou jejich uhlíkové stopy."),
+            ("destinace",          "Zvolte si konkrétní cílovou destinaci pro detailnější analýzu, nebo ponechte variantu 'All' pro získání celkového emisního přehledu."),
+            ("letecká společnost", "Tento filtr vám umožní detailně se zaměřit na vyprodukované emise pouze u jedné vámi zvolené letecké společnosti."),
+            ("režim emisí",        "Vyberte si jednu ze tří dostupných metrik pro hodnocení emisí:\n"
+                                   "• AVG CO₂ (kg/hod) — ukazuje průměrnou emisi motoru za jednu hodinu letu.\n"
+                                   "• Est. CO₂ (kg/let) — představuje odhadovanou celkovou emisi za jeden konkrétní let.\n"
+                                   "• Emise/sedadlo (kg/hod) — metrika férově přepočítávající emise na jedno sedadlo za hodinu letu."),
+            ("seskupit podle",     "Změňte úhel pohledu na data tím, že si křivky v grafu logicky seskupíte buď podle leteckých společností, typů letadel, nebo podle jednotlivých tras."),
         ],
-        "tip": "Emise/sedadlo je nejférovější metrika pro srovnání letadel různé velikosti — "
-               "velké letadlo může mít vyšší celkové emise, ale nižší na pasažéra."
+        "tip": "Metrika 'Emise/sedadlo' představuje nejférovější způsob pro srovnání letadel různých velikostí. "
+               "Velké letadlo má sice celkově vyšší emise, ale po rozpočítání na pasažéra může být ekologičtější."
     },
     {
         "id":      "sankey",
@@ -96,18 +90,15 @@ MANUAL_SECTIONS = [
         "title":   "ROUTE SANKEY DIAGRAM",
         "accent":  NEON_YELLOW,
         "href":    "/sankey",
-        "popis":   "Vizualizuje průměrné nebo mediánové ceny jako tok (flow) "
+        "popis":   "Vizualizuje průměrné nebo mediánové ceny jako plynulý tok (flow) "
                    "mezi zdrojovými a cílovými letišti.",
         "kroky": [
-            ("výchozí letiště",   "Vyber konkrétní zdrojové letiště nebo 'All Origins' "
-                                  "pro zobrazení všech toků najednou."),
-            ("destinace",         "Filtruj dle cílové destinace."),
-            ("cenová statistika", "Přepínej průměr vs. medián — "
-                                  "průměr = azurová, medián = růžová barva toků."),
+            ("výchozí letiště",   "Zvolte konkrétní letiště odletu, nebo ponechte možnost 'All Origins'. Tím se vám na jednom místě vizualizují veškeré cenové toky napříč celou sledovanou leteckou sítí."),
+            ("destinace",         "Zobrazené cenové toky můžete jednoduše omezit pouze na jednu konkrétní cílovou destinaci, která vás aktuálně zajímá."),
+            ("cenová statistika", "Přepínejte mezi vizualizací průměrné ceny a mediánu. Toky vycházející z aritmetického průměru se vykreslují azurovou barvou, zatímco ty mediánové jsou růžové."),
         ],
-        "tip": "Šířka toku odpovídá výši ceny — čím širší tok, tím dražší trasa. "
-               "Ve statistické liště pod filtry vidíš rozdíl (Δ) mezi průměrem a mediánem "
-               "pro každou trasu."
+        "tip": "Šířka zobrazeného toku přímo odpovídá výši ceny — čím je tok širší, tím je trasa dražší. "
+               "Ve statistické liště pod filtry navíc hned uvidíte rozdíl (Δ) mezi průměrem a mediánem pro každou trasu."
     },
     {
         "id":      "gini",
@@ -118,22 +109,40 @@ MANUAL_SECTIONS = [
         "popis":   "Měří cenovou nerovnoměrnost pomocí True Gini koeficientu "
                    "(Santos & Dias, 2024) — čím vyšší hodnota, tím větší rozptyl cen.",
         "kroky": [
-            ("výchozí letiště", "Filtruj dle zdrojového letiště nebo zobraz všechna najednou."),
-            ("destinace",       "Filtruj dle destinace."),
-            ("režim grafu",     "Přepínej mezi:\n"
-                                "• Bar — horizontální sloupcový graf, seřazený dle Giniho koeficientu\n"
-                                "• Heatmap — matice výchozí letiště × destinace, barva = míra nerovnoměrnosti"),
+            ("výchozí letiště", "Vyberte si, zda chcete analyzovat cenovou nerovnoměrnost a výkyvy z jednoho konkrétního letiště, nebo plošně ze všech letišť najednou."),
+            ("destinace",       "Svoji analýzu můžete upřesnit a zaměřit se na rozptyl cen u letů směřujících do jedné konkrétní destinace."),
+            ("režim grafu",     "Zvolte si preferovaný způsob vizualizace výsledků:\n"
+                                "• Bar — klasický horizontální sloupcový graf, který trasy přehledně seřadí podle hodnoty Giniho koeficientu.\n"
+                                "• Heatmap — teplotní mapa ukazující matici výchozích letišť a destinací, kde použitá barva okamžitě prozradí míru cenové nerovnoměrnosti."),
         ],
         "interpretace": [
-            ("< 0,2",    "Velmi nízká nerovnoměrnost — ceny jsou stabilní"),
-            ("0,2–0,3",  "Nízká nerovnoměrnost"),
-            ("0,3–0,4",  "Střední nerovnoměrnost — typické pro sezónní výkyvy"),
-            ("0,4–0,5",  "Vysoká nerovnoměrnost — ceny silně kolísají"),
-            ("> 0,5",    "Velmi vysoká nerovnoměrnost — výrazná cenová variabilita"),
+            ("< 0,2",    "Velmi nízká nerovnoměrnost — ceny letenek jsou velmi stabilní."),
+            ("0,2–0,3",  "Nízká nerovnoměrnost."),
+            ("0,3–0,4",  "Střední nerovnoměrnost — obvykle odráží běžné sezónní výkyvy."),
+            ("0,4–0,5",  "Vysoká nerovnoměrnost — ceny v průběhu času silně kolísají."),
+            ("> 0,5",    "Velmi vysoká nerovnoměrnost — značná cenová variabilita a neustálé změny."),
         ],
-        "tip": "True Gini splňuje symetrii, škálovou invarianci a Pigou-Daltonův princip, "
-               "ale nesplňuje princip populace — nelze jej použít pro srovnání skupin "
-               "různé velikosti."
+        "tip": "True Gini matematicky splňuje symetrii, škálovou invarianci a Pigou-Daltonův princip, "
+               "ale nesplňuje princip populace — není proto ideální pro srovnávání nestejně velkých vzorků."
+    },
+    {
+        "id":      "routes",
+        "icon":    "🛫",
+        "title":   "ROUTE COMPARISON ANALYZER",
+        "accent":  NEON_ORANGE,
+        "href":    "/routes",
+        "popis":   "Porovnává cenové hladiny jednotlivých leteckých linek a výchozích letišť "
+                   "pomocí sady přehledných horizontálních sloupcových grafů.",
+        "kroky": [
+            ("filtr zrušených letů", "Vyberte si, zda chcete do své analýzy zahrnout veškeré záznamy o letech (včetně těch zrušených), nebo zda se mají počítat výhradně lety, které se ve skutečnosti uskutečnily."),
+            ("agregační metoda",     "Rozhodněte se, jestli pro výpočet a srovnání celkových cenových hladin preferujete standardní aritmetický průměr, nebo spíše medián."),
+            ("filtry destinací",     "Nad každým ze tří zobrazených grafů najdete zaškrtávací políčka. Pomocí nich si můžete přesně určit, které cílové destinace mají být v daném grafu zahrnuty do srovnání."),
+            ("nejlevnější trasy",    "První graf zleva (fialový) vám přehledně ukáže desítku absolutně nejlevnějších leteckých spojení napříč databází na základě vašich filtrů."),
+            ("nejdražší trasy",      "Prostřední graf (růžovo-fialový) vizualizuje naopak desítku těch spojení, která vycházejí cenově nejdráž."),
+            ("srovnání letišť",      "Třetí graf vpravo (azurový) plní funkci celkového shrnutí – agreguje data a ukazuje, které výchozí letiště celkově nabízí nejlevnější letenky."),
+        ],
+        "tip": "Tato aplikace je ideálním nástrojem pro rychlé zjištění toho, z jakého letiště (a na jaké trase) "
+               "se aktuálně létá nejlevněji do vámi preferovaných evropských destinací."
     },
 ]
 
@@ -403,7 +412,8 @@ def _section(sec: dict) -> html.Div:
         "border":          f"1px solid {accent}25",
         "borderRadius":    "12px",
         "padding":         "20px",
-        "boxShadow":       f"0 0 16px {accent}10"
+        "boxShadow":       f"0 0 16px {accent}10",
+        "height":          "100%"
     })
 
 
@@ -439,7 +449,7 @@ layout = html.Div([
             "textAlign":     "center"
         }),
         html.Div(
-            "FLIGHT ANALYTICS PLATFORM  ·  UŽIVATELSKÝ MANUÁL  ·  v1.0",
+            "FLIGHT ANALYTICS PLATFORM  ·  UŽIVATELSKÝ MANUÁL  ·  v1.1",
             style={
                 "color":         NEON_BLUE,
                 "fontSize":      "9px",
@@ -458,9 +468,9 @@ layout = html.Div([
     html.Div([
         html.Span("ℹ️  ", style={"fontSize": "14px"}),
         html.Span(
-            "Platforma obsahuje 5 analytických modulů. Každý modul je přístupný "
-            "přes kartu na hlavní stránce nebo přes navigační odkaz v záhlaví každé "
-            "vizualizace. Klikni na název modulu v manuálu pro přímé přesměrování.",
+            "Platforma obsahuje celkem 6 analytických modulů. Každý modul je přístupný "
+            "přes příslušnou kartu na hlavní stránce nebo přes navigační odkaz v záhlaví každé "
+            "vizualizace. Kliknutím na název modulu v manuálu budete přímo přesměrováni do dané sekce.",
             style={
                 "color":      TEXT_MUTED,
                 "fontSize":   "12px",
@@ -483,15 +493,15 @@ layout = html.Div([
             [_section(s) for s in MANUAL_SECTIONS if s["id"] in ("offers", "emission", "gini")],
             style={"display": "flex", "flexDirection": "column", "gap": "20px", "flex": "1"}
         ),
-        # Pravý sloupec: January, Sankey
+        # Pravý sloupec: January, Sankey, Routes
         html.Div(
-            [_section(s) for s in MANUAL_SECTIONS if s["id"] in ("january", "sankey")],
+            [_section(s) for s in MANUAL_SECTIONS if s["id"] in ("january", "sankey", "routes")],
             style={"display": "flex", "flexDirection": "column", "gap": "20px", "flex": "1"}
         ),
     ], style={
         "display": "flex",
         "gap":     "20px",
-        "alignItems": "flex-start"
+        "alignItems": "stretch"
     }),
 
     # ── Patička ───────────────────────────────────────────────────────
