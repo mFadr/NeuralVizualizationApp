@@ -30,7 +30,7 @@ MANUAL_SECTIONS = [
     {
         "id":      "offers",
         "icon":    "📈",
-        "title":   "BOOKING CURVE ANALYZER",
+        "title":   "Historie vývoje cen letenek",
         "accent":  NEON_CYAN,
         "href":    "/offers",
         "popis":   "Sleduje vývoj cen letenek v čase — jak se cena mění v závislosti na tom, "
@@ -49,7 +49,7 @@ MANUAL_SECTIONS = [
     {
         "id":      "january",
         "icon":    "✈️",
-        "title":   "JANUARY FLIGHT TRACKER",
+        "title":   "Vizualizace cen letenek z Ledna",
         "accent":  NEON_PINK,
         "href":    "/january",
         "popis":   "Multioriginové srovnání cen — porovnává trasy ze dvou různých letišť "
@@ -66,7 +66,7 @@ MANUAL_SECTIONS = [
     {
         "id":      "emission",
         "icon":    "🌍",
-        "title":   "EMISSION INTELLIGENCE",
+        "title":   "Porovnání emisí leteckých společností",
         "accent":  NEON_GREEN,
         "href":    "/emission",
         "popis":   "Analyzuje uhlíkovou stopu letů — srovnává emise CO₂ dle aerolinky, "
@@ -87,7 +87,7 @@ MANUAL_SECTIONS = [
     {
         "id":      "sankey",
         "icon":    "🗺️",
-        "title":   "ROUTE SANKEY DIAGRAM",
+        "title":   "Porovnání ceny tras pomocí Sankey diagramu",
         "accent":  NEON_YELLOW,
         "href":    "/sankey",
         "popis":   "Vizualizuje průměrné nebo mediánové ceny jako plynulý tok (flow) "
@@ -103,7 +103,7 @@ MANUAL_SECTIONS = [
     {
         "id":      "gini",
         "icon":    "📊",
-        "title":   "GINI ANALYZER",
+        "title":   "Analyzátor Gini nerovnosti",
         "accent":  NEON_PURPLE,
         "href":    "/gini",
         "popis":   "Měří cenovou nerovnoměrnost pomocí True Gini koeficientu "
@@ -128,7 +128,7 @@ MANUAL_SECTIONS = [
     {
         "id":      "routes",
         "icon":    "🛫",
-        "title":   "ROUTE COMPARISON ANALYZER",
+        "title":   "Příme porovnání leteckých linek",
         "accent":  NEON_ORANGE,
         "href":    "/routes",
         "popis":   "Porovnává cenové hladiny jednotlivých leteckých linek a výchozích letišť "
@@ -240,7 +240,7 @@ def _airport_overview_table():
 
     # Hlavička tabulky + dva sloupce vedle sebe
     return html.Div([
-        html.Div("◈  PŘEHLED LETIŠŤ  //  KÓD A MĚSTO", style={
+        html.Div("◈ PŘEHLED LETIŠŤ  //  KÓD A MĚSTO", style={
             "color":         NEON_BLUE,
             "fontSize":      "9px",
             "letterSpacing": "3px",
@@ -439,7 +439,7 @@ layout = html.Div([
 
     # ── Nadpis ────────────────────────────────────────────────────────
     html.Div([
-        html.H2("◈  NÁVOD NA POUŽITÍ", style={
+        html.H2("NÁVOD NA POUŽITÍ", style={
             "color":         NEON_CYAN,
             "textShadow":    f"0 0 16px {NEON_CYAN}",
             "letterSpacing": "5px",
@@ -536,5 +536,5 @@ layout = html.Div([
 # =====================================================================
 if __name__ == "__main__":
     import os
-    port = int(os.environ.get("PORT", 8056))
+    port = int(os.environ.get("PORT", 8057))
     app.run(host="0.0.0.0", port=port, debug=False)
