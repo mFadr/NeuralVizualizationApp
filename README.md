@@ -194,9 +194,9 @@ Pro každé výchozí letiště existuje samostatný skript, který provede stat
 Vyčištěná data (po DataPreparing)
         |
         v
- PRG_1_0.py / WAW_1_0.py    statistická analýza, výpočet emisí,
- VIE_1_0.py / BER_1_0.py    generování _form.csv pro vizualizace
- BUD_1_0.py
+ PRG_formatter.py / WAW_formatter.py    statistická analýza, výpočet emisí,
+ VIE_formatter.py / BER_formatter.py    generování _form.csv pro vizualizace
+ BUD_formatter.py
         |
         v
    _form.csv soubory        čistá data připravená pro dashboard
