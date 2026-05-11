@@ -2,10 +2,7 @@ import os
 
 ENV = os.getenv("APP_ENV", "local")
 
-BASE_PATHS = {
-    "local": "C:/Users/mFadrhons/Documents/WS/repository/SAVE",
-    "cloud": "data"   # ← relative path, sits next to the scripts
-}
+
 
 BASE = BASE_PATHS[ENV]
 
