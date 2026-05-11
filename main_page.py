@@ -15,64 +15,68 @@ init_db()
 
 BG_COLOR    = "#0b0c10"
 PANEL_BG    = "#1f2833"
+KPI_BG      = "#0d1117"        # Tmavší pozadí pro neinteraktivní KPI dlaždice
 NEON_CYAN   = "#66fcf1"
 NEON_BLUE   = "#45a29e"
 NEON_PINK   = "#ff007f"
-NEON_YELLOW = "#ffa500"
 NEON_PURPLE = "#9d4edd"
+NEON_YELLOW = "#f5c518"
+NEON_GREEN  = "#39ff14"
 TEXT_MUTED  = "#c5c6c7"
 
 PAGES = [
     {
-        "title":    "BOOKING CURVE ANALYZER",
-        "subtitle": "Price trends over the scraping period",
+        "title":    "Historie vývoje cen letenek",
+        "subtitle": "Křivka vývoje cen letenek 09/2025–01/2026",
         "href":     "/offers",
         "accent":   NEON_CYAN,
         "icon":     "📈"
     },
     {
-        "title":    "JANUARY FLIGHT TRACKER",
-        "subtitle": "Multi-origin price comparison — Jan 2026",
+        "title":    "Porovnání cen letů z ledna 2026",
+        "subtitle": "Srovnání cen napříč výchozími letišti",
         "href":     "/january",
         "accent":   NEON_PINK,
         "icon":     "✈️"
     },
     {
-        "title":    "EMISSION INTELLIGENCE",
-        "subtitle": "CO₂ and per-seat emission analysis",
+        "title":    "Analýza emisí jednotlivých letů",
+        "subtitle": "Analýza emisí CO₂ pro jednotlivé typy letadel",
         "href":     "/emission",
-        "accent":   "#39ff14",
+        "accent":   NEON_GREEN,
         "icon":     "🌍"
     },
     {
-        "title":    "ROUTE SANKEY",
-        "subtitle": "Flow diagram of prices between cities",
+        "title":    "Sankey diagram tras",
+        "subtitle": "Diagram toku cen na jednotlivých trasách",
         "href":     "/sankey",
-        "accent":   "#f5c518",
+        "accent":   NEON_YELLOW,
         "icon":     "🗺️"
     },
     {
-        "title":    "GINI ANALYZER",
-        "subtitle": "Inequality analysis of price distributions",
+        "title":    "Analyzátor Gini",
+        "subtitle": "Analýza nerovnosti rozdělení cen na jednotlivých trasách",
         "href":     "/gini",
         "accent":   NEON_PURPLE,
         "icon":     "📊"
     },
     {
-        "title":    "ROUTES overview",
-        "subtitle": "Overview of all tracked routes and their price distributions",
+        "title":    "Přehled všech sledovaných tras",
+        "subtitle": "Přímé porovnání cen z letišť ve Střední Evropě: PRG / VIE / BUD / BER / WAW ",
         "href":     "/overview",
         "accent":   NEON_YELLOW,
         "icon":     "🗂️"
     },
-    {
-        "title":    "Manual",
-        "subtitle": "How to use the platform and interpret the data",
-        "href":     "/info",
-        "accent":   NEON_PURPLE,
-        "icon":     "📊"
-    },
 ]
+
+# Karta Manual zobrazená v pravém bočním panelu (symetricky s Traffic Analytics)
+MANUAL_PAGE = {
+    "title":    "Manuál",
+    "subtitle": "Jak používat platformu a interpretovat data",
+    "href":     "/info",
+    "accent":   NEON_PURPLE,
+    "icon":     "📊"
+}
 
 # === Výpočet KPI === (beze změny)
 def compute_kpis():
@@ -150,13 +154,13 @@ def make_kpi_card(label, value, unit="", accent=NEON_CYAN):
             })
         ])
     ], style={
-        "backgroundColor": PANEL_BG,
+        "backgroundColor": KPI_BG,
         "border":          f"1px solid {accent}30",
         "borderRadius":    "10px",
         "padding":         "14px 18px",
         "flex":            "1",
         "minWidth":        "120px",
-        "boxShadow":       f"0 0 10px {accent}15"
+        "boxShadow":       f"0 0 6px {accent}10"
     })
 
 
@@ -200,118 +204,101 @@ def make_card(page):
 def make_analytics_panel():
     stats = get_stats()
 
-    # Hlavička s celkovými ukazateli
+    # Hlavička s celkovými ukazateli — vertikální stack (každý KPI na vlastním řádku),
+    # aby v úzkém postranním panelu nedocházelo k přetékání.
+    def _stat_row(label, value, color):
+        return html.Div([
+            html.Div(label, style={
+                "color":         NEON_BLUE,
+                "fontSize":      "9px",
+                "letterSpacing": "2px",
+                "fontFamily":    "Courier New, monospace",
+                "marginBottom":  "2px"
+            }),
+            html.Div(f"{value:,}", style={
+                "color":      color,
+                "fontSize":   "18px",
+                "fontWeight": "bold",
+                "fontFamily": "Courier New, monospace",
+                "textShadow": f"0 0 6px {color}",
+                "lineHeight": "1.1"
+            })
+        ], style={
+            "marginBottom":  "10px",
+            "textAlign":     "left"
+        })
+
     header_row = html.Div([
-        html.Div([
-            html.Div("TOTAL VISITS", style={
-                "color": NEON_BLUE, "fontSize": "8px",
-                "letterSpacing": "2px"
-            }),
-            html.Div(f"{stats['total']:,}", style={
-                "color": NEON_CYAN, "fontSize": "18px",
-                "fontWeight": "bold",
-                "textShadow": f"0 0 6px {NEON_CYAN}"
-            })
-        ], style={"flex": "1", "textAlign": "center"}),
-
-        html.Div([
-            html.Div("LAST 24H", style={
-                "color": NEON_BLUE, "fontSize": "8px",
-                "letterSpacing": "2px"
-            }),
-            html.Div(f"{stats['last_24h']:,}", style={
-                "color": "#39ff14", "fontSize": "18px",
-                "fontWeight": "bold",
-                "textShadow": "0 0 6px #39ff14"
-            })
-        ], style={"flex": "1", "textAlign": "center"}),
-
-        html.Div([
-            html.Div("UNIQUE / 7D", style={
-                "color": NEON_BLUE, "fontSize": "8px",
-                "letterSpacing": "2px"
-            }),
-            html.Div(f"{stats['unique_7d']:,}", style={
-                "color": NEON_PINK, "fontSize": "18px",
-                "fontWeight": "bold",
-                "textShadow": f"0 0 6px {NEON_PINK}"
-            })
-        ], style={"flex": "1", "textAlign": "center"})
+        _stat_row("CELKOVÝ POČET NÁVŠTĚV", stats['total'],     NEON_CYAN),
+        _stat_row("POSLEDNÍCH 24H",     stats['last_24h'],  NEON_GREEN),
+        _stat_row("NOVĚ PŘÍCHOZÍCH ZA 7 DNÍ",    stats['unique_7d'], NEON_PINK),
     ], style={
-        "display": "flex", "gap": "12px",
-        "marginBottom": "12px",
+        "marginBottom":  "12px",
         "paddingBottom": "10px",
-        "borderBottom": f"1px solid {NEON_BLUE}20",
-        "paddingRight": "250px"  # ← Changed from 60px to ~250px (60 + 190)
+        "borderBottom":  f"1px solid {NEON_BLUE}20"
     })
 
-    # Tabulka popularity modulů
-    if not stats["modules"]:
-        module_rows = [html.Div("No traffic data yet", style={
-            "color": TEXT_MUTED, "fontSize": "10px",
-            "textAlign": "center", "padding": "8px"
-        })]
-    else:
-        max_visits = max(m["visits"] for m in stats["modules"]) or 1
-        module_rows = []
-        for m in stats["modules"]:
-            label    = PATH_LABELS.get(m["path"], m["path"])
-            width_pc = (m["visits"] / max_visits) * 100
-            module_rows.append(html.Div([
-                html.Div([
-                    html.Span(label, style={
-                        "color": NEON_CYAN, "fontSize": "10px",
-                        "fontFamily": "Courier New, monospace"
-                    }),
-                    html.Span(f"{m['visits']:,} hits", style={
-                        "color": TEXT_MUTED, "fontSize": "10px",
-                        "fontFamily": "Courier New, monospace",
-                        "float": "right"
-                    })
-                ], style={"marginBottom": "3px"}),
-                html.Div(style={
-                    "width": f"{width_pc}%",
-                    "height": "4px",
-                    "backgroundColor": NEON_CYAN,
-                    "boxShadow": f"0 0 4px {NEON_CYAN}",
-                    "borderRadius": "2px"
-                })
-            ], style={"marginBottom": "6px"}))
 
+
+
+
+def make_manual_panel():
+    """Sestavení pravého bočního panelu s odkazem na manuál.
+
+    Panel je umístěn symetricky proti levému Traffic Analytics panelu.
+    Obsahuje krátký nadpis a úzké obdélníkové tlačítko (link), které
+    navádí uživatele na detailní stránku /info.
+    """
     return html.Div([
-        html.Div("◈  TRAFFIC ANALYTICS  //  MODULE POPULARITY", style={
+        # Hlavička panelu (analogická s "TRAFFIC ANALYTICS" vlevo)
+        html.Div("◈  MANUÁL FUNKCÍ APLIKACE", style={
             "color":         NEON_BLUE,
             "fontSize":      "9px",
             "letterSpacing": "3px",
             "fontFamily":    "Courier New, monospace",
-            "marginBottom":  "10px"
+            "marginBottom":  "12px"
         }),
-        html.Div([
-            # Neviditelný spacer na levé straně
-            html.Div(module_rows, style={
-                "flex": "1"
-            }),
-            # Střed - header_row
-            html.Div(header_row, style={
-                "flex": "1",
-                "display": "flex",
-                "justifyContent": "center"
-            }),
-            # Neviditelný spacer na pravé straně
-            html.Div(style={
-                "flex": "1",
-                "visibility": "hidden"
-            })
-        ], style={
-            "display": "flex",
-            "gap": "12px"
-        })
+
+        # Krátký popis pod nadpisem
+        html.Div(
+            "Jak používat platformu a interpretovat data",
+            style={
+                "color":         TEXT_MUTED,
+                "fontSize":      "10px",
+                "lineHeight":    "1.5",
+                "fontFamily":    "Courier New, monospace",
+                "marginBottom":  "14px",
+                "textAlign":     "left"
+            }
+        ),
+
+        # Obdélníkové tlačítko (užší forma) — odkaz na manuál
+        html.A(
+            "▶  OTEVŘÍT MANUÁL",
+            href=MANUAL_PAGE["href"],
+            style={
+                "display":         "block",
+                "padding":         "10px 14px",
+                "color":           NEON_PURPLE,
+                "backgroundColor": KPI_BG,
+                "border":          f"1px solid {NEON_PURPLE}80",
+                "borderRadius":    "6px",
+                "textDecoration":  "none",
+                "fontSize":        "11px",
+                "letterSpacing":   "2px",
+                "textAlign":       "center",
+                "fontFamily":      "Courier New, monospace",
+                "fontWeight":      "bold",
+                "textShadow":      f"0 0 6px {NEON_PURPLE}",
+                "boxShadow":       f"0 0 10px {NEON_PURPLE}30"
+            }
+        ),
     ], style={
         "padding":         "12px 16px",
         "backgroundColor": PANEL_BG,
         "borderRadius":    "10px",
-        "border":          f"1px solid {NEON_PINK}30",
-        "boxShadow":       f"0 0 12px {NEON_PINK}15",
+        "border":          f"1px solid {NEON_PURPLE}30",
+        "boxShadow":       f"0 0 12px {NEON_PURPLE}15",
         "marginBottom":    "28px"
     })
 
@@ -331,20 +318,20 @@ def make_footer():
         # Hlavní řádek s textem footeru
         html.Div([
             html.Span("© 2026 ", style={"color": TEXT_MUTED}),
-            html.Span("Flight Analytics Platform ", style={
+            html.Span("Aplikace na vizualizaci leteckých dat ", style={
                 "color":      NEON_CYAN,
                 "fontWeight": "bold",
                 "textShadow": f"0 0 6px {NEON_CYAN}"
             }),
             html.Span("by ", style={"color": TEXT_MUTED}),
-            html.Span("[Jméno autora] ", style={
+            html.Span("Matěj Fadrhons ", style={
                 "color":      NEON_CYAN,
                 "fontWeight": "bold"
             }),
             html.Span(" |  ", style={"color": NEON_BLUE}),
-            html.Span("All Rights Reserved", style={"color": TEXT_MUTED}),
+            html.Span("Všechna práva vyhrazena", style={"color": TEXT_MUTED}),
             html.Span("  |  ", style={"color": NEON_BLUE}),
-            html.Span("Powered by ", style={"color": TEXT_MUTED}),
+            html.Span("S využítím ", style={"color": TEXT_MUTED}),
             html.A("Plotly Dash", href="https://plotly.com/dash/",
                    target="_blank",
                    style={
@@ -384,7 +371,7 @@ def make_footer():
 
         # Třetí řádek s informačním upozorněním
         html.Div([
-            html.Span("Data sesbírána v lednu 2026  //  Vizualizace slouží výhradně k akademickým a vzdělávacím účelům",
+            html.Span("Data sesbírána na leden 2026  //  Vizualizace slouží výhradně k akademickým a vzdělávacím účelům",
                       style={"color": TEXT_MUTED, "opacity": "0.7"})
         ], style={
             "fontSize":      "9px",
@@ -397,7 +384,7 @@ def make_footer():
         # Čtvrtý řádek s odkazem na repozitář
         html.Div([
             html.A("GitHub repozitář",
-                   href="https://github.com/[uživatelské-jméno]/[název-repozitáře]",
+                   href="https://github.com/mFadr/NeuralVizualizationApp",
                    target="_blank",
                    style={
                        "color":          NEON_BLUE,
@@ -421,130 +408,154 @@ def make_footer():
 
 
 def build_main_layout():
-    """Sestavení hlavního layoutu, aby se analytiky obnovovaly při každé návštěvě."""
+    """Sestavení hlavního layoutu, aby se analytiky obnovovaly při každé návštěvě.
+
+    Layout je 3sloupcový a symetrický:
+      vlevo:  Traffic Analytics (sledování návštěvnosti)
+      střed:  KPI dlaždice + stavová lišta + mřížka 3+3 modulů
+      vpravo: Manual for apps functions (přístup k uživatelské příručce)
+    """
+
+    # ── Hlavní obsahová oblast (3sloupcová sestava) ──────────────────
+    main_content = html.Div([
+
+        # ── Levý sloupec: Traffic Analytics ──────────────────────────
+        html.Div([
+            make_analytics_panel(),
+        ], style={
+            "width":     "220px",
+            "flexShrink": "0"
+        }),
+
+        # ── Střední sloupec: KPI + status + mřížka modulů ────────────
+        html.Div([
+            # KPI karty — horizontální řada (5 dlaždic)
+            html.Div([
+                make_kpi_card("VÝCHOZÍ LETIŠTĚ",   KPI["origins"],
+                              "letišť",  NEON_CYAN),
+                make_kpi_card("CELKOVÝ POČET ZÁZNAMŮ",     f"{KPI['total_records']:,}",
+                              "záznamů",     NEON_BLUE),
+                make_kpi_card("POČET SLEDOVANÝCH TRAS",    KPI["total_routes"],
+                              "linek",   NEON_PURPLE),
+                make_kpi_card("PRŮMĚRNÁ CENA LETENKY",  f"${KPI['avg_price']}",
+                              "USD",      NEON_YELLOW),
+                make_kpi_card("CENOVÝ ROZPTYL",
+                              f"${KPI['min_price']}–${KPI['max_price']}",
+                              "USD",      NEON_GREEN),
+            ], style={
+                "display":        "flex",
+                "flexWrap":       "wrap",
+                "gap":            "12px",
+                "marginBottom":   "20px",
+                "justifyContent": "center"
+            }),
+
+            # Stavová lišta s informacemi o načtených datech
+            html.Div([
+                html.Div("◈  NAHRANÁ DATA V SYSTÉMU: ", style={
+                    "color":         NEON_BLUE,
+                    "fontSize":      "9px",
+                    "letterSpacing": "3px",
+                    "fontFamily":    "Courier New, monospace",
+                    "marginBottom":  "8px",
+                    "textAlign":     "center"
+                }),
+                html.Div([
+                    html.Span("▶  DATASETY NAHRÁNY  ", style={"color": NEON_CYAN}),
+                    html.Span(f"{KPI['origins']}/5 výchozích letišť  ·  ",
+                              style={"color": NEON_GREEN}),
+                    html.Span(f"{KPI['total_records']:,} celkový počet záznamů  ·  ",
+                              style={"color": TEXT_MUTED}),
+                    html.Span(f"{KPI['total_routes']} sledovaných tras  ·  ",
+                              style={"color": TEXT_MUTED}),
+                    html.Span(f"průmerná cena ${KPI['avg_price']}  ·  ",
+                              style={"color": NEON_YELLOW}),
+                ], style={
+                    "fontSize":         "11px",
+                    "fontFamily":       "Courier New, monospace",
+                    "padding":          "8px 12px",
+                    "backgroundColor":  KPI_BG,
+                    "borderRadius":     "6px",
+                    "border":           f"1px solid {NEON_BLUE}30",
+                    "overflowX":        "auto",
+                    "whiteSpace":       "nowrap",
+                    "textAlign":        "center"
+                })
+            ], style={
+                "marginBottom":     "20px",
+                "padding":          "12px 16px",
+                "backgroundColor":  PANEL_BG,
+                "borderRadius":     "10px",
+                "border":           f"1px solid {NEON_BLUE}20",
+                "boxShadow":        f"0 0 12px {NEON_BLUE}20"
+            }),
+
+            # Mřížka modulů 3 + 3 (dokonale symetrická)
+            html.Div(
+                [make_card(p) for p in PAGES[:3]],
+                style={
+                    "display":             "grid",
+                    "gridTemplateColumns": "1fr 1fr 1fr",
+                    "gap":                 "20px",
+                    "marginBottom":        "20px",
+                    "width":               "100%"
+                }
+            ),
+            html.Div(
+                [make_card(p) for p in PAGES[3:6]],
+                style={
+                    "display":             "grid",
+                    "gridTemplateColumns": "1fr 1fr 1fr",
+                    "gap":                 "20px",
+                    "width":               "100%"
+                }
+            )
+        ], style={
+            "flex":      "1",
+            "minWidth":  "0"
+        }),
+
+        # ── Pravý sloupec: Manual for apps functions ─────────────────
+        html.Div([
+            make_manual_panel(),
+        ], style={
+            "width":      "220px",
+            "flexShrink": "0"
+        }),
+
+    ], style={
+        "display":     "flex",
+        "gap":         "24px",
+        "width":       "100%",
+        "alignItems":  "flex-start"
+    })
+
+    # ── Sestavení celé stránky ───────────────────────────────────────
     return html.Div([
         html.Div([
-            html.H1("✈  FLIGHT ANALYTICS PLATFORM", style={
+            html.H1("APLIKACE: VIZUALIZACE DAT Z VYBRANÝCH LETECKÝCH TRAS", style={
                 "color":        NEON_CYAN,
                 "textShadow":   f"0 0 20px {NEON_CYAN}",
                 "letterSpacing":"5px",
                 "fontSize":     "22px",
                 "fontFamily":   "Courier New, monospace",
-                "margin":       "0 0 150px 0",
+                "margin":       "0 0 18px 0",
                 "width":        "100%",
                 "textAlign":    "center"
             }),
-            html.Div("CENTRAL OPERATIONS  //  SELECT MODULE", style={
+            html.Div("ANALÝZA 20 VYBRANÝCH LETECKÝCH LINEK Z LETIŠŤ VE STŘEDNÍ EVROPĚ", style={
                 "color":         NEON_BLUE,
                 "fontSize":      "10px",
                 "letterSpacing": "4px",
                 "fontFamily":    "Courier New, monospace",
-                "marginBottom":  "28px"
+                "marginBottom":  "32px",
+                "textAlign":     "center"
             }),
 
-            # Hlavní flex layout s levým panelem analytiky a pravým obsahem s KPI
-            html.Div([
-                # Levý panel - Analytics panel jako vertikální banner
-                html.Div([
-                    make_analytics_panel(),
-                ], style={
-                    "width":       "20%",
-                    "marginRight": "24px"
-                }),
-
-                # Pravý panel - Obsah a karty modulů
-                html.Div([
-                    # KPI karty - horizontální orientace
-                    html.Div([
-                        make_kpi_card("ORIGIN AIRPORTS",   KPI["origins"],
-                                      "origins",  NEON_CYAN),
-                        make_kpi_card("TOTAL RECORDS",     f"{KPI['total_records']:,}",
-                                      "rows",     NEON_BLUE),
-                        make_kpi_card("ROUTES TRACKED",    KPI["total_routes"],
-                                      "routes",   NEON_PURPLE),
-                        make_kpi_card("AVG TICKET PRICE",  f"${KPI['avg_price']}",
-                                      "USD",      "#f5c518"),
-                        make_kpi_card("PRICE RANGE",
-                                      f"${KPI['min_price']}–${KPI['max_price']}",
-                                      "USD",      "#39ff14"),
-                    ], style={
-                        "display":        "flex",
-                        "flexWrap":       "wrap",
-                        "gap":            "12px",
-                        "marginBottom":   "20px"
-                    }),
-
-                    # Stávající stavová lišta
-                    html.Div([
-                        html.Div("◈  SYSTEM STATUS  //  DATA TRACKING", style={
-                            "color":         NEON_BLUE,
-                            "fontSize":      "9px",
-                            "letterSpacing": "3px",
-                            "fontFamily":    "Courier New, monospace",
-                            "marginBottom":  "8px"
-                        }),
-                        html.Div([
-                            html.Span("▶  DATASETS LOADED  ", style={"color": NEON_CYAN}),
-                            html.Span(f"{KPI['origins']}/5 origins  ·  ",
-                                      style={"color": "#39ff14"}),
-                            html.Span(f"{KPI['total_records']:,} total records  ·  ",
-                                      style={"color": TEXT_MUTED}),
-                            html.Span(f"{KPI['total_routes']} routes tracked  ·  ",
-                                      style={"color": TEXT_MUTED}),
-                            html.Span(f"avg price ${KPI['avg_price']}  ·  ",
-                                      style={"color": "#f5c518"}),
-                        ], style={
-                            "fontSize":   "11px",
-                            "fontFamily": "Courier New, monospace",
-                            "padding":    "8px 12px",
-                            "backgroundColor": "#0d1117",
-                            "borderRadius":    "6px",
-                            "border":          f"1px solid {NEON_BLUE}30",
-                            "overflowX":  "auto",
-                            "whiteSpace": "nowrap"
-                        })
-                    ], style={
-                        "marginBottom": "20px",
-                        "padding":      "12px 16px",
-                        "backgroundColor": PANEL_BG,
-                        "borderRadius": "10px",
-                        "border":       f"1px solid {NEON_BLUE}20",
-                        "boxShadow":    f"0 0 12px {NEON_BLUE}20"
-                    }),
-
-
-                    # Karty modulů - 3+3 layout
-                    html.Div(
-                        [make_card(p) for p in PAGES[:3]],
-                        style={
-                            "display":             "grid",
-                            "gridTemplateColumns": "1fr 1fr 1fr",
-                            "gap":                 "20px",
-                            "marginBottom":        "20px",
-                            "width":               "100%"
-                        }
-                    ),
-                    html.Div(
-                        [make_card(p) for p in PAGES[3:]],
-                        style={
-                            "display":             "grid",
-                            "gridTemplateColumns": "1fr 1fr 1fr",
-                            "gap":                 "20px",
-                            "width":               "100%"
-                        }
-                    )
-                ], style={
-                    "flex": "1"
-                })
-            ], style={
-                "display":   "flex",
-                "gap":       "20px",
-                "width":     "100%"
-            })
+            main_content
 
         ], style={
-            "textAlign": "center",
-            "maxWidth":  "960px",
+            "maxWidth":  "1280px",
             "margin":    "0 auto",
             "width":     "100%"
         }),
@@ -557,7 +568,7 @@ def build_main_layout():
         "minHeight":       "100vh",
         "display":         "flex",
         "flexDirection":   "column",
-        "alignItems":      "center",
+        "alignItems":      "stretch",
         "justifyContent":  "flex-start",
         "padding":         "32px 24px 0 24px",
         "fontFamily":      "Courier New, monospace"
