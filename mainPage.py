@@ -71,7 +71,7 @@ PAGES = [
 
 # Karta Manual zobrazená v pravém bočním panelu (symetricky s Traffic Analytics)
 MANUAL_PAGE = {
-    "title":    "Manuál",
+    "title":    "Manuál k aplikaci",
     "subtitle": "Jak používat platformu a interpretovat data",
     "href":     "/info",
     "accent":   NEON_PURPLE,
