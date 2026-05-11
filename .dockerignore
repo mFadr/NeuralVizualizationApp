@@ -30,10 +30,10 @@ Thumbs.db
 .ipynb_checkpoints/
 
 # ── Local processor scripts (not needed on server) ───────────────────
-PRG_1_0.py
-WAW_1_0.py
-VIE_1_0.py
-BER_1_0.py
-BUD_1_0.py
-fix_vie_canceled.py
-match_flights.py
+PRG_formatter.py
+WAW_formatter.py
+VIE_formatter.py
+BER_formatter.py
+BUD_formatter.py
+
+
