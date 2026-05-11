@@ -259,7 +259,9 @@ docker-compose --profile processors run --rm proc-prg
 | January Tracker | 8051 | `http://localhost:8051` |
 | Emission System | 8053 | `http://localhost:8053` |
 | Sankey Diagram | 8054 | `http://localhost:8054` |
-| Route Analyzer | 8054 | `http://localhost:8054` |
+| Gini Analyzer | 8055 | `http://localhost:8055` |
+| Route Analyzer | 8056 | `http://localhost:8056` |
+| App Manual | 8057 | `http://localhost:8057` |
 
 ## Konfigurace prostředí
 
