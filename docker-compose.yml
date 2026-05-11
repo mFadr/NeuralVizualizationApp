@@ -15,7 +15,7 @@ services:
   main-page:
     <<: *common
     container_name: main_page
-    command: gunicorn --bind 0.0.0.0:8080 --workers 2 "mainPage:server"
+    command: gunicorn --bind 0.0.0.0:8080 --workers 2 "main_page:server"
     ports:
       - "8080:8080"
     profiles: ["dashboards"]
