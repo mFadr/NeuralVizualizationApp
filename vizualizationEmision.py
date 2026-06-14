@@ -547,7 +547,7 @@ def update_airline(origin, dest, select_all):
     trad_options = [{"label": f"  {name}", "value": name} for name in traditional]
     low_options  = [{"label": f"  {name}", "value": name} for name in low_cost]
 
-    # Pokud je aktivní volba "Všechny letecké společnosti", předvyber vše dostupné.
+    # Pokud je aktivní volba "Všechny letecké společnosti", výber vše dostupné.
     if select_all and "ALL" in select_all:
         trad_value = list(traditional)
         low_value  = list(low_cost)
@@ -660,7 +660,7 @@ def update_chart(origin, dest, air_trad, air_low, mode, groupby):
                 f"<b>%{{customdata[3]}}  |  %{{x|%d %b %Y}}</b><br>"
                 f"<b>{y_label}:</b> %{{customdata[4]}}<br>"
                 f"<b>Emise/Sedadlo:</b> %{{customdata[5]}} kg/hod<br>"
-                f"<b>Cena letenky:</b> %{{customdata[0]}}<br>"
+                f"<b>Průmerná cena letenky:</b> %{{customdata[0]}}<br>"
                 f"<b>Letecká společnost:</b> %{{customdata[1]}}<br>"
                 f"<b>Typ letadla:</b> %{{customdata[2]}}"
                 "<extra></extra>"
@@ -778,6 +778,7 @@ def _apply_theme(fig, title, y_label, accent):
 # =====================================================================
 # 8. Spuštění
 # =====================================================================
-# Odeberte nebo zakomentujte:
-if __name__ == '__main__':
-    app.run(debug=True)
+if __name__ == "__main__":
+    import os
+    port = int(os.environ.get("PORT", 8053))
+    app.run(host="0.0.0.0", port=port, debug=False)
