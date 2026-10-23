@@ -334,9 +334,7 @@ NeuralVizualizationApp/
 
 ## Autor
 
-Matěj Fadrhons
-Prague, Czech Republic
-GitHub: [@mFadr](https://github.com/mFadr)
+*Built by Matěj Fadrhons  [github.com/mFadr](https://github.com/mFadr)*
 
 ---
 
